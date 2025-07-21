@@ -148,21 +148,21 @@ export default {
 
 ### Phase 1: MongoDB Atlas Setup
 
-- [ ] **TASK-005**: Create MongoDB Atlas account
+- [x] **TASK-005**: Create MongoDB Atlas account
   - Sign up for free tier
-  - Select eu-west-2 region
+  - Select eu-west-1 region (Cluster0)
   - Document cluster name
-- [ ] **TASK-006**: Configure Atlas security
+- [x] **TASK-006**: Configure Atlas security
   - Create database user
   - Add current IP to whitelist
   - Enable IP Access List for production IPs
   - Copy connection string
-- [ ] **TASK-007**: Create database and collections
+- [x] **TASK-007**: Create database and collections
   - Create database `ckshtn`
   - Create collection `kg` for graph
   - Create collection `chunks` for vectors
   - Create collection `audit_log` for compliance
-- [ ] **TASK-008**: Test MongoDB connection
+- [x] **TASK-008**: Test MongoDB connection
   - Write `scripts/test_connection.py`
   - Verify read/write access
   - Handle connection errors gracefully
