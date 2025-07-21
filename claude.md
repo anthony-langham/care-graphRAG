@@ -556,6 +556,8 @@ export default {
 
 ## Workflow
 
+**MANDATORY**
+
 Each task should follow:
 
 1. Create feature branch: `git checkout -b TASK-XXX-description`
