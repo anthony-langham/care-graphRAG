@@ -5,7 +5,8 @@ Handles environment variable validation and default values.
 
 import os
 from typing import Optional
-from pydantic import BaseSettings, Field, validator
+from pydantic import Field, field_validator
+from pydantic_settings import BaseSettings
 
 
 class Settings(BaseSettings):
@@ -49,7 +50,7 @@ class Settings(BaseSettings):
     scraper_delay_seconds: float = Field(default=1.0, env="SCRAPER_DELAY_SECONDS")
     scraper_timeout_seconds: int = Field(default=10, env="SCRAPER_TIMEOUT_SECONDS")
     
-    @validator("log_level")
+    @field_validator("log_level")
     def validate_log_level(cls, v):
         """Validate log level is one of the standard levels."""
         valid_levels = ["DEBUG", "INFO", "WARNING", "ERROR", "CRITICAL"]
@@ -57,7 +58,7 @@ class Settings(BaseSettings):
             raise ValueError(f"Log level must be one of {valid_levels}")
         return v.upper()
     
-    @validator("environment")
+    @field_validator("environment")
     def validate_environment(cls, v):
         """Validate environment is development, staging, or production."""
         valid_envs = ["development", "staging", "production"]
@@ -65,18 +66,18 @@ class Settings(BaseSettings):
             raise ValueError(f"Environment must be one of {valid_envs}")
         return v.lower()
     
-    @validator("openai_temperature")
+    @field_validator("openai_temperature")
     def validate_temperature(cls, v):
         """Validate OpenAI temperature is between 0 and 2."""
         if not 0 <= v <= 2:
             raise ValueError("OpenAI temperature must be between 0 and 2")
         return v
     
-    class Config:
-        """Pydantic configuration."""
-        env_file = ".env"
-        env_file_encoding = "utf-8"
-        case_sensitive = False
+    model_config = {
+        "env_file": ".env",
+        "env_file_encoding": "utf-8",
+        "case_sensitive": False
+    }
 
 
 # Global settings instance

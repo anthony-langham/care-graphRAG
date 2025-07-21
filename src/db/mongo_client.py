@@ -6,6 +6,8 @@ Optimized for AWS Lambda environments.
 import time
 from typing import Optional, Dict, Any
 from contextlib import contextmanager
+import ssl
+import certifi
 
 import pymongo
 from pymongo import MongoClient
@@ -71,8 +73,8 @@ class MongoDBClient(LoggerMixin):
                 # Other settings
                 compressors="snappy,zlib",
                 readPreference="secondaryPreferred",
-                readConcern={"level": "majority"},
-                writeConcern={"w": "majority", "wtimeout": 10000}
+                # SSL settings for macOS
+                tlsCAFile=certifi.where()
             )
             
             # Test connection
