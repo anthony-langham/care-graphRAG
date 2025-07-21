@@ -185,11 +185,11 @@ export default {
 
 ### Phase 3: Web Scraping
 
-- [ ] **TASK-012**: Implement basic scraper
-  - Create `src/scraper.py`
-  - Fetch NICE hypertension page
-  - Handle request errors/timeouts
-  - User-agent headers
+- [x] **TASK-012**: Implement basic scraper
+  - Create `src/scraper.py` ✓
+  - Fetch NICE hypertension page ✓
+  - Handle request errors/timeouts ✓
+  - User-agent headers ✓
 - [ ] **TASK-013**: Parse HTML structure
   - Extract main content sections
   - Identify headers (h1, h2, h3)
