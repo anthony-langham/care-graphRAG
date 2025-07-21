@@ -103,7 +103,7 @@ export default {
 
 ### Phase 0: Project Setup
 
-- [ ] **TASK-001**: Initialize git repository and .gitignore
+- [x] **TASK-001**: Initialize git repository and .gitignore
   - Create repo `care-graphRAG`
   - Add Python .gitignore template
   - Add `.env` to .gitignore
