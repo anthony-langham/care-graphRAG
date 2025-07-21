@@ -27,4 +27,36 @@ care-graphRAG/
 
 ## Setup
 
-See CLAUDE.md for detailed setup instructions and task list.
+### Python Environment
+
+1. **Create and activate virtual environment:**
+   ```bash
+   python3 -m venv venv
+   source venv/bin/activate  # On Windows: venv\Scripts\activate
+   ```
+
+2. **Install dependencies:**
+   ```bash
+   # Production dependencies
+   pip install -r requirements.txt
+   
+   # Development dependencies (includes production)
+   pip install -r requirements-dev.txt
+   ```
+
+3. **Environment configuration:**
+   ```bash
+   # Copy template and fill in your values
+   cp .env.template .env
+   ```
+
+### Development Workflow
+
+- Use `pytest` for running tests
+- Use `black` for code formatting: `black src/ functions/ tests/`
+- Use `flake8` for linting: `flake8 src/ functions/ tests/`
+- Use `mypy` for type checking: `mypy src/ functions/`
+
+### Detailed Instructions
+
+See CLAUDE.md for complete setup instructions and task list.

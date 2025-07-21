@@ -131,12 +131,12 @@ export default {
   └── requirements.txt     # Python deps
   ```
 
-- [ ] **TASK-003**: Setup Python environment
+- [x] **TASK-003**: Setup Python environment
   - Create requirements.txt with versions
   - Create requirements-dev.txt
   - Setup venv and activate
   - Document in [README.md](https://README.md)
-- [ ] **TASK-004**: Create .env.template
+- [x] **TASK-004**: Create .env.template
 
   ```env
   OPENAI_API_KEY=sk-***
@@ -169,15 +169,15 @@ export default {
 
 ### Phase 2: Core Infrastructure
 
-- [ ] **TASK-009**: Implement configuration management
+- [x] **TASK-009**: Implement configuration management
   - Create `config/settings.py` with pydantic
   - Environment variable validation
   - Default values for development
-- [ ] **TASK-010**: Setup logging infrastructure
+- [x] **TASK-010**: Setup logging infrastructure
   - Configure Python logging
   - Separate loggers for each module
   - Rotation policy for production
-- [ ] **TASK-011**: Create base MongoDB connector
+- [x] **TASK-011**: Create base MongoDB connector
   - Implement `src/db/mongo_client.py`
   - Connection pooling
   - Retry logic with exponential backoff
