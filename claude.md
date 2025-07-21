@@ -195,7 +195,7 @@ export default {
   - Identify headers (h1, h2, h3) ✓
   - Clean text extraction ✓
   - Remove navigation/footer ✓
-- [ ] **TASK-014**: Implement chunking logic
+- [x] **TASK-014**: Implement chunking logic
   - 8000 character limit per chunk
   - Preserve section context
   - Generate unique hashes
