@@ -108,7 +108,7 @@ export default {
   - Add Python .gitignore template
   - Add `.env` to .gitignore
   - Initial commit
-- [ ] **TASK-002**: Create project structure
+- [x] **TASK-002**: Create project structure
 
   ```
   nice-cks-graphrag/
@@ -564,6 +564,7 @@ Each task should follow:
 1. Complete implementation
 1. Write/update tests
 1. Update documentation
+1. Update CLAUDE.md to mark task as complete (change `- [ ]` to `- [x]`)
 1. Commit with message: `TASK-XXX: Brief description`
 1. Push and create PR
 1. Merge after review
