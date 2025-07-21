@@ -12,7 +12,7 @@ pymongo==4.6.1
 # Web scraping
 requests==2.31.0
 beautifulsoup4==4.12.2
-lxml==4.9.3
+lxml==5.1.0
 
 # AWS Lambda
 mangum==0.17.0
