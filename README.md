@@ -1,6 +1,18 @@
-# care-graphRAG
+# Care-GraphRAG
 
 Building an explainable, low-cost GraphRAG system for UK NICE Clinical Knowledge Summary (CKS) on Hypertension.
+
+## Status
+
+🚧 **Active Development** - Currently implementing core web scraping functionality
+
+### Completed Tasks
+- ✅ Project structure and environment setup
+- ✅ MongoDB Atlas configuration  
+- ✅ Basic NICE website scraper with retry logic
+
+### Current Phase
+- 🔄 Phase 3: Web Scraping - HTML parsing and content extraction
 
 ## Project Structure
 
@@ -37,25 +49,41 @@ care-graphRAG/
 
 2. **Install dependencies:**
    ```bash
-   # Production dependencies
    pip install -r requirements.txt
-   
-   # Development dependencies (includes production)
-   pip install -r requirements-dev.txt
    ```
 
 3. **Environment configuration:**
    ```bash
    # Copy template and fill in your values
    cp .env.template .env
+   # Edit .env with your MongoDB URI and OpenAI API key
    ```
+
+4. **Test the setup:**
+   ```bash
+   # Test scraper functionality
+   python src/scraper.py
+   
+   # Or run the test script
+   python scripts/test_scraper.py
+   ```
+
+### Current Features
+
+#### Web Scraper (`src/scraper.py`)
+- Fetches NICE Clinical Knowledge Summary pages
+- Robust error handling with exponential backoff retry
+- Proper HTTP headers and user-agent configuration  
+- Beautiful Soup HTML parsing with fallback parsers
+- Metadata extraction (title, revision dates)
+- Session management with context manager support
 
 ### Development Workflow
 
-- Use `pytest` for running tests
-- Use `black` for code formatting: `black src/ functions/ tests/`
-- Use `flake8` for linting: `flake8 src/ functions/ tests/`
-- Use `mypy` for type checking: `mypy src/ functions/`
+- Follow task-driven development from CLAUDE.md
+- Each task creates a feature branch: `git checkout -b TASK-XXX-description`
+- Test changes: `python src/scraper.py` or `python scripts/test_scraper.py`
+- Commit with task reference: `TASK-XXX: Brief description`
 
 ### Detailed Instructions
 
