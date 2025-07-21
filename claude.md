@@ -190,11 +190,11 @@ export default {
   - Fetch NICE hypertension page ✓
   - Handle request errors/timeouts ✓
   - User-agent headers ✓
-- [ ] **TASK-013**: Parse HTML structure
-  - Extract main content sections
-  - Identify headers (h1, h2, h3)
-  - Clean text extraction
-  - Remove navigation/footer
+- [x] **TASK-013**: Parse HTML structure
+  - Extract main content sections ✓
+  - Identify headers (h1, h2, h3) ✓
+  - Clean text extraction ✓
+  - Remove navigation/footer ✓
 - [ ] **TASK-014**: Implement chunking logic
   - 8000 character limit per chunk
   - Preserve section context

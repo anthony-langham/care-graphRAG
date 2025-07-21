@@ -3,11 +3,12 @@ Web scraper for NICE Clinical Knowledge Summary (CKS) pages.
 Fetches and parses HTML content from NICE hypertension guidance.
 """
 import logging
-from typing import Optional, Dict, Any
+from typing import Optional, Dict, Any, List
 import requests
-from bs4 import BeautifulSoup
+from bs4 import BeautifulSoup, Tag
 from tenacity import retry, stop_after_attempt, wait_exponential, retry_if_exception_type
 from requests.exceptions import RequestException, Timeout, ConnectionError
+import re
 
 from config.settings import get_settings
 
@@ -163,6 +164,245 @@ class NICEScraper:
         logger.info(f"Extracted metadata: {metadata}")
         return metadata
     
+    def _remove_navigation_and_footer(self, soup: BeautifulSoup) -> BeautifulSoup:
+        """
+        Remove navigation, footer, and other non-content elements.
+        More conservative approach for NICE pages.
+        
+        Args:
+            soup: BeautifulSoup object to clean
+            
+        Returns:
+            Cleaned BeautifulSoup object
+        """
+        # More conservative removal - focus on obvious navigation/footer elements
+        # Avoid removing divs that might contain content
+        remove_selectors = [
+            'script', 'style', 'noscript',  # Always remove these
+            'nav',  # Navigation elements
+            '[role="navigation"]',
+            '[role="banner"]', 
+            '[role="contentinfo"]',  # Footer role
+            '.skip-link', '.skip-links',  # Accessibility links
+            '.cookie-banner', '.cookie-notice',  # Cookie notifications
+        ]
+        
+        # Remove elements matching selectors
+        for selector in remove_selectors:
+            for element in soup.select(selector):
+                element.decompose()
+        
+        # Remove hidden elements (but be careful with this)
+        for element in soup.find_all(attrs={'style': re.compile(r'display\s*:\s*none', re.I)}):
+            # Only remove if it's clearly not content
+            if element.name in ['div', 'span'] and len(element.get_text(strip=True)) < 10:
+                element.decompose()
+            
+        # Remove elements with accessibility/tracking classes (but not content containers)
+        non_content_classes = [
+            'visually-hidden', 'sr-only', 'screen-reader-only',
+            'tracking', 'analytics'
+        ]
+        
+        for class_name in non_content_classes:
+            for element in soup.find_all(class_=re.compile(class_name, re.I)):
+                # Only remove small elements to avoid removing content containers
+                if len(element.get_text(strip=True)) < 50:
+                    element.decompose()
+        
+        return soup
+    
+    def extract_main_content(self, soup: BeautifulSoup) -> Dict[str, Any]:
+        """
+        Extract main content sections from the parsed page.
+        
+        Args:
+            soup: BeautifulSoup parsed page
+            
+        Returns:
+            Dictionary containing structured content sections
+        """
+        logger.info("Extracting main content sections")
+        
+        # Create a copy to avoid modifying original
+        content_soup = BeautifulSoup(str(soup), 'html.parser')
+        
+        # Clean navigation and footer elements
+        content_soup = self._remove_navigation_and_footer(content_soup)
+        
+        # Find main content area - NICE pages often use these containers
+        main_content_selectors = [
+            'main',
+            '[role="main"]',
+            '.main-content',
+            '.content',
+            '.page-content',
+            '.article-content',
+            '.topic-content',
+            '#main-content',
+            '#content'
+        ]
+        
+        main_content_area = None
+        for selector in main_content_selectors:
+            main_content_area = content_soup.select_one(selector)
+            if main_content_area:
+                logger.info(f"Found main content area using selector: {selector}")
+                break
+        
+        # If no main content area found, use body
+        if not main_content_area:
+            main_content_area = content_soup.find('body') or content_soup
+            logger.info("No specific main content area found, using body")
+        
+        # Extract sections with headers
+        sections = []
+        current_section = None
+        
+        # Find all elements that could be headers or content
+        for element in main_content_area.find_all(['h1', 'h2', 'h3', 'h4', 'h5', 'h6', 'p', 'div', 'section', 'article', 'ul', 'ol', 'table']):
+            if element.name in ['h1', 'h2', 'h3', 'h4', 'h5', 'h6']:
+                # Start a new section
+                if current_section:
+                    sections.append(current_section)
+                
+                current_section = {
+                    'header': element.get_text(strip=True),
+                    'header_level': int(element.name[1]),
+                    'content_elements': [],
+                    'text_content': ''
+                }
+            elif current_section is not None:
+                # Add content to current section
+                text = element.get_text(strip=True)
+                if text and len(text) > 10:  # Skip very short text
+                    current_section['content_elements'].append({
+                        'tag': element.name,
+                        'text': text,
+                        'classes': element.get('class', [])
+                    })
+        
+        # Don't forget the last section
+        if current_section:
+            sections.append(current_section)
+        
+        # Combine text content for each section
+        for section in sections:
+            section['text_content'] = '\n'.join([
+                elem['text'] for elem in section['content_elements']
+            ])
+        
+        # Extract all text content as fallback
+        full_text = main_content_area.get_text(strip=True, separator='\n')
+        
+        # Clean up extra whitespace
+        full_text = re.sub(r'\n\s*\n', '\n\n', full_text)
+        full_text = re.sub(r' +', ' ', full_text)
+        
+        logger.info(f"Extracted {len(sections)} sections")
+        logger.info(f"Total text length: {len(full_text)} characters")
+        
+        return {
+            'sections': sections,
+            'full_text': full_text,
+            'section_count': len(sections)
+        }
+    
+    def extract_headers(self, soup: BeautifulSoup) -> List[Dict[str, Any]]:
+        """
+        Extract all headers (h1-h6) with their hierarchy and content.
+        
+        Args:
+            soup: BeautifulSoup parsed page
+            
+        Returns:
+            List of header dictionaries with text, level, and position
+        """
+        logger.info("Extracting page headers")
+        
+        headers = []
+        
+        # Find all header elements
+        header_elements = soup.find_all(['h1', 'h2', 'h3', 'h4', 'h5', 'h6'])
+        
+        for idx, header in enumerate(header_elements):
+            header_text = header.get_text(strip=True)
+            
+            # Skip empty headers
+            if not header_text:
+                continue
+            
+            headers.append({
+                'text': header_text,
+                'level': int(header.name[1]),
+                'tag': header.name,
+                'position': idx,
+                'id': header.get('id', ''),
+                'classes': header.get('class', [])
+            })
+        
+        logger.info(f"Found {len(headers)} headers")
+        
+        return headers
+    
+    def extract_clean_text(self, soup: BeautifulSoup) -> str:
+        """
+        Extract clean text content with minimal formatting.
+        
+        Args:
+            soup: BeautifulSoup parsed page
+            
+        Returns:
+            Clean text content
+        """
+        logger.info("Extracting clean text content")
+        
+        # Create copy and remove unwanted elements
+        clean_soup = BeautifulSoup(str(soup), 'html.parser')
+        clean_soup = self._remove_navigation_and_footer(clean_soup)
+        
+        # Find main content
+        main_content_selectors = [
+            'main', '[role="main"]', '.main-content', '.content',
+            '.page-content', '.article-content', '.topic-content'
+        ]
+        
+        main_content = None
+        for selector in main_content_selectors:
+            main_content = clean_soup.select_one(selector)
+            if main_content:
+                break
+        
+        if not main_content:
+            main_content = clean_soup.find('body') or clean_soup
+        
+        # Extract text with some structure preservation
+        text = main_content.get_text(separator='\n', strip=True)
+        
+        # Clean up whitespace
+        text = re.sub(r'\n\s*\n\s*\n+', '\n\n', text)  # Multiple newlines -> double
+        text = re.sub(r' +', ' ', text)  # Multiple spaces -> single
+        text = re.sub(r'\t+', ' ', text)  # Tabs -> spaces
+        
+        # Remove lines with only punctuation or very short content
+        lines = text.split('\n')
+        cleaned_lines = []
+        
+        for line in lines:
+            line = line.strip()
+            if len(line) < 3:  # Skip very short lines
+                continue
+            if re.match(r'^[^\w]*$', line):  # Skip lines with only non-word characters
+                continue
+            cleaned_lines.append(line)
+        
+        clean_text = '\n'.join(cleaned_lines)
+        
+        logger.info(f"Clean text length: {len(clean_text)} characters")
+        logger.info(f"Clean text lines: {len(cleaned_lines)}")
+        
+        return clean_text
+    
     def scrape(self, url: Optional[str] = None) -> Dict[str, Any]:
         """
         Main scraping method that fetches and parses a page.
@@ -175,6 +415,9 @@ class NICEScraper:
                 - html: Raw HTML content
                 - soup: BeautifulSoup object
                 - metadata: Extracted metadata
+                - content: Structured content sections
+                - headers: List of page headers
+                - clean_text: Clean text content
         """
         try:
             # Fetch the page
@@ -186,10 +429,22 @@ class NICEScraper:
             # Extract metadata
             metadata = self.extract_metadata(soup)
             
+            # Extract structured content
+            content = self.extract_main_content(soup)
+            
+            # Extract headers
+            headers = self.extract_headers(soup)
+            
+            # Extract clean text
+            clean_text = self.extract_clean_text(soup)
+            
             return {
                 'html': html_content,
                 'soup': soup,
                 'metadata': metadata,
+                'content': content,
+                'headers': headers,
+                'clean_text': clean_text,
                 'success': True,
                 'error': None
             }
@@ -200,6 +455,9 @@ class NICEScraper:
                 'html': None,
                 'soup': None,
                 'metadata': None,
+                'content': None,
+                'headers': None,
+                'clean_text': None,
                 'success': False,
                 'error': str(e)
             }
@@ -228,6 +486,39 @@ def main():
             print(f"  Title: {result['metadata']['title']}")
             print(f"  HTML length: {len(result['html'])} characters")
             print(f"  Last revised: {result['metadata']['last_revised']}")
+            
+            # Display content extraction results
+            content = result['content']
+            headers = result['headers']
+            clean_text = result['clean_text']
+            
+            print(f"\n📄 Content Analysis:")
+            print(f"  Sections found: {content['section_count']}")
+            print(f"  Headers found: {len(headers)}")
+            print(f"  Clean text length: {len(clean_text)} characters")
+            
+            # Show header hierarchy
+            if headers:
+                print(f"\n📋 Header Structure:")
+                for header in headers[:10]:  # Show first 10 headers
+                    indent = "  " * (header['level'] - 1)
+                    print(f"    {indent}H{header['level']}: {header['text'][:80]}...")
+            
+            # Show first few sections
+            if content['sections']:
+                print(f"\n📑 Sample Sections:")
+                for i, section in enumerate(content['sections'][:3]):  # Show first 3 sections
+                    print(f"    Section {i+1}: {section['header']}")
+                    print(f"      Level: H{section['header_level']}")
+                    print(f"      Content length: {len(section['text_content'])} chars")
+                    print(f"      Preview: {section['text_content'][:100]}...")
+                    print()
+            
+            # Show clean text sample
+            if clean_text:
+                print(f"\n🧹 Clean Text Sample (first 300 chars):")
+                print(f"    {clean_text[:300]}...")
+                
         else:
             print(f"✗ Scraping failed: {result['error']}")
 
