@@ -9,6 +9,8 @@ from bs4 import BeautifulSoup, Tag
 from tenacity import retry, stop_after_attempt, wait_exponential, retry_if_exception_type
 from requests.exceptions import RequestException, Timeout, ConnectionError
 import re
+import hashlib
+from datetime import datetime, timezone
 
 from config.settings import get_settings
 
@@ -403,6 +405,265 @@ class NICEScraper:
         
         return clean_text
     
+    def chunk_content(self, content: Dict[str, Any], url: Optional[str] = None) -> List[Dict[str, Any]]:
+        """
+        Chunk content into sections with 8000 character limit per chunk.
+        Preserves section context and generates unique hashes.
+        
+        Args:
+            content: Content dictionary from extract_main_content
+            url: Source URL for metadata
+            
+        Returns:
+            List of chunk dictionaries with metadata
+        """
+        logger.info("Chunking content for document storage")
+        
+        chunks = []
+        sections = content.get('sections', [])
+        source_url = url or self.NICE_HTN_URL
+        timestamp = datetime.now(timezone.utc).isoformat()
+        
+        # Track section hierarchy for context
+        section_hierarchy = []
+        
+        for section in sections:
+            header = section.get('header', '')
+            header_level = section.get('header_level', 1)
+            text_content = section.get('text_content', '')
+            
+            # Update section hierarchy based on header level
+            # Keep only parent sections at higher levels
+            section_hierarchy = [s for s in section_hierarchy if s['level'] < header_level]
+            section_hierarchy.append({
+                'header': header,
+                'level': header_level
+            })
+            
+            # Build section context path
+            context_path = ' > '.join([s['header'] for s in section_hierarchy])
+            
+            # Check if section content fits in single chunk
+            if len(text_content) <= 8000:
+                chunk = self._create_chunk(
+                    content=text_content,
+                    header=header,
+                    header_level=header_level,
+                    context_path=context_path,
+                    source_url=source_url,
+                    timestamp=timestamp,
+                    chunk_index=0,
+                    total_chunks=1
+                )
+                chunks.append(chunk)
+            else:
+                # Split large sections into multiple chunks
+                sub_chunks = self._split_large_section(
+                    text_content=text_content,
+                    header=header,
+                    header_level=header_level,
+                    context_path=context_path,
+                    source_url=source_url,
+                    timestamp=timestamp
+                )
+                chunks.extend(sub_chunks)
+        
+        # Handle case where no sections found - chunk the full text
+        if not chunks and content.get('full_text'):
+            full_text = content['full_text']
+            if len(full_text) <= 8000:
+                chunk = self._create_chunk(
+                    content=full_text,
+                    header="Full Document",
+                    header_level=1,
+                    context_path="Full Document",
+                    source_url=source_url,
+                    timestamp=timestamp,
+                    chunk_index=0,
+                    total_chunks=1
+                )
+                chunks.append(chunk)
+            else:
+                # Split full text into chunks
+                sub_chunks = self._split_large_section(
+                    text_content=full_text,
+                    header="Full Document",
+                    header_level=1,
+                    context_path="Full Document",
+                    source_url=source_url,
+                    timestamp=timestamp
+                )
+                chunks.extend(sub_chunks)
+        
+        logger.info(f"Created {len(chunks)} chunks from {len(sections)} sections")
+        return chunks
+    
+    def _create_chunk(self, content: str, header: str, header_level: int, 
+                     context_path: str, source_url: str, timestamp: str,
+                     chunk_index: int, total_chunks: int) -> Dict[str, Any]:
+        """
+        Create a single chunk with metadata and hash.
+        
+        Args:
+            content: Text content of the chunk
+            header: Section header
+            header_level: Header level (1-6)
+            context_path: Full hierarchical context path
+            source_url: Source URL
+            timestamp: ISO timestamp
+            chunk_index: Index of this chunk within the section
+            total_chunks: Total number of chunks in this section
+            
+        Returns:
+            Chunk dictionary with content and metadata
+        """
+        # Generate SHA-1 hash of content for deduplication
+        content_hash = hashlib.sha1(content.encode('utf-8')).hexdigest()
+        
+        # Create unique chunk ID combining hash and position
+        chunk_id = f"{content_hash}_{chunk_index}"
+        
+        chunk = {
+            'chunk_id': chunk_id,
+            'content_hash': content_hash,
+            'content': content,
+            'character_count': len(content),
+            'metadata': {
+                'source_url': source_url,
+                'section_header': header,
+                'header_level': header_level,
+                'context_path': context_path,
+                'chunk_index': chunk_index,
+                'total_chunks_in_section': total_chunks,
+                'scraped_at': timestamp,
+                'chunk_type': 'section' if header != 'Full Document' else 'full_text'
+            }
+        }
+        
+        return chunk
+    
+    def _split_large_section(self, text_content: str, header: str, header_level: int,
+                           context_path: str, source_url: str, timestamp: str) -> List[Dict[str, Any]]:
+        """
+        Split a large section into multiple chunks while preserving context.
+        
+        Args:
+            text_content: Section text content
+            header: Section header  
+            header_level: Header level
+            context_path: Hierarchical context path
+            source_url: Source URL
+            timestamp: ISO timestamp
+            
+        Returns:
+            List of chunk dictionaries
+        """
+        chunks = []
+        max_chunk_size = 8000
+        overlap_size = 200  # Overlap between chunks for context
+        
+        # Split by paragraphs first to avoid breaking sentences
+        paragraphs = text_content.split('\n\n')
+        
+        # If no double newlines found, try single newlines
+        if len(paragraphs) == 1 and len(text_content) > max_chunk_size:
+            paragraphs = text_content.split('\n')
+        
+        # If still one large chunk, split by sentences
+        if len(paragraphs) == 1 and len(text_content) > max_chunk_size:
+            # Split by sentences (periods followed by space and capital letter)
+            import re
+            sentences = re.split(r'(?<=[.!?])\s+(?=[A-Z])', text_content)
+            paragraphs = sentences
+        
+        current_chunk = ""
+        chunk_index = 0
+        
+        for paragraph in paragraphs:
+            paragraph = paragraph.strip()
+            if not paragraph:
+                continue
+                
+            # Check if adding this paragraph would exceed limit
+            if len(current_chunk) + len(paragraph) + 2 > max_chunk_size and current_chunk:
+                # Create chunk with current content
+                chunk = self._create_chunk(
+                    content=current_chunk.strip(),
+                    header=header,
+                    header_level=header_level,
+                    context_path=context_path,
+                    source_url=source_url,
+                    timestamp=timestamp,
+                    chunk_index=chunk_index,
+                    total_chunks=0  # Will update after all chunks created
+                )
+                chunks.append(chunk)
+                
+                # Start new chunk with overlap from previous chunk
+                current_chunk = self._get_overlap_text(current_chunk, overlap_size) + "\n\n" + paragraph
+                chunk_index += 1
+            else:
+                # Add paragraph to current chunk
+                if current_chunk:
+                    current_chunk += "\n\n" + paragraph
+                else:
+                    current_chunk = paragraph
+        
+        # Add final chunk if there's remaining content
+        if current_chunk.strip():
+            chunk = self._create_chunk(
+                content=current_chunk.strip(),
+                header=header,
+                header_level=header_level,
+                context_path=context_path,
+                source_url=source_url,
+                timestamp=timestamp,
+                chunk_index=chunk_index,
+                total_chunks=0  # Will update below
+            )
+            chunks.append(chunk)
+        
+        # Update total_chunks count in all chunks
+        total_chunks = len(chunks)
+        for chunk in chunks:
+            chunk['metadata']['total_chunks_in_section'] = total_chunks
+        
+        logger.info(f"Split large section '{header}' into {total_chunks} chunks")
+        return chunks
+    
+    def _get_overlap_text(self, text: str, overlap_size: int) -> str:
+        """
+        Get the last overlap_size characters from text, breaking at word boundaries.
+        
+        Args:
+            text: Source text
+            overlap_size: Target overlap size
+            
+        Returns:
+            Overlap text
+        """
+        if len(text) <= overlap_size:
+            return text
+        
+        # Start from overlap_size characters from the end
+        overlap_start = len(text) - overlap_size
+        overlap_text = text[overlap_start:]
+        
+        # Try to break at sentence boundary (period + space)
+        sentences = overlap_text.split('. ')
+        if len(sentences) > 1:
+            # Return from the second sentence onward (to preserve complete sentences)
+            return '. '.join(sentences[1:])
+        
+        # Try to break at word boundary
+        words = overlap_text.split()
+        if len(words) > 1:
+            # Skip first partial word
+            return ' '.join(words[1:])
+        
+        # Return as-is if no good break point
+        return overlap_text
+    
     def scrape(self, url: Optional[str] = None) -> Dict[str, Any]:
         """
         Main scraping method that fetches and parses a page.
@@ -438,6 +699,9 @@ class NICEScraper:
             # Extract clean text
             clean_text = self.extract_clean_text(soup)
             
+            # Create chunks from content
+            chunks = self.chunk_content(content, url)
+            
             return {
                 'html': html_content,
                 'soup': soup,
@@ -445,6 +709,7 @@ class NICEScraper:
                 'content': content,
                 'headers': headers,
                 'clean_text': clean_text,
+                'chunks': chunks,
                 'success': True,
                 'error': None
             }
@@ -458,6 +723,7 @@ class NICEScraper:
                 'content': None,
                 'headers': None,
                 'clean_text': None,
+                'chunks': None,
                 'success': False,
                 'error': str(e)
             }
@@ -491,11 +757,27 @@ def main():
             content = result['content']
             headers = result['headers']
             clean_text = result['clean_text']
+            chunks = result['chunks']
             
             print(f"\n📄 Content Analysis:")
             print(f"  Sections found: {content['section_count']}")
             print(f"  Headers found: {len(headers)}")
             print(f"  Clean text length: {len(clean_text)} characters")
+            print(f"  Chunks created: {len(chunks)}")
+            
+            # Show chunk statistics
+            if chunks:
+                total_chunk_chars = sum(chunk['character_count'] for chunk in chunks)
+                avg_chunk_size = total_chunk_chars / len(chunks)
+                max_chunk_size = max(chunk['character_count'] for chunk in chunks)
+                min_chunk_size = min(chunk['character_count'] for chunk in chunks)
+                
+                print(f"\n📦 Chunk Statistics:")
+                print(f"  Total chunks: {len(chunks)}")
+                print(f"  Average chunk size: {avg_chunk_size:.0f} characters")
+                print(f"  Max chunk size: {max_chunk_size} characters")
+                print(f"  Min chunk size: {min_chunk_size} characters")
+                print(f"  Total chunked content: {total_chunk_chars} characters")
             
             # Show header hierarchy
             if headers:
@@ -512,6 +794,19 @@ def main():
                     print(f"      Level: H{section['header_level']}")
                     print(f"      Content length: {len(section['text_content'])} chars")
                     print(f"      Preview: {section['text_content'][:100]}...")
+                    print()
+            
+            # Show sample chunks
+            if chunks:
+                print(f"\n📑 Sample Chunks:")
+                for i, chunk in enumerate(chunks[:3]):  # Show first 3 chunks
+                    metadata = chunk['metadata']
+                    print(f"    Chunk {i+1} (ID: {chunk['chunk_id'][:12]}...):")
+                    print(f"      Section: {metadata['section_header']}")
+                    print(f"      Context: {metadata['context_path']}")
+                    print(f"      Size: {chunk['character_count']} chars")
+                    print(f"      Hash: {chunk['content_hash'][:12]}...")
+                    print(f"      Preview: {chunk['content'][:100]}...")
                     print()
             
             # Show clean text sample
