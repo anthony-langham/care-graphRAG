@@ -554,7 +554,7 @@ export default {
 - Automated compliance reporting
 - Regular security audits
 
-## Git Workflow
+## Workflow
 
 Each task should follow:
 
