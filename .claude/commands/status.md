@@ -1,4 +1,5 @@
 Check CLAUDE.md and provide a brief status report:
+
 1. Current phase
 2. Tasks completed in current phase
 3. Tasks remaining in current phase
