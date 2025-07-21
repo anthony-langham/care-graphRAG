@@ -207,11 +207,11 @@ export default {
 
 ### Phase 4: Graph Building
 
-- [ ] **TASK-016**: Setup LangChain graph store
-  - Initialize MongoDBGraphStore
-  - Configure GPT-4o-mini for extraction
-  - Set temperature=0
-  - Configure max_depth=3
+- [x] **TASK-016**: Setup LangChain graph store
+  - Initialize MongoDBGraphStore ✓
+  - Configure GPT-4o-mini for extraction ✓
+  - Set temperature=0 ✓
+  - Configure max_depth=3 ✓
 - [ ] **TASK-017**: Implement entity extraction
   - Create medical entity prompt
   - Define VALID_ENTITY_TYPES
