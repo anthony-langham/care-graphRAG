@@ -222,11 +222,11 @@ export default {
   - Batch processing for efficiency ✓
   - Progress tracking ✓
   - Error handling per chunk ✓
-- [ ] **TASK-019**: Implement graph persistence
-  - Add documents to graph store
-  - Verify node/edge creation
-  - Log entity statistics
-  - Handle partial failures
+- [x] **TASK-019**: Implement graph persistence
+  - Add documents to graph store ✓
+  - Verify node/edge creation ✓
+  - Log entity statistics ✓
+  - Handle partial failures ✓
 
 ### Phase 5: Vector Store (Optional)
 
