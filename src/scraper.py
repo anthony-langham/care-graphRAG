@@ -13,6 +13,7 @@ import hashlib
 from datetime import datetime, timezone
 
 from config.settings import get_settings
+from src.deduplication import ChunkDeduplicator
 
 logger = logging.getLogger(__name__)
 settings = get_settings()
@@ -35,6 +36,7 @@ class NICEScraper:
             'Accept-Encoding': 'gzip, deflate',
             'Connection': 'keep-alive',
         })
+        self.deduplicator = ChunkDeduplicator()
     
     @retry(
         stop=stop_after_attempt(3),
@@ -664,6 +666,82 @@ class NICEScraper:
         # Return as-is if no good break point
         return overlap_text
     
+    def deduplicate_chunks(self, chunks: List[Dict[str, Any]], 
+                          source_url: Optional[str] = None) -> Dict[str, Any]:
+        """
+        Deduplicate chunks against existing content in MongoDB.
+        
+        Args:
+            chunks: List of chunk dictionaries
+            source_url: Source URL for filtering existing hashes
+            
+        Returns:
+            Dictionary with deduplication results:
+                - new_chunks: List of chunks not seen before
+                - duplicate_count: Number of duplicate chunks filtered out
+                - total_count: Total number of input chunks
+        """
+        logger.info(f"Starting deduplication for {len(chunks)} chunks")
+        
+        if not chunks:
+            return {
+                'new_chunks': [],
+                'duplicate_count': 0,
+                'total_count': 0,
+                'stats': {}
+            }
+        
+        try:
+            # Get existing chunk statistics before deduplication
+            existing_stats = self.deduplicator.get_chunk_statistics(source_url)
+            
+            # Filter out existing chunks
+            new_chunks = self.deduplicator.filter_new_chunks(chunks, source_url)
+            
+            duplicate_count = len(chunks) - len(new_chunks)
+            
+            logger.info(
+                f"Deduplication complete: {len(new_chunks)} new chunks, "
+                f"{duplicate_count} duplicates filtered out"
+            )
+            
+            return {
+                'new_chunks': new_chunks,
+                'duplicate_count': duplicate_count,
+                'total_count': len(chunks),
+                'existing_stats': existing_stats
+            }
+            
+        except Exception as e:
+            logger.error(f"Deduplication failed: {e}")
+            # Return all chunks if deduplication fails
+            return {
+                'new_chunks': chunks,
+                'duplicate_count': 0,
+                'total_count': len(chunks),
+                'error': str(e)
+            }
+    
+    def store_new_chunks(self, chunks: List[Dict[str, Any]]) -> None:
+        """
+        Store new chunks in MongoDB for future deduplication.
+        
+        Args:
+            chunks: List of chunk dictionaries to store
+        """
+        if not chunks:
+            logger.info("No new chunks to store")
+            return
+        
+        try:
+            logger.info(f"Storing {len(chunks)} new chunks in MongoDB")
+            self.deduplicator.mark_chunks_processed(chunks)
+            logger.info("Chunks stored successfully")
+            
+        except Exception as e:
+            logger.error(f"Failed to store chunks: {e}")
+            raise
+    
     def scrape(self, url: Optional[str] = None) -> Dict[str, Any]:
         """
         Main scraping method that fetches and parses a page.
@@ -724,6 +802,77 @@ class NICEScraper:
                 'headers': None,
                 'clean_text': None,
                 'chunks': None,
+                'success': False,
+                'error': str(e)
+            }
+    
+    def scrape_with_deduplication(self, url: Optional[str] = None, 
+                                 store_chunks: bool = False) -> Dict[str, Any]:
+        """
+        Main scraping method with chunk deduplication.
+        Only processes chunks that haven't been seen before.
+        
+        Args:
+            url: URL to scrape. Defaults to hypertension page.
+            store_chunks: Whether to store new chunks in MongoDB
+            
+        Returns:
+            Dictionary containing scraping results plus deduplication info:
+                - All fields from scrape() method
+                - deduplication: Results of deduplication process
+        """
+        try:
+            # Perform standard scraping
+            result = self.scrape(url)
+            
+            if not result['success']:
+                return result
+            
+            # Deduplicate chunks
+            chunks = result.get('chunks', [])
+            source_url = url or self.NICE_HTN_URL
+            
+            dedup_result = self.deduplicate_chunks(chunks, source_url)
+            
+            # Optionally store new chunks
+            new_chunks = dedup_result['new_chunks']
+            if store_chunks and new_chunks:
+                try:
+                    self.store_new_chunks(new_chunks)
+                    dedup_result['stored'] = True
+                except Exception as e:
+                    logger.error(f"Failed to store chunks: {e}")
+                    dedup_result['stored'] = False
+                    dedup_result['store_error'] = str(e)
+            else:
+                dedup_result['stored'] = False
+            
+            # Add deduplication results to response
+            result['deduplication'] = dedup_result
+            result['new_chunks_count'] = len(new_chunks)
+            result['duplicate_chunks_count'] = dedup_result['duplicate_count']
+            
+            logger.info(
+                f"Scraping with deduplication complete: "
+                f"{len(new_chunks)} new chunks, "
+                f"{dedup_result['duplicate_count']} duplicates"
+            )
+            
+            return result
+            
+        except Exception as e:
+            logger.error(f"Scraping with deduplication failed: {e}")
+            return {
+                'html': None,
+                'soup': None,
+                'metadata': None,
+                'content': None,
+                'headers': None,
+                'clean_text': None,
+                'chunks': None,
+                'deduplication': None,
+                'new_chunks_count': 0,
+                'duplicate_chunks_count': 0,
                 'success': False,
                 'error': str(e)
             }

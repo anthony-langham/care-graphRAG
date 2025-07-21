@@ -200,10 +200,10 @@ export default {
   - Preserve section context
   - Generate unique hashes
   - Add metadata (source, section, timestamp)
-- [ ] **TASK-015**: Create chunk deduplication
-  - SHA-1 hash generation
-  - Compare with existing chunks
-  - Only process changed content
+- [x] **TASK-015**: Create chunk deduplication
+  - SHA-1 hash generation ✓
+  - Compare with existing chunks ✓
+  - Only process changed content ✓
 
 ### Phase 4: Graph Building
 

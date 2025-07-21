@@ -1,5 +1,5 @@
 {
-  "name": "nice-cks-graphrag",
+  "name": "care-graphRAG",
   "version": "0.1.0",
   "description": "GraphRAG system for UK NICE Clinical Knowledge Summary on Hypertension",
   "private": true,
