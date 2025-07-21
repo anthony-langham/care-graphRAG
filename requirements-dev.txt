@@ -1,0 +1,29 @@
+# Development dependencies for Care-GraphRAG
+# Include all production dependencies plus development tools
+
+-r requirements.txt
+
+# Testing framework
+pytest==7.4.3
+pytest-cov==4.1.0
+pytest-mock==3.12.0
+
+# Code formatting and linting
+black==23.11.0
+flake8==6.1.0
+isort==5.12.0
+
+# Type checking
+mypy==1.7.1
+
+# Development utilities
+ipython==8.17.2
+jupyter==1.0.0
+python-decouple==3.8
+
+# AWS development
+boto3==1.34.0
+moto==4.2.11  # AWS mocking for tests
+
+# Testing utilities
+httpx==0.25.2  # For FastAPI testing
