@@ -1,0 +1,29 @@
+# Core dependencies for Care-GraphRAG
+# Versions will be specified in TASK-003
+
+# LangChain and related
+langchain
+langchain-community
+langchain-openai
+
+# MongoDB
+pymongo
+
+# Web scraping
+requests
+beautifulsoup4
+lxml
+
+# AWS Lambda
+mangum
+
+# FastAPI for Lambda
+fastapi
+
+# Utilities
+python-dotenv
+pydantic
+tenacity
+
+# OpenAI
+openai
