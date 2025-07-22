@@ -164,12 +164,14 @@ export default {
 The detailed task list is maintained in `TODO.md` for all project tasks (TASK-001 through TASK-060) and future work items.
 
 ### Recent Major Achievements:
+- **Enhanced Entity Extraction**: Improved clinical decision tree extraction with new entity types
+- **Treatment Algorithm Capture**: Added Age_Criteria, Ethnicity_Criteria, Clinical_Decision, Drug_Class entities
+- **Advanced Relationship Types**: Implemented FIRST_LINE_FOR, IF_NOT_TOLERATED, CONDITIONAL_ON relationships
+- **Better Clinical Coverage**: Now extracting 8+ medication entities, patient groups, and treatment pathways
 - **Complete Script Suite**: Added comprehensive utility scripts for graph management
 - **Advanced Graph Building**: Enhanced document processing with structured extraction
 - **Database Management**: Index optimization and cluster analysis tools
 - **SSL Certificate Fix**: Resolved LangChain MongoDB SSL verification issues
-- **Entity Extraction**: Successfully extracting medical entities from NICE content
-- **Graph Building**: Creating knowledge graphs from clinical guidelines  
 - **Graph Retrieval**: Implemented graph-first retrieval with fallback mechanisms
 
 - Regular security audits

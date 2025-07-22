@@ -63,7 +63,9 @@ class ClusterVisualizer:
         analysis = {
             'nodes': {'count': 0, 'types': Counter(), 'sample_nodes': []},
             'edges': {'count': 0, 'types': Counter(), 'sample_edges': []},
-            'documents': {'count': 0, 'sample_docs': []}
+            'documents': {'count': 0, 'sample_docs': []},
+            'kg_entities': {'count': 0, 'types': Counter(), 'sample_entities': []},
+            'relationships': {'count': 0, 'types': Counter(), 'sample_relationships': []}
         }
         
         try:
@@ -74,13 +76,48 @@ class ClusterVisualizer:
                 collection = self.db[collection_name]
                 
                 # Sample documents to understand structure
-                samples = list(collection.find().limit(3))
+                samples = list(collection.find().limit(5))
                 
                 if samples:
                     first_sample = samples[0]
                     
-                    # Identify collection type based on structure
-                    if 'type' in first_sample and first_sample.get('type') in ['node', 'edge']:
+                    # Handle our actual graph structure (kg collection)
+                    if collection_name == 'kg' and 'type' in first_sample and 'attributes' in first_sample:
+                        analysis['kg_entities']['count'] = collection.count_documents({})
+                        
+                        # Analyze entity types
+                        for doc in collection.find():
+                            entity_type = doc.get('type', 'Unknown')
+                            analysis['kg_entities']['types'][entity_type] += 1
+                            
+                            # Count relationships
+                            if 'relationships' in doc and doc['relationships']:
+                                if 'target_ids' in doc['relationships']:
+                                    rel_count = len(doc['relationships']['target_ids'])
+                                    analysis['relationships']['count'] += rel_count
+                                    
+                                    # Count relationship types
+                                    if 'types' in doc['relationships']:
+                                        for rel_type in doc['relationships']['types']:
+                                            analysis['relationships']['types'][rel_type] += 1
+                        
+                        # Get diverse samples (different entity types)
+                        entity_types_seen = set()
+                        for doc in samples:
+                            entity_type = doc.get('type', 'Unknown')
+                            if entity_type not in entity_types_seen or len(analysis['kg_entities']['sample_entities']) < 3:
+                                analysis['kg_entities']['sample_entities'].append({
+                                    'id': doc.get('_id'),
+                                    'type': entity_type,
+                                    'attributes_keys': list(doc.get('attributes', {}).keys()),
+                                    'relationship_count': len(doc.get('relationships', {}).get('target_ids', []))
+                                })
+                                entity_types_seen.add(entity_type)
+                                if len(analysis['kg_entities']['sample_entities']) >= 5:
+                                    break
+                    
+                    # Identify collection type based on structure (original logic for other formats)
+                    elif 'type' in first_sample and first_sample.get('type') in ['node', 'edge']:
                         # This looks like a graph element
                         if first_sample['type'] == 'node':
                             analysis['nodes']['count'] = collection.count_documents({'type': 'node'})
@@ -179,17 +216,32 @@ class ClusterVisualizer:
         print("-" * 30)
         graph_analysis = self.analyze_graph_store()
         
-        print(f"📍 Nodes: {graph_analysis['nodes']['count']}")
-        if graph_analysis['nodes']['types']:
-            print("   Node types:")
-            for node_type, count in graph_analysis['nodes']['types'].most_common(5):
-                print(f"     • {node_type}: {count}")
-        
-        print(f"🔗 Edges: {graph_analysis['edges']['count']}")
-        if graph_analysis['edges']['types']:
-            print("   Edge types:")
-            for edge_type, count in graph_analysis['edges']['types'].most_common(5):
-                print(f"     • {edge_type}: {count}")
+        # Show KG entities (our actual data structure)
+        if graph_analysis['kg_entities']['count'] > 0:
+            print(f"🏥 Medical Entities: {graph_analysis['kg_entities']['count']}")
+            if graph_analysis['kg_entities']['types']:
+                print("   Entity types:")
+                for entity_type, count in graph_analysis['kg_entities']['types'].most_common(10):
+                    print(f"     • {entity_type}: {count}")
+            
+            print(f"🔗 Relationships: {graph_analysis['relationships']['count']}")
+            if graph_analysis['relationships']['types']:
+                print("   Relationship types:")
+                for rel_type, count in graph_analysis['relationships']['types'].most_common(10):
+                    print(f"     • {rel_type}: {count}")
+        else:
+            # Fallback to original node/edge analysis
+            print(f"📍 Nodes: {graph_analysis['nodes']['count']}")
+            if graph_analysis['nodes']['types']:
+                print("   Node types:")
+                for node_type, count in graph_analysis['nodes']['types'].most_common(5):
+                    print(f"     • {node_type}: {count}")
+            
+            print(f"🔗 Edges: {graph_analysis['edges']['count']}")
+            if graph_analysis['edges']['types']:
+                print("   Edge types:")
+                for edge_type, count in graph_analysis['edges']['types'].most_common(5):
+                    print(f"     • {edge_type}: {count}")
         
         print(f"📄 Documents: {graph_analysis['documents']['count']}")
         print()
@@ -218,7 +270,19 @@ class ClusterVisualizer:
         print("🔍 SAMPLE DATA")
         print("-" * 30)
         
-        if graph_analysis['nodes']['sample_nodes']:
+        # Show KG entity samples
+        if graph_analysis['kg_entities']['sample_entities']:
+            print("Sample medical entities:")
+            for i, entity in enumerate(graph_analysis['kg_entities']['sample_entities'][:3]):
+                print(f"   Entity {i+1}:")
+                print(f"     • ID: {entity['id']}")
+                print(f"     • Type: {entity['type']}")
+                print(f"     • Attributes: {entity['attributes_keys']}")
+                print(f"     • Relationships: {entity['relationship_count']}")
+                print()
+        
+        # Fallback to original node format
+        elif graph_analysis['nodes']['sample_nodes']:
             print("Sample node:")
             sample_node = graph_analysis['nodes']['sample_nodes'][0]
             print(f"   ID: {sample_node.get('id', 'N/A')}")

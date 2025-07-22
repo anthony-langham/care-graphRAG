@@ -28,25 +28,40 @@ class GraphBuilder(LoggerMixin):
         "Condition", "Treatment", "Medication", "Dosage", "Symptom", 
         "Risk_Factor", "Complication", "Guideline", "Recommendation",
         "Patient_Group", "Contraindication", "Side_Effect", "Procedure",
-        "Investigation", "Monitoring", "Lifestyle", "Prevention"
+        "Investigation", "Monitoring", "Lifestyle", "Prevention",
+        "Treatment_Algorithm", "Age_Criteria", "Ethnicity_Criteria", 
+        "Drug_Class", "Clinical_Decision", "Treatment_Sequence", "Target"
     ]
     
     # Custom medical entity extraction prompt
     MEDICAL_ENTITY_PROMPT = """
 You are a medical knowledge extraction expert analyzing UK NICE clinical guidelines.
-Extract entities and relationships from the provided clinical text with high precision.
+Extract entities and relationships from clinical text with special focus on treatment algorithms and clinical decision pathways.
 
 ENTITY TYPES TO EXTRACT (use these exact labels):
+
+CORE CLINICAL ENTITIES:
 - Condition: Medical conditions, diseases, syndromes (e.g., "hypertension", "diabetes")
 - Treatment: Therapeutic interventions (e.g., "antihypertensive therapy", "lifestyle modification")
 - Medication: Specific drugs or drug classes (e.g., "ACE inhibitor", "amlodipine", "diuretic")
+- Drug_Class: Medication categories (e.g., "ACE inhibitors", "calcium channel blockers", "beta blockers")
 - Dosage: Medication dosages and frequencies (e.g., "5mg daily", "twice daily")
 - Symptom: Clinical signs and symptoms (e.g., "chest pain", "shortness of breath")
 - Risk_Factor: Risk factors for conditions (e.g., "smoking", "obesity", "family history")
 - Complication: Disease complications (e.g., "stroke", "heart failure", "kidney disease")
-- Guideline: Specific clinical guidelines or recommendations (e.g., "NICE CKS", "first-line treatment")
-- Recommendation: Specific clinical recommendations (e.g., "monitor blood pressure", "lifestyle advice")
-- Patient_Group: Specific patient populations (e.g., "elderly patients", "pregnant women")
+- Target: Clinical targets or thresholds (e.g., "blood pressure <140/90", "clinic BP 180/120")
+
+DECISION-MAKING ENTITIES:
+- Treatment_Algorithm: Step-by-step treatment pathways (e.g., "Step 1 treatment", "first-line therapy")
+- Clinical_Decision: Decision points in treatment (e.g., "if ACE inhibitor not tolerated", "if patient aged over 55")
+- Age_Criteria: Age-based treatment decisions (e.g., "under 55 years", "55 years or over")
+- Ethnicity_Criteria: Ethnicity-based guidance (e.g., "black African or African-Caribbean family origin")
+- Patient_Group: Specific patient populations (e.g., "type 2 diabetes patients", "pregnant women")
+- Treatment_Sequence: Treatment order/progression (e.g., "first line", "if not tolerated", "add to existing")
+
+CLINICAL GUIDANCE:
+- Guideline: Specific clinical guidelines (e.g., "NICE CKS", "first-line treatment")
+- Recommendation: Clinical recommendations (e.g., "monitor blood pressure", "lifestyle advice")
 - Contraindication: Contraindications or cautions (e.g., "pregnancy", "renal impairment")
 - Side_Effect: Adverse effects (e.g., "dry cough", "ankle swelling")
 - Procedure: Medical procedures (e.g., "blood pressure measurement", "ECG")
@@ -56,19 +71,32 @@ ENTITY TYPES TO EXTRACT (use these exact labels):
 - Prevention: Preventive measures (e.g., "cardiovascular risk assessment")
 
 RELATIONSHIP TYPES TO EXTRACT (use these exact labels):
+
+TREATMENT RELATIONSHIPS:
 - TREATS: Treatment treats condition (e.g., ACE inhibitor TREATS hypertension)
+- FIRST_LINE_FOR: First-line treatment for patient group (e.g., ACE inhibitor FIRST_LINE_FOR under_55_non_black)
+- ALTERNATIVE_TO: Alternative treatment option (e.g., ARB ALTERNATIVE_TO ACE inhibitor)
+- PRESCRIBED_FOR: Medication prescribed for condition (e.g., amlodipine PRESCRIBED_FOR hypertension)
+- CONTRAINDICATED_FOR: Treatment contraindicated for condition/group (e.g., ACE inhibitor CONTRAINDICATED_FOR pregnancy)
+
+DECISION RELATIONSHIPS:
+- APPLIES_TO: Criteria applies to patient group (e.g., age_under_55 APPLIES_TO non_black_patients)
+- IF_NOT_TOLERATED: Alternative if treatment not tolerated (e.g., ARB IF_NOT_TOLERATED ACE_inhibitor)
+- CONDITIONAL_ON: Treatment conditional on criteria (e.g., CCB_first_line CONDITIONAL_ON age_over_55)
+- ESCALATES_TO: Treatment progression (e.g., dual_therapy ESCALATES_TO triple_therapy)
+- REQUIRES_ASSESSMENT: Decision requires assessment (e.g., specialist_referral REQUIRES_ASSESSMENT severe_hypertension)
+
+CLINICAL RELATIONSHIPS:
 - CAUSES: Risk factor causes condition (e.g., smoking CAUSES hypertension)
 - ASSOCIATED_WITH: General association (e.g., obesity ASSOCIATED_WITH hypertension)
-- CONTRAINDICATED_FOR: Treatment contraindicated for condition/group (e.g., ACE inhibitor CONTRAINDICATED_FOR pregnancy)
-- REQUIRES: Treatment requires monitoring/investigation (e.g., diuretic REQUIRES electrolyte monitoring)
+- REQUIRES: Treatment requires monitoring (e.g., diuretic REQUIRES electrolyte_monitoring)
 - MONITORS: Investigation monitors condition (e.g., blood pressure monitoring MONITORS hypertension)
 - PREVENTS: Intervention prevents condition (e.g., lifestyle modification PREVENTS cardiovascular disease)
-- RECOMMENDS: Guideline recommends treatment (e.g., NICE CKS RECOMMENDS ACE inhibitor)
-- INCLUDES: Category includes specific item (e.g., antihypertensive INCLUDES ACE inhibitor)
-- AFFECTS: Condition affects patient group (e.g., hypertension AFFECTS elderly patients)
-- INDICATES: Symptom indicates condition (e.g., chest pain INDICATES cardiovascular risk)
-- PRESCRIBED_FOR: Medication prescribed for condition (e.g., amlodipine PRESCRIBED_FOR hypertension)
-- DIAGNOSED_BY: Condition diagnosed by investigation (e.g., hypertension DIAGNOSED_BY blood pressure measurement)
+- RECOMMENDS: Guideline recommends treatment (e.g., NICE_CKS RECOMMENDS ACE_inhibitor)
+- INCLUDES: Category includes item (e.g., antihypertensive INCLUDES ACE_inhibitor)
+- AFFECTS: Condition affects group (e.g., hypertension AFFECTS elderly_patients)
+- INDICATES: Symptom indicates condition (e.g., chest_pain INDICATES cardiovascular_risk)
+- DIAGNOSED_BY: Condition diagnosed by test (e.g., hypertension DIAGNOSED_BY blood_pressure_measurement)
 
 EXTRACTION RULES:
 1. Extract only entities explicitly mentioned in the text
@@ -78,6 +106,24 @@ EXTRACTION RULES:
 5. Ensure relationships are directionally correct and clinically meaningful
 6. Do not infer entities not explicitly stated in the text
 7. Maintain clinical accuracy - if unsure, omit rather than guess
+
+SPECIAL FOCUS ON TREATMENT ALGORITHMS:
+8. Extract age criteria (e.g., "under 55 years", "55 years or over") as Age_Criteria entities
+9. Extract ethnicity criteria (e.g., "black African or African-Caribbean family origin") as Ethnicity_Criteria entities
+10. Extract conditional logic (e.g., "If ACE inhibitor not tolerated, offer ARB") as Clinical_Decision entities
+11. Extract treatment sequences and steps (e.g., "Step 1 treatment", "first line") as Treatment_Algorithm entities
+12. Extract specific drug classes mentioned (e.g., "ACE inhibitors", "calcium channel blockers") as Drug_Class entities
+13. Create relationships that capture decision logic: FIRST_LINE_FOR, CONDITIONAL_ON, IF_NOT_TOLERATED, ALTERNATIVE_TO
+14. Link patient characteristics to treatment recommendations using APPLIES_TO relationships
+
+EXAMPLES OF ENHANCED EXTRACTION:
+- Text: "Offer ACE inhibitor first line for people under 55 years not of black African origin"
+- Extract: "ACE inhibitor" (Drug_Class), "under 55 years" (Age_Criteria), "not of black African origin" (Ethnicity_Criteria)
+- Relationships: ACE_inhibitor FIRST_LINE_FOR under_55_non_black_patients
+
+- Text: "If ACE inhibitor not tolerated due to cough, offer ARB"
+- Extract: "ACE inhibitor not tolerated" (Clinical_Decision), "cough" (Side_Effect), "ARB" (Drug_Class)
+- Relationships: ARB IF_NOT_TOLERATED ACE_inhibitor, cough CAUSES ACE_inhibitor_intolerance
 
 IMPORTANT: This is for UK clinical practice following NICE guidelines. 
 Maintain high precision over high recall - accuracy is critical for patient safety.
@@ -119,7 +165,9 @@ Maintain high precision over high recall - accuracy is critical for patient safe
                 allowed_relationship_types=[
                     "TREATS", "CAUSES", "ASSOCIATED_WITH", "CONTRAINDICATED_FOR",
                     "REQUIRES", "MONITORS", "PREVENTS", "RECOMMENDS", "INCLUDES",
-                    "AFFECTS", "INDICATES", "PRESCRIBED_FOR", "DIAGNOSED_BY"
+                    "AFFECTS", "INDICATES", "PRESCRIBED_FOR", "DIAGNOSED_BY",
+                    "FIRST_LINE_FOR", "ALTERNATIVE_TO", "APPLIES_TO", "IF_NOT_TOLERATED",
+                    "CONDITIONAL_ON", "ESCALATES_TO", "REQUIRES_ASSESSMENT"
                 ],
                 validate=True,
                 validation_action="warn"
@@ -137,7 +185,9 @@ Maintain high precision over high recall - accuracy is critical for patient safe
             allowed_relationships=[
                 "TREATS", "CAUSES", "ASSOCIATED_WITH", "CONTRAINDICATED_FOR",
                 "REQUIRES", "MONITORS", "PREVENTS", "RECOMMENDS", "INCLUDES",
-                "AFFECTS", "INDICATES", "PRESCRIBED_FOR", "DIAGNOSED_BY"
+                "AFFECTS", "INDICATES", "PRESCRIBED_FOR", "DIAGNOSED_BY",
+                "FIRST_LINE_FOR", "ALTERNATIVE_TO", "APPLIES_TO", "IF_NOT_TOLERATED",
+                "CONDITIONAL_ON", "ESCALATES_TO", "REQUIRES_ASSESSMENT"
             ],
             node_properties=["description", "category", "confidence", "source_section"],
             relationship_properties=["strength", "evidence_level", "source_section", "clinical_significance"]

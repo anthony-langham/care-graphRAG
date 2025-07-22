@@ -14,9 +14,11 @@ Building an explainable, low-cost GraphRAG system for UK NICE Clinical Knowledge
 - **Graph Retrieval**: Graph-first retrieval system with similarity fallback
 
 ### 🎯 Current Capabilities
-- **Data Pipeline**: NICE Guidelines → Medical Knowledge Graph → Graph-based Retrieval
+- **Enhanced Data Pipeline**: NICE Guidelines → Advanced Medical Knowledge Graph → Graph-based Retrieval
+- **Clinical Decision Trees**: Age-based, ethnicity-based, and conditional treatment pathways
+- **Advanced Entity Extraction**: 20+ entity types including Drug_Class, Age_Criteria, Treatment_Algorithm
+- **Treatment Relationships**: FIRST_LINE_FOR, IF_NOT_TOLERATED, CONDITIONAL_ON pathway logic
 - **SSL Security**: MongoDB Atlas connections secured and operational
-- **Entity Extraction**: GPT-4o-mini extracts medical entities from clinical content
 - **Graph Storage**: Persistent medical knowledge graphs in MongoDB
 - **Retrieval System**: Query medical knowledge using graph traversal
 - **Management Scripts**: Comprehensive suite for graph building, data management, and analysis
@@ -89,9 +91,11 @@ care-graphRAG/
 - ✅ Robust error handling with retry logic
 
 #### Graph Builder (`src/graph_builder.py`)
-- ✅ Medical entity extraction using GPT-4o-mini
+- ✅ Enhanced medical entity extraction using GPT-4o-mini
+- ✅ Clinical decision tree extraction with treatment algorithms
+- ✅ Advanced entity types: Age_Criteria, Ethnicity_Criteria, Drug_Class, Clinical_Decision
+- ✅ Treatment pathway relationships: FIRST_LINE_FOR, IF_NOT_TOLERATED, CONDITIONAL_ON
 - ✅ MongoDB Graph Store integration
-- ✅ Custom medical entity types and relationships
 - ✅ SSL-secured connections to MongoDB Atlas
 
 #### Graph Retriever (`src/retriever.py`)
