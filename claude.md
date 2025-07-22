@@ -140,11 +140,19 @@ export default {
 - Graph traversal functional ✓
 
 ### 🚧 CURRENT STATUS:
-- **Core System**: FULLY OPERATIONAL
-- **Data Pipeline**: Scraping → Chunking → Graph Building → Retrieval
+- **Core System**: FULLY OPERATIONAL with comprehensive script suite
+- **Data Pipeline**: Enhanced scraping → advanced chunking → optimized graph building → retrieval
 - **SSL Issues**: RESOLVED (comprehensive fix applied)
 - **API Integration**: OpenAI GPT-4o-mini working for entity extraction
 - **MongoDB Atlas**: Connected and storing graph data successfully
+- **Development Tools**: Complete set of utility scripts for management and analysis
+
+### 🛠️ AVAILABLE SCRIPTS:
+- **Graph Building**: `build_graph.py`, `enhanced_graph_builder.py`, `quick_enhanced_graph.py`
+- **Data Management**: `simple_populate.py`, `structured_extraction.py`
+- **Content Management**: `rescrape_management.py`, `llm_html_graph_builder.py`
+- **Database Utilities**: `fix_indexes.py`, `show_all_sections.py`
+- **Analysis**: `visualize_cluster.py`, `cluster_summary.json`
 
 ### 📋 NEXT PRIORITIES:
 - TASK-023: Implement hybrid retrieval (combine graph + vector)
@@ -156,6 +164,9 @@ export default {
 The detailed task list is maintained in `TODO.md` for all project tasks (TASK-001 through TASK-060) and future work items.
 
 ### Recent Major Achievements:
+- **Complete Script Suite**: Added comprehensive utility scripts for graph management
+- **Advanced Graph Building**: Enhanced document processing with structured extraction
+- **Database Management**: Index optimization and cluster analysis tools
 - **SSL Certificate Fix**: Resolved LangChain MongoDB SSL verification issues
 - **Entity Extraction**: Successfully extracting medical entities from NICE content
 - **Graph Building**: Creating knowledge graphs from clinical guidelines  
