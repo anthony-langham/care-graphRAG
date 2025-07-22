@@ -1,4 +1,4 @@
-Read CLAUDE.md and identify the next uncompleted task (marked with `- [ ]`).
+Read CLAUDE.md and identify the next uncompleted task
 
 First, think deeply about:
 
