@@ -1,8 +1,13 @@
 {
-  "timestamp": "2025-07-22T23:08:48.857191",
+  "timestamp": "2025-07-22T23:31:25.494732",
   "collections": {
+    "test_ssl_fix": {
+      "document_count": 0,
+      "sample_keys": [],
+      "sample_doc": null
+    },
     "kg": {
-      "document_count": 46,
+      "document_count": 21,
       "sample_keys": [
         "_id",
         "type",
@@ -10,7 +15,7 @@
         "relationships"
       ],
       "sample_doc": {
-        "_id": "html_section_1",
+        "_id": "section_1",
         "type": "Clinical_Section",
         "attributes": {
           "title": [
@@ -22,9 +27,6 @@
           "header_level": [
             1
           ],
-          "html_hierarchy": [
-            "H1"
-          ],
           "content_length": [
             23953
           ],
@@ -35,33 +37,48 @@
               "evidence_level": "NICE_guideline"
             }
           ],
-          "extraction_method": [
-            "llm"
-          ],
           "entity_count": [
-            10
+            19
           ],
           "relationship_count": [
-            8
+            52
           ],
-          "llm_model": [
-            "gpt-4o-mini"
+          "content_preview": [
+            "Last revised in May 2025\\n\\nCovers the management of hypertension.\\n\\nScenario: ManagementSummaryHave I got the right topic?How up-to-date is this topic?Goals and outcome measuresBackground informationDiagnosisManagementScenario: ManagementPrescribing informationSupporting evidenceHow this topic was..."
           ]
         },
         "relationships": {
           "target_ids": [
+            "ACE inhibitor",
+            "angiotensin-converting enzyme inhibitor",
+            "ARB",
+            "CCB",
+            "thiazide-like diuretic",
+            "spironolactone",
+            "beta-blocker",
+            "alpha-blocker",
+            "pregnant women",
+            "people aged under 80",
+            "people aged over 80",
+            "black african",
+            "blood pressure monitoring",
+            "annual review",
+            "home blood pressure monitoring",
             "hypertension",
-            "type 1 diabetes",
-            "chronic kidney disease (CKD)",
-            "clinic blood pressure of 180/120 mmHg",
-            "retinal haemorrhage",
-            "papilloedema",
-            "new onset confusion",
-            "chest pain",
-            "signs of heart failure",
-            "acute kidney injury"
+            "resistant hypertension",
+            "stage 1 hypertension",
+            "stage 2 hypertension"
           ],
           "types": [
+            "CONTAINS",
+            "CONTAINS",
+            "CONTAINS",
+            "CONTAINS",
+            "CONTAINS",
+            "CONTAINS",
+            "CONTAINS",
+            "CONTAINS",
+            "CONTAINS",
             "CONTAINS",
             "CONTAINS",
             "CONTAINS",
@@ -75,73 +92,122 @@
           ],
           "attributes": [
             {
-              "entity_type": "Condition",
-              "extraction_confidence": 0.9,
-              "html_section": "Hypertension:Scenario: Management",
-              "extraction_context": "management of hypertension"
+              "entity_type": "Medication",
+              "clinical_relevance": "high",
+              "extraction_method": "heuristic",
+              "section_context": "Hypertension:Scenario: Management"
+            },
+            {
+              "entity_type": "Medication",
+              "clinical_relevance": "high",
+              "extraction_method": "heuristic",
+              "section_context": "Hypertension:Scenario: Management"
+            },
+            {
+              "entity_type": "Medication",
+              "clinical_relevance": "high",
+              "extraction_method": "heuristic",
+              "section_context": "Hypertension:Scenario: Management"
+            },
+            {
+              "entity_type": "Medication",
+              "clinical_relevance": "high",
+              "extraction_method": "heuristic",
+              "section_context": "Hypertension:Scenario: Management"
+            },
+            {
+              "entity_type": "Medication",
+              "clinical_relevance": "high",
+              "extraction_method": "heuristic",
+              "section_context": "Hypertension:Scenario: Management"
+            },
+            {
+              "entity_type": "Medication",
+              "clinical_relevance": "medium",
+              "extraction_method": "heuristic",
+              "section_context": "Hypertension:Scenario: Management"
+            },
+            {
+              "entity_type": "Medication",
+              "clinical_relevance": "medium",
+              "extraction_method": "heuristic",
+              "section_context": "Hypertension:Scenario: Management"
+            },
+            {
+              "entity_type": "Medication",
+              "clinical_relevance": "medium",
+              "extraction_method": "heuristic",
+              "section_context": "Hypertension:Scenario: Management"
             },
             {
               "entity_type": "Patient_Group",
-              "extraction_confidence": 0.8,
-              "html_section": "Hypertension:Scenario: Management",
-              "extraction_context": "specific guidance for those with type 1 diabetes"
+              "clinical_relevance": "high",
+              "extraction_method": "heuristic",
+              "section_context": "Hypertension:Scenario: Management"
             },
             {
               "entity_type": "Patient_Group",
-              "extraction_confidence": 0.8,
-              "html_section": "Hypertension:Scenario: Management",
-              "extraction_context": "specific guidance for those with chronic kidney disease"
+              "clinical_relevance": "high",
+              "extraction_method": "heuristic",
+              "section_context": "Hypertension:Scenario: Management"
             },
             {
-              "entity_type": "Target",
-              "extraction_confidence": 0.9,
-              "html_section": "Hypertension:Scenario: Management",
-              "extraction_context": "clinic blood pressure indicating need for specialist assessment"
+              "entity_type": "Patient_Group",
+              "clinical_relevance": "high",
+              "extraction_method": "heuristic",
+              "section_context": "Hypertension:Scenario: Management"
             },
             {
-              "entity_type": "Condition",
-              "extraction_confidence": 0.7,
-              "html_section": "Hypertension:Scenario: Management",
-              "extraction_context": "signs of retinal haemorrhage"
+              "entity_type": "Patient_Group",
+              "clinical_relevance": "high",
+              "extraction_method": "heuristic",
+              "section_context": "Hypertension:Scenario: Management"
             },
             {
-              "entity_type": "Condition",
-              "extraction_confidence": 0.7,
-              "html_section": "Hypertension:Scenario: Management",
-              "extraction_context": "signs of papilloedema"
+              "entity_type": "Monitoring",
+              "clinical_relevance": "high",
+              "extraction_method": "heuristic",
+              "section_context": "Hypertension:Scenario: Management"
             },
             {
-              "entity_type": "Condition",
-              "extraction_confidence": 0.7,
-              "html_section": "Hypertension:Scenario: Management",
-              "extraction_context": "life-threatening symptoms"
+              "entity_type": "Monitoring",
+              "clinical_relevance": "high",
+              "extraction_method": "heuristic",
+              "section_context": "Hypertension:Scenario: Management"
             },
             {
-              "entity_type": "Condition",
-              "extraction_confidence": 0.7,
-              "html_section": "Hypertension:Scenario: Management",
-              "extraction_context": "life-threatening symptoms"
-            },
-            {
-              "entity_type": "Condition",
-              "extraction_confidence": 0.7,
-              "html_section": "Hypertension:Scenario: Management",
-              "extraction_context": "life-threatening symptoms"
+              "entity_type": "Monitoring",
+              "clinical_relevance": "high",
+              "extraction_method": "heuristic",
+              "section_context": "Hypertension:Scenario: Management"
             },
             {
               "entity_type": "Condition",
-              "extraction_confidence": 0.7,
-              "html_section": "Hypertension:Scenario: Management",
-              "extraction_context": "life-threatening symptoms"
+              "clinical_relevance": "high",
+              "extraction_method": "heuristic",
+              "section_context": "Hypertension:Scenario: Management"
+            },
+            {
+              "entity_type": "Condition",
+              "clinical_relevance": "high",
+              "extraction_method": "heuristic",
+              "section_context": "Hypertension:Scenario: Management"
+            },
+            {
+              "entity_type": "Condition",
+              "clinical_relevance": "high",
+              "extraction_method": "heuristic",
+              "section_context": "Hypertension:Scenario: Management"
+            },
+            {
+              "entity_type": "Condition",
+              "clinical_relevance": "high",
+              "extraction_method": "heuristic",
+              "section_context": "Hypertension:Scenario: Management"
             }
           ]
         }
       }
-    },
-    "test_ssl_fix": {
-      "document_count": 0,
-      "sample_keys": [],
-      "sample_doc": null
     },
     "audit_log": {
       "document_count": 0,
@@ -168,6 +234,78 @@
     "documents": {
       "count": 0,
       "sample_docs": []
+    },
+    "kg_entities": {
+      "count": 21,
+      "types": {
+        "Clinical_Section": 2,
+        "Medication": 8,
+        "Condition": 4,
+        "Patient_Group": 4,
+        "Monitoring": 3
+      },
+      "sample_entities": [
+        {
+          "id": "section_1",
+          "type": "Clinical_Section",
+          "attributes_keys": [
+            "title",
+            "section_type",
+            "header_level",
+            "content_length",
+            "clinical_context",
+            "entity_count",
+            "relationship_count",
+            "content_preview"
+          ],
+          "relationship_count": 19
+        },
+        {
+          "id": "angiotensin-converting enzyme inhibitor",
+          "type": "Medication",
+          "attributes_keys": [
+            "name",
+            "source_section",
+            "clinical_context",
+            "relevance",
+            "extraction_confidence"
+          ],
+          "relationship_count": 4
+        },
+        {
+          "id": "spironolactone",
+          "type": "Medication",
+          "attributes_keys": [
+            "name",
+            "source_section",
+            "clinical_context",
+            "relevance",
+            "extraction_confidence"
+          ],
+          "relationship_count": 4
+        },
+        {
+          "id": "stage 1 hypertension",
+          "type": "Condition",
+          "attributes_keys": [
+            "name",
+            "source_section",
+            "clinical_context",
+            "relevance",
+            "extraction_confidence"
+          ],
+          "relationship_count": 0
+        }
+      ]
+    },
+    "relationships": {
+      "count": 82,
+      "types": {
+        "CONTAINS": 38,
+        "TREATS": 32,
+        "MONITORS": 12
+      },
+      "sample_relationships": []
     }
   },
   "chunk_analysis": {
