@@ -1,0 +1,180 @@
+{
+  "timestamp": "2025-07-22T23:08:48.857191",
+  "collections": {
+    "kg": {
+      "document_count": 46,
+      "sample_keys": [
+        "_id",
+        "type",
+        "attributes",
+        "relationships"
+      ],
+      "sample_doc": {
+        "_id": "html_section_1",
+        "type": "Clinical_Section",
+        "attributes": {
+          "title": [
+            "Hypertension:Scenario: Management"
+          ],
+          "section_type": [
+            "Management"
+          ],
+          "header_level": [
+            1
+          ],
+          "html_hierarchy": [
+            "H1"
+          ],
+          "content_length": [
+            23953
+          ],
+          "clinical_context": [
+            {
+              "clinical_area": "hypertension",
+              "guidance_type": "management",
+              "evidence_level": "NICE_guideline"
+            }
+          ],
+          "extraction_method": [
+            "llm"
+          ],
+          "entity_count": [
+            10
+          ],
+          "relationship_count": [
+            8
+          ],
+          "llm_model": [
+            "gpt-4o-mini"
+          ]
+        },
+        "relationships": {
+          "target_ids": [
+            "hypertension",
+            "type 1 diabetes",
+            "chronic kidney disease (CKD)",
+            "clinic blood pressure of 180/120 mmHg",
+            "retinal haemorrhage",
+            "papilloedema",
+            "new onset confusion",
+            "chest pain",
+            "signs of heart failure",
+            "acute kidney injury"
+          ],
+          "types": [
+            "CONTAINS",
+            "CONTAINS",
+            "CONTAINS",
+            "CONTAINS",
+            "CONTAINS",
+            "CONTAINS",
+            "CONTAINS",
+            "CONTAINS",
+            "CONTAINS",
+            "CONTAINS"
+          ],
+          "attributes": [
+            {
+              "entity_type": "Condition",
+              "extraction_confidence": 0.9,
+              "html_section": "Hypertension:Scenario: Management",
+              "extraction_context": "management of hypertension"
+            },
+            {
+              "entity_type": "Patient_Group",
+              "extraction_confidence": 0.8,
+              "html_section": "Hypertension:Scenario: Management",
+              "extraction_context": "specific guidance for those with type 1 diabetes"
+            },
+            {
+              "entity_type": "Patient_Group",
+              "extraction_confidence": 0.8,
+              "html_section": "Hypertension:Scenario: Management",
+              "extraction_context": "specific guidance for those with chronic kidney disease"
+            },
+            {
+              "entity_type": "Target",
+              "extraction_confidence": 0.9,
+              "html_section": "Hypertension:Scenario: Management",
+              "extraction_context": "clinic blood pressure indicating need for specialist assessment"
+            },
+            {
+              "entity_type": "Condition",
+              "extraction_confidence": 0.7,
+              "html_section": "Hypertension:Scenario: Management",
+              "extraction_context": "signs of retinal haemorrhage"
+            },
+            {
+              "entity_type": "Condition",
+              "extraction_confidence": 0.7,
+              "html_section": "Hypertension:Scenario: Management",
+              "extraction_context": "signs of papilloedema"
+            },
+            {
+              "entity_type": "Condition",
+              "extraction_confidence": 0.7,
+              "html_section": "Hypertension:Scenario: Management",
+              "extraction_context": "life-threatening symptoms"
+            },
+            {
+              "entity_type": "Condition",
+              "extraction_confidence": 0.7,
+              "html_section": "Hypertension:Scenario: Management",
+              "extraction_context": "life-threatening symptoms"
+            },
+            {
+              "entity_type": "Condition",
+              "extraction_confidence": 0.7,
+              "html_section": "Hypertension:Scenario: Management",
+              "extraction_context": "life-threatening symptoms"
+            },
+            {
+              "entity_type": "Condition",
+              "extraction_confidence": 0.7,
+              "html_section": "Hypertension:Scenario: Management",
+              "extraction_context": "life-threatening symptoms"
+            }
+          ]
+        }
+      }
+    },
+    "test_ssl_fix": {
+      "document_count": 0,
+      "sample_keys": [],
+      "sample_doc": null
+    },
+    "audit_log": {
+      "document_count": 0,
+      "sample_keys": [],
+      "sample_doc": null
+    },
+    "test_collection": {
+      "document_count": 0,
+      "sample_keys": [],
+      "sample_doc": null
+    }
+  },
+  "graph_analysis": {
+    "nodes": {
+      "count": 0,
+      "types": {},
+      "sample_nodes": []
+    },
+    "edges": {
+      "count": 0,
+      "types": {},
+      "sample_edges": []
+    },
+    "documents": {
+      "count": 0,
+      "sample_docs": []
+    }
+  },
+  "chunk_analysis": {
+    "total_chunks": 0,
+    "sources": {},
+    "sections": {},
+    "avg_length": 0,
+    "sample_chunks": []
+  }
+}
