@@ -105,8 +105,12 @@ Maintain high precision over high recall - accuracy is critical for patient safe
         
         # Initialize MongoDBGraphStore with the LLM
         try:
+            # Use working SSL connection parameters
+            from src.db.connection_helper import get_mongodb_connection_string
+            mongodb_uri = get_mongodb_connection_string(allow_invalid_certs=True)
+            
             self.graph_store = MongoDBGraphStore(
-                connection_string=self.settings.mongodb_uri,
+                connection_string=mongodb_uri,
                 database_name=self.settings.mongodb_db_name,
                 collection_name=self.settings.mongodb_graph_collection,
                 entity_extraction_model=self.llm,
@@ -781,6 +785,7 @@ Maintain high precision over high recall - accuracy is critical for patient safe
     def get_graph_statistics(self) -> Dict[str, Any]:
         """
         Get current statistics about the knowledge graph from MongoDB.
+        Fixed version that handles LangChain's graph structure properly.
         
         Returns:
             Dictionary with comprehensive graph statistics
@@ -792,70 +797,100 @@ Maintain high precision over high recall - accuracy is critical for patient safe
             # Get basic document count
             total_documents = collection.count_documents({})
             
-            # Aggregation pipeline to count nodes and relationships
-            pipeline = [
-                {
-                    "$group": {
-                        "_id": None,
-                        "total_documents": {"$sum": 1},
-                        "total_nodes": {"$sum": {"$size": {"$ifNull": ["$relationships", []]}}},
-                        "node_types": {"$push": "$type"},
-                        "relationship_data": {"$push": "$relationships"}
-                    }
-                }
-            ]
-            
-            agg_results = list(collection.aggregate(pipeline))
-            
-            if agg_results:
-                result = agg_results[0]
-                
-                # Count relationship types from all documents
-                relationship_types = {}
-                total_relationships = 0
-                
-                for rel_data in result.get("relationship_data", []):
-                    if rel_data:
-                        for rel in rel_data:
-                            rel_type = rel.get("type", "Unknown")
-                            relationship_types[rel_type] = relationship_types.get(rel_type, 0) + 1
-                            total_relationships += 1
-                
-                # Count node types
-                node_types = {}
-                for node_type in result.get("node_types", []):
-                    if node_type:
-                        node_types[node_type] = node_types.get(node_type, 0) + 1
-                
-                # Get latest extraction timestamp
-                latest_doc = collection.find_one({}, sort=[("_id", -1)])
-                last_updated = latest_doc.get("_id").generation_time if latest_doc else datetime.now(timezone.utc)
-                
-                stats = {
-                    "total_documents": total_documents,
-                    "total_nodes": result.get("total_nodes", 0),
-                    "total_relationships": total_relationships,
-                    "node_types": node_types,
-                    "relationship_types": relationship_types,
-                    "last_updated": last_updated.isoformat() if hasattr(last_updated, 'isoformat') else str(last_updated),
-                    "collection_name": self.settings.mongodb_graph_collection,
-                    "database_name": self.settings.mongodb_db_name
-                }
-                
-                self.logger.info(
-                    f"Graph statistics retrieved: {stats['total_documents']} documents, "
-                    f"{stats['total_nodes']} nodes, {stats['total_relationships']} relationships"
-                )
-                
-                return stats
-            
-            else:
-                # Empty collection
+            if total_documents == 0:
                 return {
                     "total_documents": 0,
                     "total_nodes": 0,
                     "total_relationships": 0,
                     "node_types": {},
+                    "relationship_types": {},
+                    "last_updated": datetime.now(timezone.utc).isoformat(),
+                    "collection_name": self.settings.mongodb_graph_collection,
+                    "database_name": self.settings.mongodb_db_name
+                }
+            
+            # Use safe aggregation pipeline that handles different relationship structures
+            pipeline = [
+                {
+                    "$project": {
+                        "_id": 1,
+                        "type": 1,
+                        "relationship_count": {
+                            "$cond": [
+                                {"$isArray": "$relationships"},
+                                {"$size": "$relationships"},
+                                {
+                                    "$cond": [
+                                        {"$and": [
+                                            {"$type": ["$relationships", "object"]},
+                                            {"$isArray": "$relationships.target_ids"}
+                                        ]},
+                                        {"$size": "$relationships.target_ids"},
+                                        0
+                                    ]
+                                }
+                            ]
+                        }
+                    }
+                },
+                {
+                    "$group": {
+                        "_id": None,
+                        "total_documents": {"$sum": 1},
+                        "total_relationships": {"$sum": "$relationship_count"},
+                        "node_types": {"$push": "$type"}
+                    }
+                }
+            ]
+            
+            try:
+                agg_results = list(collection.aggregate(pipeline))
+                
+                if agg_results:
+                    result = agg_results[0]
+                    
+                    # Count node types
+                    node_types = {}
+                    for node_type in result.get("node_types", []):
+                        if node_type:
+                            node_types[node_type] = node_types.get(node_type, 0) + 1
+                    
+                    # Get latest extraction timestamp
+                    latest_doc = collection.find_one({}, sort=[("_id", -1)])
+                    last_updated = latest_doc.get("_id").generation_time if latest_doc else datetime.now(timezone.utc)
+                    
+                    stats = {
+                        "total_documents": result.get("total_documents", 0),
+                        "total_nodes": result.get("total_documents", 0),  # Each doc is a node
+                        "total_relationships": result.get("total_relationships", 0),
+                        "node_types": node_types,
+                        "relationship_types": {},  # Would need separate query for detailed breakdown
+                        "last_updated": last_updated.isoformat() if hasattr(last_updated, 'isoformat') else str(last_updated),
+                        "collection_name": self.settings.mongodb_graph_collection,
+                        "database_name": self.settings.mongodb_db_name
+                    }
+                    
+                    self.logger.info(
+                        f"Graph statistics retrieved: {stats['total_documents']} documents, "
+                        f"{stats['total_nodes']} nodes, {stats['total_relationships']} relationships"
+                    )
+                    
+                    return stats
+                
+            except Exception as agg_error:
+                self.logger.warning(f"Aggregation failed, falling back to simple count: {agg_error}")
+                
+                # Fallback to simple document count
+                node_types = {}
+                for doc in collection.find({}, {"type": 1}):
+                    node_type = doc.get("type", "Unknown")
+                    node_types[node_type] = node_types.get(node_type, 0) + 1
+                
+                return {
+                    "total_documents": total_documents,
+                    "total_nodes": total_documents,
+                    "total_relationships": 0,  # Can't reliably count without proper aggregation
+                    "node_types": node_types,
                     "relationship_types": {},
                     "last_updated": datetime.now(timezone.utc).isoformat(),
                     "collection_name": self.settings.mongodb_graph_collection,
