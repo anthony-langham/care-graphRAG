@@ -15,6 +15,8 @@ Building an explainable, low-cost GraphRAG system for UK NICE Clinical Knowledge
 
 ### 🎯 Current Capabilities
 - **Enhanced Data Pipeline**: NICE Guidelines → Advanced Medical Knowledge Graph → Graph-based Retrieval
+- **Interactive Graph Visualization**: Neo4j-style network explorer with color-coded entities and relationships
+- **Analytics Dashboard**: Comprehensive network statistics, entity distributions, and graph metrics
 - **Clinical Decision Trees**: Age-based, ethnicity-based, and conditional treatment pathways
 - **Advanced Entity Extraction**: 20+ entity types including Drug_Class, Age_Criteria, Treatment_Algorithm
 - **Treatment Relationships**: FIRST_LINE_FOR, IF_NOT_TOLERATED, CONDITIONAL_ON pathway logic
@@ -144,9 +146,14 @@ python scripts/show_all_sections.py        # Show all document sections
 
 #### Analysis & Visualization
 ```bash
-# Analysis tools
-python scripts/visualize_cluster.py        # Visualize graph clusters
+# Cluster analysis
+python scripts/visualize_cluster.py        # Analyze graph structure and statistics
 # Review cluster_summary.json for cluster analysis results
+
+# Interactive graph visualization (Neo4j-style)
+python scripts/graph_visualizer.py         # Create interactive network visualizations
+# Opens: medical_knowledge_graph.html - Interactive graph explorer
+# Opens: graph_analytics_dashboard.html - Network statistics dashboard
 ```
 
 ### Testing

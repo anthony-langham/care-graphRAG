@@ -153,6 +153,7 @@ export default {
 - **Content Management**: `rescrape_management.py`, `llm_html_graph_builder.py`
 - **Database Utilities**: `fix_indexes.py`, `show_all_sections.py`
 - **Analysis**: `visualize_cluster.py`, `cluster_summary.json`
+- **Graph Visualization**: `graph_visualizer.py` - Interactive Neo4j-style network graphs
 
 ### 📋 NEXT PRIORITIES:
 - TASK-023: Implement hybrid retrieval (combine graph + vector)
@@ -164,6 +165,9 @@ export default {
 The detailed task list is maintained in `TODO.md` for all project tasks (TASK-001 through TASK-060) and future work items.
 
 ### Recent Major Achievements:
+- **Interactive Graph Visualization**: Neo4j-style network visualization with NetworkX and Plotly
+- **Medical Knowledge Graph Explorer**: Interactive HTML interface for exploring clinical entities and relationships
+- **Analytics Dashboard**: Comprehensive network statistics and entity distribution analysis
 - **Enhanced Entity Extraction**: Improved clinical decision tree extraction with new entity types
 - **Treatment Algorithm Capture**: Added Age_Criteria, Ethnicity_Criteria, Clinical_Decision, Drug_Class entities
 - **Advanced Relationship Types**: Implemented FIRST_LINE_FOR, IF_NOT_TOLERATED, CONDITIONAL_ON relationships

@@ -30,3 +30,8 @@ tenacity==8.2.3
 
 # OpenAI
 openai>=1.86.0,<2.0.0
+
+# Graph visualization dependencies
+networkx==3.5
+plotly==6.2.0
+pandas==2.3.1
