@@ -24,9 +24,9 @@ fastapi==0.104.1
 
 # Utilities
 python-dotenv==1.0.0
-pydantic==2.5.2
-pydantic-settings==2.5.2
+pydantic>=2.7.4
+pydantic-settings>=2.5.2
 tenacity==8.2.3
 
 # OpenAI
-openai==1.6.1
+openai>=1.86.0,<2.0.0

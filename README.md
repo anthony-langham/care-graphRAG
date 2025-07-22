@@ -19,6 +19,7 @@ Building an explainable, low-cost GraphRAG system for UK NICE Clinical Knowledge
 - **Entity Extraction**: GPT-4o-mini extracts medical entities from clinical content
 - **Graph Storage**: Persistent medical knowledge graphs in MongoDB
 - **Retrieval System**: Query medical knowledge using graph traversal
+- **Management Scripts**: Comprehensive suite for graph building, data management, and analysis
 
 ### 📋 Next Steps
 - **TASK-023**: Hybrid retrieval (graph + vector combination)
@@ -111,6 +112,38 @@ care-graphRAG/
 - Each task creates a feature branch: `git checkout -b TASK-XXX-description`
 - Test changes: Run relevant test scripts in `scripts/` directory
 - Commit with task reference: `TASK-XXX: Brief description`
+
+### Available Scripts
+
+#### Graph Building & Management
+```bash
+# Main graph building scripts
+python scripts/build_graph.py              # Standard graph building
+python scripts/enhanced_graph_builder.py   # Enhanced with better extraction
+python scripts/quick_enhanced_graph.py     # Fast enhanced version
+
+# Data management
+python scripts/simple_populate.py          # Simple data population
+python scripts/structured_extraction.py    # Structured entity extraction
+```
+
+#### Content & Database Management
+```bash
+# Content management
+python scripts/rescrape_management.py      # Manage content re-scraping
+python scripts/llm_html_graph_builder.py   # LLM-powered HTML processing
+
+# Database utilities
+python scripts/fix_indexes.py              # Fix database indexes
+python scripts/show_all_sections.py        # Show all document sections
+```
+
+#### Analysis & Visualization
+```bash
+# Analysis tools
+python scripts/visualize_cluster.py        # Visualize graph clusters
+# Review cluster_summary.json for cluster analysis results
+```
 
 ### Testing
 
