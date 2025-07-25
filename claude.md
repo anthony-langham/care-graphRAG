@@ -204,6 +204,73 @@ Each task should follow:
 - Write tests alongside implementation
 - Document functions and complex logic
 
+## Test-Driven Development (TDD) Approach
+
+**MANDATORY: Follow TDD practices for all new code**
+
+### TDD Workflow:
+1. **Red**: Write failing test first
+2. **Green**: Write minimal code to pass the test
+3. **Refactor**: Improve code while keeping tests green
+4. **Repeat**: For each new feature or change
+
+### Design for Testability:
+- **Dependency Injection**: Pass dependencies as constructor parameters, not hardcoded imports
+- **Interface Segregation**: Keep classes focused on single responsibilities
+- **Mock-Friendly Design**: Avoid complex object creation in constructors
+- **Error Handling**: Design methods to handle both real and mock objects gracefully
+
+### Example: Good Testable Design
+```python
+class HybridRetriever:
+    def __init__(self, 
+                 graph_store=None,
+                 mongo_client=None,           # Injectable dependency
+                 embedding_generator=None):   # Injectable dependency
+        # Use injected dependencies or create defaults
+        self._mongo_client = mongo_client or get_mongo_client()
+        self._embedding_generator = embedding_generator or EmbeddingGenerator()
+```
+
+### Test Structure:
+```python
+class TestClassName(unittest.TestCase):
+    def setUp(self):
+        # Create mocks for all external dependencies
+        self.mock_dependency = Mock()
+        
+        # Inject mocks into class under test
+        self.instance = ClassName(dependency=self.mock_dependency)
+    
+    def test_specific_behavior(self):
+        # Arrange: Set up test data and mock behavior
+        # Act: Call the method under test
+        # Assert: Verify expected behavior
+```
+
+### Red Flags (Avoid These):
+- ❌ Creating real database connections in tests
+- ❌ Making HTTP calls in unit tests
+- ❌ Hardcoding dependencies in constructors
+- ❌ Writing implementation before tests
+- ❌ Testing implementation details instead of behavior
+- ❌ Large, complex test setup methods
+
+### Green Flags (Do These):
+- ✅ Mock all external dependencies
+- ✅ Test behavior, not implementation
+- ✅ Write tests first (Red-Green-Refactor)
+- ✅ Use dependency injection
+- ✅ Keep tests fast and isolated
+- ✅ One assertion per test (when possible)
+
+### Test Categories:
+1. **Unit Tests**: Test individual methods in isolation (with mocks)
+2. **Integration Tests**: Test component interactions (with real dependencies)
+3. **End-to-End Tests**: Test complete user workflows
+
+**Priority: Unit tests should cover all business logic before integration tests.**
+
 ## SST/Lambda Specific Considerations
 
 ### Benefits of SST + Lambda approach:
