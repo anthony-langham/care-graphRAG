@@ -151,11 +151,13 @@ This file contains the detailed task list for the Care-GraphRAG project. It was 
   - Add vector fallback logic ✓
   - Set confidence thresholds ✓
   - **SSL ISSUE FIXED**: MongoDB connection working perfectly ✓
-- [todo] **TASK-023**: Implement hybrid retrieval
-  - Combine graph and vector results
-  - Deduplication logic
-  - Ranking algorithm
-  - Context size limits
+- [done] **TASK-023**: Implement hybrid retrieval ✓
+  - Combine graph and vector results ✓
+  - Deduplication logic ✓
+  - Ranking algorithm ✓
+  - Context size limits ✓
+  - **IMPLEMENTED**: Created HybridRetriever class with graph-first approach and vector fallback
+  - **FEATURES**: Direct graph search fallback, weighted scoring, deduplication
 - [todo] **TASK-024**: Add retrieval monitoring
   - Log retrieval paths
   - Track graph vs vector usage

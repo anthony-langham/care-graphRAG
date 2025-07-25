@@ -1,0 +1,33 @@
+{
+  "Condition": "hypertension",
+  "Treatment": "Antihypertensive drug treatment including lifestyle advice, with a stepwise approach involving monotherapy and escalation through multiple treatment steps for adults with persistent hypertension.",
+  "Medication": {
+    "Drug_Name": "ACE inhibitor",
+    "Dosage": null,
+    "Drug_Class": "ACE inhibitors",
+    "Side_Effects": null,
+    "Contraindications": [
+      "pregnancy",
+      "breastfeeding"
+    ]
+  },
+  "Symptom": null,
+  "Risk_Factor": null,
+  "Complication": "stroke, myocardial infarction, heart failure, chronic kidney disease, cognitive decline, premature death",
+  "Guideline": {
+    "Guideline_Name": "NICE guideline NG136: Hypertension in adults: diagnosis and management",
+    "Recommendation": "Covers identifying and treating primary hypertension in people aged 18 and over, including those with type 2 diabetes. Provides recommendations for diagnosis, measurement, risk assessment, lifestyle advice, drug treatment, monitoring, and blood pressure targets. If starting or changing diuretic treatment for hypertension, offer a thiazide-like diuretic, such as indapamide, in preference to a conventional thiazide diuretic such as bendroflumethiazide or hydrochlorothiazide. Recommends stepwise antihypertensive drug treatment with monotherapy as step 1, an individualised approach for steps 2 and 3, confirmation of resistant hypertension before step 4, and referral for same-day specialist review based on emergency symptoms.",
+    "Patient_Group": "Adults aged 18 and over, including people with type 2 diabetes, with suspected or diagnosed hypertension.",
+    "Age_Criteria": "18 years and over",
+    "Ethnicity_Criteria": null
+  },
+  "Procedure": "Blood pressure measurement (clinic, home, postural), device validation and maintenance, specialist referral for persistent symptoms.",
+  "Investigation": "Urine albumin:creatinine ratio, haematuria test, blood sample for HbA1C, electrolytes, creatinine, eGFR, total cholesterol, HDL cholesterol, fundi examination, 12-lead ECG",
+  "Monitoring": "Monitor blood pressure using clinic measurements, ABPM, or HBPM; provide annual review of care; monitor response to lifestyle changes or drug treatment.",
+  "Lifestyle": "Lifestyle advice including healthy diet, regular exercise, reduced alcohol intake, reduced caffeine, low sodium intake, smoking cessation, and support for healthy lifestyle change.",
+  "Prevention": null,
+  "Treatment_Algorithm": "Stepwise antihypertensive treatment algorithm: Step 1 - ACE inhibitor or ARB for adults with type 2 diabetes or under 55 (not Black African/African-Caribbean); CCB for those 55+ or Black African/African-Caribbean without type 2 diabetes; alternatives if not tolerated; do not combine ACE inhibitor and ARB. Step 2 - add CCB or thiazide-like diuretic. Step 3 - triple therapy (combination therapy). Step 4 - confirm resistant hypertension, consider aldosterone antagonist, alpha- or beta-blocker, or seek specialist advice.",
+  "Clinical_Decision": "If ACE inhibitor not tolerated, offer ARB. If CCB not tolerated, offer thiazide-like diuretic. Use clinical judgement for frailty or multimorbidity. Refer for specialist assessment if secondary causes suspected. If hypertension is not controlled in adults taking step 1 treatment, add a CCB or thiazide-like diuretic; if not controlled on step 2, offer triple therapy; if not controlled on triple therapy, consider step 4 treatment or specialist advice. Do not start dual therapy at step 1; confirm resistant hypertension before step 4; refer for same-day specialist review if emergency symptoms are present.",
+  "Treatment_Sequence": null,
+  "Target": "Clinic blood pressure target: under 80 years, below 140/90 mmHg; 80 and over, below 150/90 mmHg. ABPM/HBPM targets: under 80, below 135/85 mmHg; 80 and over, below 145/85 mmHg."
+}

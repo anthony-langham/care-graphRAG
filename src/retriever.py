@@ -196,15 +196,35 @@ class GraphRetriever(LoggerMixin):
                 
                 self.logger.debug(f"Searching for entity: '{entity_name}'")
                 
-                # Find entity in graph
-                found_entity = self.graph_store.find_entity_by_name(entity_name)
+                # Find entity in graph - try different variations
+                found_entity = None
+                entity_variations = [
+                    entity_name,
+                    entity_name.lower(),
+                    entity_name.upper(),
+                    entity_name.replace(" ", "_"),
+                    entity_name.replace("-", " "),
+                    entity_name.title()
+                ]
+                
+                for variation in entity_variations:
+                    try:
+                        found_entity = self.graph_store.find_entity_by_name(variation)
+                        if found_entity:
+                            self.logger.debug(f"Found entity with variation: '{variation}'")
+                            break
+                    except:
+                        continue
                 
                 if found_entity:
                     # Get related entities up to max_depth
-                    related = self.graph_store.related_entities(
-                        entity_name,
-                        max_depth=self.max_depth
-                    )
+                    try:
+                        related = self.graph_store.related_entities(
+                            found_entity.get("name", entity_name),
+                            max_depth=self.max_depth
+                        )
+                    except:
+                        related = []
                     
                     # Process results
                     self._process_graph_results(
