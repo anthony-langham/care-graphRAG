@@ -187,10 +187,14 @@ This file contains the detailed task list for the Care-GraphRAG project. It was 
   - **FEATURES**: Confidence scoring, in-text citations, enhanced provenance, clinical safety warnings
   - **INTEGRATION**: Ready for QA chain integration, supports hybrid retrieval metadata
   - **TESTING**: Full test suite with 7 passing tests
-- [todo] **TASK-027**: Add answer validation
-  - Check for hallucinations
-  - Verify source usage
-  - Flag low-confidence answers
+- [done] **TASK-027**: Add answer validation ✅
+  - Check for hallucinations ✓
+  - Verify source usage ✓  
+  - Flag low-confidence answers ✓
+  - **IMPLEMENTED**: Created AnswerValidator class with comprehensive validation
+  - **FEATURES**: Hallucination detection via semantic similarity, source verification, clinical safety flags
+  - **INTEGRATION**: Integrated into QA chain with enhanced formatting support
+  - **TESTING**: Full test suite with 9 passing tests
 
 ### Phase 8: Testing & Validation
 
@@ -198,7 +202,8 @@ This file contains the detailed task list for the Care-GraphRAG project. It was 
   - Sample questions/answers
   - Mock data for unit tests
   - Integration test data
-- [todo] **TASK-029**: Implement unit tests
+- [todo] **
+  TASK-029**: Implement unit tests
   - Test scraper components
   - Test graph operations
   - Test retrieval logic
@@ -391,6 +396,7 @@ This file contains the detailed task list for the Care-GraphRAG project. It was 
 ### Phase 17: Future Enhancements
 
 - [todo] **TASK-018a**: Fix document processor test issues
+
   - Fix error handling test expectations (currently expects 3 but gets 5 valid docs)
   - Add mock/offline mode for real scraper data test to avoid connection dependency
   - Improve test robustness and error message clarity

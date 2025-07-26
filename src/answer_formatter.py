@@ -43,7 +43,8 @@ class AnswerFormatter(LoggerMixin):
                                  qa_result: Dict[str, Any],
                                  processing_time: float,
                                  cost: float,
-                                 model_info: Optional[Dict[str, Any]] = None) -> Dict[str, Any]:
+                                 model_info: Optional[Dict[str, Any]] = None,
+                                 validation_result: Optional[Any] = None) -> Dict[str, Any]:
         """
         Format QA result into structured response with all required components.
         
@@ -53,6 +54,7 @@ class AnswerFormatter(LoggerMixin):
             processing_time: Time taken to process in seconds
             cost: Cost in USD
             model_info: Optional model configuration information
+            validation_result: Optional validation result from AnswerValidator
             
         Returns:
             Structured response dictionary
@@ -60,8 +62,11 @@ class AnswerFormatter(LoggerMixin):
         answer = qa_result.get("result", "")
         source_documents = qa_result.get("source_documents", [])
         
-        # Calculate confidence score
-        confidence = self.calculate_confidence_score(source_documents, answer)
+        # Use validation confidence if available, otherwise calculate
+        if validation_result:
+            confidence = validation_result.confidence_score
+        else:
+            confidence = self.calculate_confidence_score(source_documents, answer)
         
         # Format sources
         formatted_sources = self._format_source_documents(source_documents)
@@ -102,6 +107,15 @@ class AnswerFormatter(LoggerMixin):
         # Add model info if provided
         if model_info:
             metadata["model_config"] = model_info
+        
+        # Add validation results if available
+        if validation_result:
+            metadata["validation"] = {
+                "is_valid": validation_result.is_valid,
+                "hallucination_risk": validation_result.hallucination_risk,
+                "clinical_safety_flags": validation_result.clinical_safety_flags,
+                "validation_flags": validation_result.validation_flags
+            }
         
         structured_response = {
             "answer": citations["formatted_answer"],
