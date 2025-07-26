@@ -11,6 +11,7 @@ Building an explainable, low-cost GraphRAG system for UK NICE Clinical Knowledge
 - **MongoDB Atlas**: Database setup, collections, SSL-secured connections
 - **Web Scraping**: NICE content scraping, chunking, deduplication
 - **Graph Building**: LangChain integration, medical entity extraction
+- **Vector Store**: MongoDB Atlas vector search with OpenAI embeddings
 - **Retrieval System**: Hybrid graph-first retrieval with vector fallback
 - **Monitoring**: Comprehensive metrics tracking for performance and costs
 - **QA Chain**: Complete question-answering system with clinical safety prompting
@@ -32,10 +33,10 @@ Building an explainable, low-cost GraphRAG system for UK NICE Clinical Knowledge
 - **Management Scripts**: Comprehensive suite for graph building, data management, and analysis
 
 ### 📋 Next Steps
-- **TASK-026**: Answer formatting with enhanced response structure
-- **TASK-027**: Answer validation and confidence scoring
 - **TASK-028**: Test fixtures and validation dataset creation
-- **API Development**: Lambda functions for serverless deployment
+- **TASK-032**: Lambda function structure for API development
+- **TASK-029**: Comprehensive unit test implementation
+- **TASK-030**: Validation suite with golden queries and benchmarks
 
 ## Project Structure
 
@@ -49,6 +50,7 @@ care-graphRAG/
 │   ├── __init__.py
 │   ├── scraper.py      # NICE website scraper
 │   ├── graph_builder.py # MongoDB graph construction
+│   ├── vector_store.py # MongoDB Atlas vector search
 │   ├── retriever.py    # Graph-first retrieval
 │   ├── hybrid_retriever.py # Hybrid retrieval system
 │   ├── qa_chain.py     # Question-answering system
