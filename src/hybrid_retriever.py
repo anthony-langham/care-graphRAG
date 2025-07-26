@@ -18,6 +18,8 @@ from config.logging import LoggerMixin, log_performance
 from src.db.mongo_client import get_mongo_client
 from src.embeddings import EmbeddingGenerator
 from src.retriever import GraphRetriever
+from src.monitoring.retrieval_monitor import RetrievalMonitor
+from src.monitoring.cost_tracker import CostTracker
 
 
 class HybridRetriever(GraphRetriever):
@@ -33,7 +35,8 @@ class HybridRetriever(GraphRetriever):
                  max_results: int = 10,
                  vector_weight: float = 0.3,
                  mongo_client=None,
-                 embedding_generator=None):
+                 embedding_generator=None,
+                 monitoring_enabled: bool = True):
         """
         Initialize the hybrid retriever.
         
@@ -45,6 +48,7 @@ class HybridRetriever(GraphRetriever):
             vector_weight: Weight for vector results in hybrid scoring (0-1)
             mongo_client: MongoDB client for dependency injection (optional)
             embedding_generator: Embedding generator for dependency injection (optional)
+            monitoring_enabled: Whether to enable retrieval monitoring
         """
         # Initialize parent GraphRetriever
         super().__init__(graph_store, max_depth, similarity_threshold, max_results)
@@ -56,12 +60,15 @@ class HybridRetriever(GraphRetriever):
         self._mongo_client = mongo_client or getattr(self, 'mongo_client', None)
         self._embedding_generator = embedding_generator
         
+        # Initialize monitoring
+        self.monitor = RetrievalMonitor() if monitoring_enabled else None
+        
         # Initialize vector components
         self._initialize_vector_store()
         
         self.logger.info(
             f"HybridRetriever initialized with vector_weight={vector_weight}, "
-            f"graph_weight={self.graph_weight}"
+            f"graph_weight={self.graph_weight}, monitoring={monitoring_enabled}"
         )
     
     def _initialize_vector_store(self) -> None:
@@ -199,12 +206,22 @@ class HybridRetriever(GraphRetriever):
         start_time = datetime.now()
         k = k or self.max_results
         
+        # Track monitoring metrics
+        entities_extracted = []
+        retrieval_type = "graph"  # Default
+        total_cost = 0.0
+        error_msg = None
+        
         try:
             self.logger.info(f"Hybrid retrieval for query: '{query[:100]}...'")
             
             # Step 1: Graph-first retrieval
             graph_documents = super().retrieve(query, k=k*2, include_metadata=include_metadata)
             self.logger.info(f"Graph retrieval returned {len(graph_documents)} documents")
+            
+            # Extract entities from parent retriever if available
+            if hasattr(self, '_last_entities_extracted'):
+                entities_extracted = self._last_entities_extracted
             
             # If graph retrieval failed, try direct search
             if len(graph_documents) == 0:
@@ -225,6 +242,7 @@ class HybridRetriever(GraphRetriever):
             
             if need_vector_search and self._vector_store_available():
                 # Step 3: Vector search
+                retrieval_type = "hybrid"
                 vector_documents = self._vector_search(query, k=k*2, include_metadata=include_metadata)
                 self.logger.info(f"Vector search returned {len(vector_documents)} documents")
                 
@@ -245,6 +263,17 @@ class HybridRetriever(GraphRetriever):
                     f"in {duration_ms:.2f}ms"
                 )
                 
+                # Log monitoring metrics
+                if self.monitor:
+                    self.monitor.log_retrieval(
+                        query=query,
+                        retrieval_type=retrieval_type,
+                        entities_extracted=entities_extracted,
+                        documents_retrieved=len(combined_documents),
+                        latency_ms=duration_ms,
+                        cost_usd=total_cost
+                    )
+                
                 return combined_documents
             else:
                 # Use only graph results
@@ -254,10 +283,36 @@ class HybridRetriever(GraphRetriever):
                 duration_ms = (datetime.now() - start_time).total_seconds() * 1000
                 log_performance("hybrid_retrieval_graph_only", duration_ms)
                 
+                # Log monitoring metrics
+                if self.monitor:
+                    self.monitor.log_retrieval(
+                        query=query,
+                        retrieval_type=retrieval_type,
+                        entities_extracted=entities_extracted,
+                        documents_retrieved=len(graph_documents[:k]),
+                        latency_ms=duration_ms,
+                        cost_usd=total_cost
+                    )
+                
                 return graph_documents[:k]
                 
         except Exception as e:
             self.logger.error(f"Hybrid retrieval failed: {e}")
+            error_msg = str(e)
+            
+            # Log error in monitoring
+            if self.monitor:
+                duration_ms = (datetime.now() - start_time).total_seconds() * 1000
+                self.monitor.log_retrieval(
+                    query=query,
+                    retrieval_type=retrieval_type,
+                    entities_extracted=entities_extracted,
+                    documents_retrieved=0,
+                    latency_ms=duration_ms,
+                    cost_usd=total_cost,
+                    error=error_msg
+                )
+            
             return []
     
     def _vector_store_available(self) -> bool:

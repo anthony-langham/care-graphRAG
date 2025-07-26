@@ -112,6 +112,9 @@ class GraphRetriever(LoggerMixin):
             entities = self._extract_query_entities(query)
             self.logger.info(f"Extracted {len(entities)} entities from query")
             
+            # Store for monitoring purposes (used by HybridRetriever)
+            self._last_entities_extracted = [e.get("entity", "") for e in entities if "entity" in e]
+            
             # Step 2: Perform graph traversal to find related entities and relationships
             graph_results = self._graph_traversal(entities, query)
             
