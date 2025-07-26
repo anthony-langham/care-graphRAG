@@ -170,16 +170,23 @@ This file contains the detailed task list for the Care-GraphRAG project. It was 
 
 ### Phase 7: QA Chain
 
-- [todo] **TASK-025**: Setup QA chain
-  - Configure RetrievalQA
-  - GPT-4o-mini for answers
-  - Return source documents
-  - Format prompt template
-- [todo] **TASK-026**: Implement answer formatting
-  - Structure response JSON
-  - Include provenance
-  - Format citations
-  - Confidence scores
+- [done] **TASK-025**: Setup QA chain ✅
+  - Configure RetrievalQA ✓
+  - GPT-4o-mini for answers ✓
+  - Return source documents ✓
+  - Format prompt template ✓
+  - **IMPLEMENTED**: Full QA chain with hybrid retrieval, cost tracking, and clinical safety prompting
+  - **FEATURES**: Medical-focused prompt, source attribution, error handling, performance monitoring
+  - **TESTING**: Successfully answering clinical questions with proper source citation
+- [done] **TASK-026**: Implement answer formatting ✅
+  - Structure response JSON ✓
+  - Include provenance ✓
+  - Format citations ✓
+  - Confidence scores ✓
+  - **IMPLEMENTED**: Created AnswerFormatter class with comprehensive response structuring
+  - **FEATURES**: Confidence scoring, in-text citations, enhanced provenance, clinical safety warnings
+  - **INTEGRATION**: Ready for QA chain integration, supports hybrid retrieval metadata
+  - **TESTING**: Full test suite with 7 passing tests
 - [todo] **TASK-027**: Add answer validation
   - Check for hallucinations
   - Verify source usage

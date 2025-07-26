@@ -9,6 +9,8 @@ from datetime import datetime
 import numpy as np
 
 from langchain.schema import Document
+from langchain_core.retrievers import BaseRetriever
+from pydantic import Field
 from langchain_openai import ChatOpenAI
 from langchain_mongodb.graphrag.graph import MongoDBGraphStore
 from pymongo.collection import Collection
@@ -22,11 +24,28 @@ from src.monitoring.retrieval_monitor import RetrievalMonitor
 from src.monitoring.cost_tracker import CostTracker
 
 
-class HybridRetriever(GraphRetriever):
+class HybridRetriever(BaseRetriever, LoggerMixin):
     """
     Hybrid retriever that combines graph-first retrieval with vector search fallback.
     Extends GraphRetriever to add vector search capabilities.
     """
+    
+    # Define fields that BaseRetriever will accept
+    max_depth: int = Field(default=3)
+    similarity_threshold: float = Field(default=0.7)
+    max_results: int = Field(default=10)
+    vector_weight: float = Field(default=0.3)
+    graph_weight: float = Field(default=0.7)
+    monitoring_enabled: bool = Field(default=True)
+    
+    # Private fields (not validated by Pydantic)
+    _mongo_client: Optional[Any] = None
+    _embedding_generator: Optional[Any] = None
+    graph_store: Optional[Any] = None
+    chunks_collection: Optional[Any] = None
+    embedding_generator: Optional[Any] = None
+    monitor: Optional[Any] = None
+    _last_entities_extracted: Optional[List[str]] = None
     
     def __init__(self, 
                  graph_store: Optional[MongoDBGraphStore] = None,
@@ -50,28 +69,79 @@ class HybridRetriever(GraphRetriever):
             embedding_generator: Embedding generator for dependency injection (optional)
             monitoring_enabled: Whether to enable retrieval monitoring
         """
-        # Initialize parent GraphRetriever
-        super().__init__(graph_store, max_depth, similarity_threshold, max_results)
+        # Initialize BaseRetriever with field values
+        graph_weight = 1.0 - vector_weight
+        BaseRetriever.__init__(
+            self,
+            max_depth=max_depth,
+            similarity_threshold=similarity_threshold,
+            max_results=max_results,
+            vector_weight=vector_weight,
+            graph_weight=graph_weight,
+            monitoring_enabled=monitoring_enabled
+        )
+        LoggerMixin.__init__(self)
         
-        self.vector_weight = vector_weight
-        self.graph_weight = 1.0 - vector_weight
-        
-        # Store injected dependencies or use parent's
-        self._mongo_client = mongo_client or getattr(self, 'mongo_client', None)
+        # Store configuration and dependencies (access computed value)
+        self._mongo_client = mongo_client
         self._embedding_generator = embedding_generator
+        
+        # Get settings (not as instance attribute due to Pydantic constraints)
+        settings = get_settings()
+        
+        # Initialize graph store
+        if graph_store:
+            self.graph_store = graph_store
+            self.logger.info("Using provided MongoDB Graph Store")
+        else:
+            self._initialize_graph_store(settings)
         
         # Initialize monitoring
         self.monitor = RetrievalMonitor() if monitoring_enabled else None
         
         # Initialize vector components
-        self._initialize_vector_store()
+        self._initialize_vector_store(settings)
         
         self.logger.info(
             f"HybridRetriever initialized with vector_weight={vector_weight}, "
             f"graph_weight={self.graph_weight}, monitoring={monitoring_enabled}"
         )
     
-    def _initialize_vector_store(self) -> None:
+    def _initialize_graph_store(self, settings) -> None:
+        """Initialize MongoDB Graph Store for retrieval."""
+        try:
+            # Initialize MongoDB client
+            from src.db.mongo_client import get_mongo_client
+            mongo_client = get_mongo_client()
+            self._mongo_client = mongo_client
+            
+            # Initialize OpenAI LLM for entity extraction from queries
+            llm = ChatOpenAI(
+                model="gpt-4o-mini",
+                temperature=0,
+                openai_api_key=settings.openai_api_key
+            )
+            
+            # Initialize graph store in read mode  
+            # Use working SSL connection parameters
+            from src.db.connection_helper import get_mongodb_connection_string
+            mongodb_uri = get_mongodb_connection_string(allow_invalid_certs=True)
+            
+            self.graph_store = MongoDBGraphStore(
+                connection_string=mongodb_uri,
+                database_name=settings.mongodb_db_name,
+                collection_name=settings.mongodb_graph_collection,
+                entity_extraction_model=llm,
+                max_depth=self.max_depth
+            )
+            
+            self.logger.info("MongoDB Graph Store initialized for retrieval")
+            
+        except Exception as e:
+            self.logger.error(f"Failed to initialize MongoDB Graph Store: {e}")
+            raise
+    
+    def _initialize_vector_store(self, settings) -> None:
         """Initialize vector store components."""
         try:
             # Use injected mongo client or get a new one
@@ -80,7 +150,7 @@ class HybridRetriever(GraphRetriever):
             
             # Get chunks collection
             self.chunks_collection: Collection = self._mongo_client.database[
-                self.settings.mongodb_vector_collection
+                settings.mongodb_vector_collection
             ]
             
             # Use injected embedding generator or create new one
@@ -121,7 +191,8 @@ class HybridRetriever(GraphRetriever):
         """
         try:
             # Get graph collection
-            graph_collection = self._mongo_client.database[self.settings.mongodb_graph_collection]
+            settings = get_settings()
+            graph_collection = self._mongo_client.database[settings.mongodb_graph_collection]
             
             # Search for entities containing query terms
             query_terms = query.lower().split()
@@ -183,6 +254,19 @@ class HybridRetriever(GraphRetriever):
             self.logger.error(f"Direct graph search failed: {e}")
             return []
     
+    def _get_relevant_documents(self, query: str) -> List[Document]:
+        """
+        Required method for BaseRetriever.
+        Get relevant documents for the given query.
+        
+        Args:
+            query: Query string
+            
+        Returns:
+            List of relevant documents
+        """
+        return self.retrieve(query)
+    
     def retrieve(self, query: str, 
                  k: Optional[int] = None,
                  include_metadata: bool = True,
@@ -215,8 +299,8 @@ class HybridRetriever(GraphRetriever):
         try:
             self.logger.info(f"Hybrid retrieval for query: '{query[:100]}...'")
             
-            # Step 1: Graph-first retrieval
-            graph_documents = super().retrieve(query, k=k*2, include_metadata=include_metadata)
+            # Step 1: Graph-first retrieval using GraphRetriever logic
+            graph_documents = self._graph_retrieve(query, k=k*2, include_metadata=include_metadata)
             self.logger.info(f"Graph retrieval returned {len(graph_documents)} documents")
             
             # Extract entities from parent retriever if available
@@ -527,6 +611,269 @@ class HybridRetriever(GraphRetriever):
         
         return final_docs
     
+    def _graph_retrieve(self, query: str, 
+                       k: Optional[int] = None,
+                       include_metadata: bool = True) -> List[Document]:
+        """
+        Graph-only retrieval logic (copied from GraphRetriever).
+        
+        Args:
+            query: User query string
+            k: Number of results to return (overrides max_results if provided)
+            include_metadata: Whether to include detailed metadata
+            
+        Returns:
+            List of relevant Document objects with content and metadata
+        """
+        if not query:
+            self.logger.warning("Empty query provided to retriever")
+            return []
+        
+        start_time = datetime.now()
+        k = k or self.max_results
+        
+        try:
+            self.logger.info(f"Graph retrieving documents for query: '{query[:100]}...'")
+            
+            # Step 1: Extract entities from the query
+            entities = self._extract_query_entities(query)
+            self.logger.info(f"Extracted {len(entities)} entities from query")
+            
+            # Store for monitoring purposes
+            self._last_entities_extracted = [e.get("entity", "") for e in entities if "entity" in e]
+            
+            # Step 2: Perform graph traversal to find related entities and relationships
+            graph_results = self._graph_traversal(entities, query)
+            
+            # Step 3: Convert graph results to documents
+            documents = self._graph_results_to_documents(
+                graph_results, 
+                query,
+                include_metadata=include_metadata
+            )
+            
+            # Step 4: Rank and filter results
+            ranked_documents = self._rank_documents(documents, query, k)
+            
+            # Log performance
+            duration_ms = (datetime.now() - start_time).total_seconds() * 1000
+            log_performance("graph_retrieval", duration_ms)
+            
+            self.logger.info(
+                f"Graph retrieved {len(ranked_documents)} documents in {duration_ms:.2f}ms"
+            )
+            
+            return ranked_documents
+            
+        except Exception as e:
+            self.logger.error(f"Graph retrieval failed: {e}")
+            return []
+    
+    def _extract_query_entities(self, query: str) -> List[Dict[str, Any]]:
+        """Extract medical entities from the user query."""
+        try:
+            entities = self.graph_store.extract_entities(query)
+            for entity in entities:
+                self.logger.debug(
+                    f"Extracted entity: '{entity.get('name')}' "
+                    f"(type: {entity.get('type', 'Unknown')})"
+                )
+            return entities
+        except Exception as e:
+            self.logger.error(f"Entity extraction failed: {e}")
+            return []
+    
+    def _graph_traversal(self, entities: List[Dict[str, Any]], 
+                        query: str) -> Dict[str, Any]:
+        """Perform graph traversal to find related entities and relationships."""
+        graph_results = {
+            "nodes": [],
+            "relationships": [],
+            "paths": [],
+            "entity_scores": {}
+        }
+        
+        try:
+            for entity in entities:
+                entity_name = entity.get("name", "")
+                if not entity_name:
+                    continue
+                
+                # Find entity in graph
+                found_entity = None
+                entity_variations = [
+                    entity_name, entity_name.lower(), entity_name.upper(),
+                    entity_name.replace(" ", "_"), entity_name.replace("-", " "),
+                    entity_name.title()
+                ]
+                
+                for variation in entity_variations:
+                    try:
+                        found_entity = self.graph_store.find_entity_by_name(variation)
+                        if found_entity:
+                            break
+                    except:
+                        continue
+                
+                if found_entity:
+                    try:
+                        related = self.graph_store.related_entities(
+                            found_entity.get("name", entity_name),
+                            max_depth=self.max_depth
+                        )
+                    except:
+                        related = []
+                    
+                    self._process_graph_results(
+                        found_entity, related, graph_results, entity_name
+                    )
+            
+            # Fallback similarity search
+            if not graph_results["nodes"]:
+                similar_results = self._similarity_search_fallback(query)
+                graph_results["nodes"].extend(similar_results)
+            
+            return graph_results
+            
+        except Exception as e:
+            self.logger.error(f"Graph traversal failed: {e}")
+            return graph_results
+    
+    def _process_graph_results(self, entity: Dict[str, Any], 
+                              related: List[Dict[str, Any]],
+                              graph_results: Dict[str, Any],
+                              base_entity_name: str) -> None:
+        """Process and aggregate graph traversal results."""
+        if entity not in graph_results["nodes"]:
+            graph_results["nodes"].append(entity)
+            graph_results["entity_scores"][entity.get("name", "")] = 1.0
+        
+        for rel_entity in related:
+            if rel_entity not in graph_results["nodes"]:
+                graph_results["nodes"].append(rel_entity)
+                distance = rel_entity.get("distance", 1)
+                score = 1.0 / (1 + distance)
+                graph_results["entity_scores"][rel_entity.get("name", "")] = score
+            
+            relationships = rel_entity.get("relationships", [])
+            for rel in relationships:
+                if rel not in graph_results["relationships"]:
+                    graph_results["relationships"].append(rel)
+    
+    def _similarity_search_fallback(self, query: str) -> List[Dict[str, Any]]:
+        """Fallback to similarity search when direct entity matching fails."""
+        try:
+            try:
+                similar_docs = self.graph_store.similarity_search(query, k=self.max_results)
+            except TypeError:
+                try:
+                    similar_docs = self.graph_store.similarity_search(query)
+                    if isinstance(similar_docs, list) and len(similar_docs) > self.max_results:
+                        similar_docs = similar_docs[:self.max_results]
+                except Exception:
+                    similar_docs = []
+            
+            return similar_docs
+            
+        except Exception as e:
+            self.logger.warning(f"Similarity search fallback failed: {e}")
+            return []
+    
+    def _graph_results_to_documents(self, graph_results: Dict[str, Any],
+                                   query: str,
+                                   include_metadata: bool = True) -> List[Document]:
+        """Convert graph results to LangChain Document objects."""
+        documents = []
+        
+        try:
+            for node in graph_results["nodes"]:
+                content = self._format_node_content(node, graph_results["relationships"])
+                
+                metadata = {
+                    "entity_name": node.get("name", ""),
+                    "entity_type": node.get("type", ""),
+                    "relevance_score": graph_results["entity_scores"].get(
+                        node.get("name", ""), 0.5
+                    ),
+                    "source": "graph_traversal",
+                    "retrieval_query": query
+                }
+                
+                if include_metadata:
+                    metadata.update({
+                        "relationships": self._get_node_relationships(
+                            node, graph_results["relationships"]
+                        ),
+                        "properties": node.get("properties", {}),
+                        "retrieval_timestamp": datetime.now().isoformat()
+                    })
+                
+                doc = Document(page_content=content, metadata=metadata)
+                documents.append(doc)
+            
+            return documents
+            
+        except Exception as e:
+            self.logger.error(f"Failed to convert graph results to documents: {e}")
+            return []
+    
+    def _format_node_content(self, node: Dict[str, Any], 
+                           relationships: List[Dict[str, Any]]) -> str:
+        """Format node and its relationships into readable content."""
+        content_parts = []
+        
+        entity_name = node.get("name", "Unknown")
+        entity_type = node.get("type", "Entity")
+        content_parts.append(f"{entity_type}: {entity_name}")
+        
+        properties = node.get("properties", {})
+        if properties:
+            for key, value in properties.items():
+                if key not in ["name", "type", "_id"]:
+                    content_parts.append(f"- {key}: {value}")
+        
+        node_relationships = self._get_node_relationships(node, relationships)
+        if node_relationships:
+            content_parts.append("\nRelationships:")
+            for rel in node_relationships:
+                rel_type = rel.get("type", "RELATED_TO")
+                target = rel.get("target", {}).get("name", "Unknown")
+                content_parts.append(f"- {rel_type} {target}")
+        
+        return "\n".join(content_parts)
+    
+    def _get_node_relationships(self, node: Dict[str, Any], 
+                               relationships: List[Dict[str, Any]]) -> List[Dict[str, Any]]:
+        """Get relationships for a specific node."""
+        node_name = node.get("name", "")
+        node_relationships = []
+        
+        for rel in relationships:
+            source_name = rel.get("source", {}).get("name", "")
+            target_name = rel.get("target", {}).get("name", "")
+            
+            if source_name == node_name or target_name == node_name:
+                node_relationships.append(rel)
+        
+        return node_relationships
+    
+    def _rank_documents(self, documents: List[Document], 
+                       query: str, 
+                       k: int) -> List[Document]:
+        """Rank documents by relevance and return top k."""
+        sorted_docs = sorted(
+            documents,
+            key=lambda d: d.metadata.get("relevance_score", 0),
+            reverse=True
+        )
+        
+        filtered_docs = [
+            doc for doc in sorted_docs
+            if doc.metadata.get("relevance_score", 0) >= self.similarity_threshold
+        ]
+        
+        return filtered_docs[:k]
+    
     def get_retrieval_stats(self) -> Dict[str, Any]:
         """
         Get statistics about hybrid retrieval performance.
@@ -534,22 +881,41 @@ class HybridRetriever(GraphRetriever):
         Returns:
             Dictionary with retrieval statistics
         """
-        stats = super().get_retrieval_stats()
-        
-        # Add vector store stats
-        if self._vector_store_available():
-            vector_stats = {
-                "total_chunks": self.chunks_collection.count_documents({}),
-                "embedded_chunks": self.chunks_collection.count_documents({
-                    "embedding": {"$exists": True}
-                }),
-                "vector_weight": self.vector_weight,
-                "graph_weight": self.graph_weight
+        try:
+            # Get graph statistics
+            graph_stats = self.graph_store.entity_schema()
+            
+            stats = {
+                "graph_stats": graph_stats,
+                "retriever_config": {
+                    "max_depth": self.max_depth,
+                    "similarity_threshold": self.similarity_threshold,
+                    "max_results": self.max_results
+                },
+                "status": "ready"
             }
-            stats["vector_stats"] = vector_stats
-        else:
-            stats["vector_stats"] = {"status": "unavailable"}
-        
-        stats["retriever_type"] = "hybrid"
-        
-        return stats
+            
+            # Add vector store stats
+            if self._vector_store_available():
+                vector_stats = {
+                    "total_chunks": self.chunks_collection.count_documents({}),
+                    "embedded_chunks": self.chunks_collection.count_documents({
+                        "embedding": {"$exists": True}
+                    }),
+                    "vector_weight": self.vector_weight,
+                    "graph_weight": self.graph_weight
+                }
+                stats["vector_stats"] = vector_stats
+            else:
+                stats["vector_stats"] = {"status": "unavailable"}
+            
+            stats["retriever_type"] = "hybrid"
+            
+            return stats
+            
+        except Exception as e:
+            self.logger.error(f"Failed to get retrieval stats: {e}")
+            return {
+                "error": str(e),
+                "status": "error"
+            }
