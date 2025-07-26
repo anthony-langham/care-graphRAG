@@ -4,17 +4,20 @@ Building an explainable, low-cost GraphRAG system for UK NICE Clinical Knowledge
 
 ## Status
 
-🚀 **Core System Operational** - Graph-based retrieval system functional
+🚀 **Core System Operational** - Hybrid graph-based retrieval system with monitoring
 
 ### ✅ Completed Phases
 - **Project Setup**: Repository, structure, Python environment
 - **MongoDB Atlas**: Database setup, collections, SSL-secured connections
 - **Web Scraping**: NICE content scraping, chunking, deduplication
 - **Graph Building**: LangChain integration, medical entity extraction
-- **Graph Retrieval**: Graph-first retrieval system with similarity fallback
+- **Retrieval System**: Hybrid graph-first retrieval with vector fallback
+- **Monitoring**: Comprehensive metrics tracking for performance and costs
 
 ### 🎯 Current Capabilities
-- **Enhanced Data Pipeline**: NICE Guidelines → Advanced Medical Knowledge Graph → Graph-based Retrieval
+- **Enhanced Data Pipeline**: NICE Guidelines → Advanced Medical Knowledge Graph → Hybrid Retrieval
+- **Hybrid Retrieval**: Graph-first approach with intelligent vector search fallback
+- **Performance Monitoring**: Track retrieval latency, costs, and usage patterns
 - **Interactive Graph Visualization**: Neo4j-style network explorer with color-coded entities and relationships
 - **Analytics Dashboard**: Comprehensive network statistics, entity distributions, and graph metrics
 - **Clinical Decision Trees**: Age-based, ethnicity-based, and conditional treatment pathways
@@ -22,12 +25,12 @@ Building an explainable, low-cost GraphRAG system for UK NICE Clinical Knowledge
 - **Treatment Relationships**: FIRST_LINE_FOR, IF_NOT_TOLERATED, CONDITIONAL_ON pathway logic
 - **SSL Security**: MongoDB Atlas connections secured and operational
 - **Graph Storage**: Persistent medical knowledge graphs in MongoDB
-- **Retrieval System**: Query medical knowledge using graph traversal
 - **Management Scripts**: Comprehensive suite for graph building, data management, and analysis
 
 ### 📋 Next Steps
-- **TASK-023**: Hybrid retrieval (graph + vector combination)
 - **TASK-025**: Question-answering chain integration
+- **TASK-026**: Answer formatting with provenance
+- **TASK-027**: Answer validation and confidence scoring
 - **API Development**: Lambda functions for serverless deployment
 
 ## Project Structure
@@ -42,7 +45,11 @@ care-graphRAG/
 │   ├── __init__.py
 │   ├── scraper.py      # NICE website scraper
 │   ├── graph_builder.py # MongoDB graph construction
-│   ├── retriever.py    # Hybrid retrieval system
+│   ├── retriever.py    # Graph-first retrieval
+│   ├── hybrid_retriever.py # Hybrid retrieval system
+│   ├── monitoring/     # Performance tracking
+│   │   ├── retrieval_monitor.py
+│   │   └── cost_tracker.py
 │   └── qa_chain.py     # Question-answering chain
 ├── layers/
 │   └── python/         # Lambda layer dependencies
