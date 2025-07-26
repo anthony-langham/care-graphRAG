@@ -158,11 +158,15 @@ This file contains the detailed task list for the Care-GraphRAG project. It was 
   - Context size limits ✓
   - **IMPLEMENTED**: Created HybridRetriever class with graph-first approach and vector fallback
   - **FEATURES**: Direct graph search fallback, weighted scoring, deduplication
-- [todo] **TASK-024**: Add retrieval monitoring
-  - Log retrieval paths
-  - Track graph vs vector usage
-  - Measure retrieval latency
-  - Cost per retrieval
+- [done] **TASK-024**: Add retrieval monitoring ✓
+  - Log retrieval paths ✓
+  - Track graph vs vector usage ✓
+  - Measure retrieval latency ✓
+  - Cost per retrieval ✓
+  - **IMPLEMENTED**: Created RetrievalMonitor class with comprehensive metrics tracking
+  - **FEATURES**: Latency tracking, cost calculation, retrieval type statistics, JSON export
+  - **INTEGRATION**: Added monitoring_enabled parameter to HybridRetriever
+  - **TESTING**: Full test suite with 14 passing tests
 
 ### Phase 7: QA Chain
 
