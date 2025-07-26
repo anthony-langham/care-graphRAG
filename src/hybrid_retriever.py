@@ -19,6 +19,7 @@ from config.settings import get_settings
 from config.logging import LoggerMixin, log_performance
 from src.db.mongo_client import get_mongo_client
 from src.embeddings import EmbeddingGenerator
+from src.vector_store import MongoDBVectorStore
 from src.retriever import GraphRetriever
 from src.monitoring.retrieval_monitor import RetrievalMonitor
 from src.monitoring.cost_tracker import CostTracker
@@ -44,6 +45,7 @@ class HybridRetriever(BaseRetriever, LoggerMixin):
     graph_store: Optional[Any] = None
     chunks_collection: Optional[Any] = None
     embedding_generator: Optional[Any] = None
+    vector_store: Optional[Any] = None
     monitor: Optional[Any] = None
     _last_entities_extracted: Optional[List[str]] = None
     
@@ -153,6 +155,13 @@ class HybridRetriever(BaseRetriever, LoggerMixin):
                 settings.mongodb_vector_collection
             ]
             
+            # Initialize vector store
+            self.vector_store = MongoDBVectorStore(
+                collection=self.chunks_collection,
+                embedding_model="text-embedding-ada-002",
+                index_name="vector_index"
+            )
+            
             # Use injected embedding generator or create new one
             if self._embedding_generator is None:
                 self.embedding_generator = EmbeddingGenerator()
@@ -177,6 +186,7 @@ class HybridRetriever(BaseRetriever, LoggerMixin):
             self.logger.error(f"Failed to initialize vector store: {e}")
             self.chunks_collection = None
             self.embedding_generator = None
+            self.vector_store = None
     
     def _direct_graph_search(self, query: str, k: int = 10) -> List[Document]:
         """
@@ -434,7 +444,7 @@ class HybridRetriever(BaseRetriever, LoggerMixin):
                       k: int = 10,
                       include_metadata: bool = True) -> List[Document]:
         """
-        Perform vector similarity search.
+        Perform vector similarity search using the MongoDB vector store.
         
         Args:
             query: Query text
@@ -447,76 +457,28 @@ class HybridRetriever(BaseRetriever, LoggerMixin):
         try:
             start_time = datetime.now()
             
-            # Generate query embedding
-            query_embedding = self.embedding_generator.embed_text(query)
+            # Check if vector store is available
+            if not self.vector_store:
+                self.logger.warning("Vector store not initialized, falling back to direct graph search")
+                return self._direct_graph_search(query, k)
             
-            if not query_embedding:
-                self.logger.error("Failed to generate query embedding")
-                return []
+            # Perform similarity search using vector store
+            results = self.vector_store.similarity_search(
+                query=query,
+                k=k,
+                score_threshold=self.similarity_threshold
+            )
             
-            # Perform vector search in MongoDB
-            # Using aggregation pipeline for vector search
-            pipeline = [
-                # Match documents with embeddings
-                {"$match": {"embedding": {"$exists": True}}},
-                
-                # Add similarity score
-                {"$addFields": {
-                    "similarity_score": {
-                        "$let": {
-                            "vars": {
-                                "embedding": "$embedding"
-                            },
-                            "in": 1.0  # Placeholder - actual similarity computed below
-                        }
-                    }
-                }},
-                
-                # Sort by similarity (we'll compute this in Python for now)
-                # In production, use Atlas Vector Search
-                {"$limit": k * 3}  # Get more candidates for similarity filtering
-            ]
-            
-            # Execute pipeline
-            candidates = list(self.chunks_collection.aggregate(pipeline))
-            
-            # Compute similarities in Python
-            similarities = []
-            for candidate in candidates:
-                if candidate.get("embedding"):
-                    similarity = self.embedding_generator.compute_similarity(
-                        query_embedding,
-                        candidate["embedding"]
-                    )
-                    if similarity >= self.similarity_threshold:
-                        similarities.append((candidate, similarity))
-            
-            # Sort by similarity
-            similarities.sort(key=lambda x: x[1], reverse=True)
-            
-            # Convert to documents
+            # Convert results to Document format expected by hybrid retriever
             documents = []
-            for chunk, similarity in similarities[:k]:
-                metadata = {
-                    "source": chunk.get("source", ""),
-                    "chunk_hash": chunk.get("chunk_hash", ""),
-                    "relevance_score": similarity,
+            for doc, score in results:
+                # Update metadata with retrieval info
+                doc.metadata.update({
+                    "relevance_score": score,
                     "retrieval_method": "vector_search",
-                    "retrieval_query": query
-                }
-                
-                if include_metadata:
-                    metadata.update({
-                        "original_metadata": chunk.get("metadata", {}),
-                        "embedded_at": chunk.get("embedded_at", ""),
-                        "embedding_model": chunk.get("embedding_model", ""),
-                        "retrieval_timestamp": datetime.now().isoformat()
-                    })
-                
-                doc = Document(
-                    page_content=chunk.get("content", ""),
-                    metadata=metadata
-                )
+                    "retrieval_query": query,
+                    "retrieval_timestamp": datetime.now().isoformat()
+                })
                 documents.append(doc)
             
             # Log performance

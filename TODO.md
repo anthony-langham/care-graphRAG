@@ -133,15 +133,21 @@ This file contains the detailed task list for the Care-GraphRAG project. It was 
 
 ### Phase 5: Vector Store (Optional)
 
-- [blocked] **TASK-020**: Setup vector collection (OPTIONAL - DEFERRED)
-  - Create Atlas search index
-  - Configure embedding dimensions
-  - Set up similarity metrics
-- [blocked] **TASK-021**: Implement vector store (DEPENDS ON TASK-020)
-  - Initialize MongoDBAtlasVectorSearch
-  - Configure OpenAI embeddings
-  - Add documents in batches
-  - Monitor embedding costs
+- [done] **TASK-020**: Setup vector collection ✅
+  - ✅ Create Atlas search index (automated script with manual instructions)
+  - ✅ Configure embedding dimensions (1536 for OpenAI text-embedding-ada-002)
+  - ✅ Set up similarity metrics (cosine similarity)
+  - ✅ Create MongoDB indexes for filtering and metadata
+  - **IMPLEMENTED**: Created setup_vector_collection.py script
+  - **FEATURES**: Atlas Vector Search index definition, MongoDB indexes, verification
+- [done] **TASK-021**: Implement vector store ✅
+  - ✅ Initialize MongoDBAtlasVectorSearch (using langchain-mongodb)
+  - ✅ Configure OpenAI embeddings (text-embedding-ada-002)
+  - ✅ Add documents in batches (with deduplication)
+  - ✅ Monitor embedding costs (token tracking and cost calculation)
+  - **IMPLEMENTED**: Created MongoDBVectorStore class with full functionality
+  - **FEATURES**: Similarity search, document storage, cost tracking, error handling
+  - **INTEGRATION**: Updated HybridRetriever to use actual vector store
 
 ### Phase 6: Retrieval System
 
