@@ -13,11 +13,15 @@ Building an explainable, low-cost GraphRAG system for UK NICE Clinical Knowledge
 - **Graph Building**: LangChain integration, medical entity extraction
 - **Retrieval System**: Hybrid graph-first retrieval with vector fallback
 - **Monitoring**: Comprehensive metrics tracking for performance and costs
+- **QA Chain**: Complete question-answering system with clinical safety prompting
 
 ### 🎯 Current Capabilities
-- **Enhanced Data Pipeline**: NICE Guidelines → Advanced Medical Knowledge Graph → Hybrid Retrieval
+- **Enhanced Data Pipeline**: NICE Guidelines → Advanced Medical Knowledge Graph → Hybrid Retrieval → QA Chain
+- **Clinical Question Answering**: GPT-4o-mini powered QA with medical safety prompting
 - **Hybrid Retrieval**: Graph-first approach with intelligent vector search fallback
+- **Source Attribution**: Complete provenance tracking with confidence scoring
 - **Performance Monitoring**: Track retrieval latency, costs, and usage patterns
+- **Cost Tracking**: Token-based estimation for OpenAI API usage
 - **Interactive Graph Visualization**: Neo4j-style network explorer with color-coded entities and relationships
 - **Analytics Dashboard**: Comprehensive network statistics, entity distributions, and graph metrics
 - **Clinical Decision Trees**: Age-based, ethnicity-based, and conditional treatment pathways
@@ -28,9 +32,9 @@ Building an explainable, low-cost GraphRAG system for UK NICE Clinical Knowledge
 - **Management Scripts**: Comprehensive suite for graph building, data management, and analysis
 
 ### 📋 Next Steps
-- **TASK-025**: Question-answering chain integration
-- **TASK-026**: Answer formatting with provenance
+- **TASK-026**: Answer formatting with enhanced response structure
 - **TASK-027**: Answer validation and confidence scoring
+- **TASK-028**: Test fixtures and validation dataset creation
 - **API Development**: Lambda functions for serverless deployment
 
 ## Project Structure
@@ -47,10 +51,10 @@ care-graphRAG/
 │   ├── graph_builder.py # MongoDB graph construction
 │   ├── retriever.py    # Graph-first retrieval
 │   ├── hybrid_retriever.py # Hybrid retrieval system
-│   ├── monitoring/     # Performance tracking
-│   │   ├── retrieval_monitor.py
-│   │   └── cost_tracker.py
-│   └── qa_chain.py     # Question-answering chain
+│   ├── qa_chain.py     # Question-answering system
+│   └── monitoring/     # Performance tracking
+│       ├── retrieval_monitor.py
+│       └── cost_tracker.py
 ├── layers/
 │   └── python/         # Lambda layer dependencies
 ├── tests/              # Test suite
