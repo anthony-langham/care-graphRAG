@@ -16,7 +16,8 @@ from config.settings import get_settings
 from config.logging import LoggerMixin
 from src.hybrid_retriever import HybridRetriever
 from src.monitoring.cost_tracker import CostTracker
-# from src.answer_formatter import AnswerFormatter  # Future TASK-026
+from src.answer_formatter import AnswerFormatter
+from src.answer_validator import AnswerValidator
 
 
 class QAChain(LoggerMixin):
@@ -29,7 +30,8 @@ class QAChain(LoggerMixin):
                  retriever: Optional[HybridRetriever] = None,
                  llm: Optional[ChatOpenAI] = None,
                  cost_tracking: bool = True,
-                 use_enhanced_formatting: bool = True):
+                 use_enhanced_formatting: bool = True,
+                 enable_validation: bool = True):
         """
         Initialize the QA chain.
         
@@ -37,13 +39,18 @@ class QAChain(LoggerMixin):
             retriever: HybridRetriever instance (will create if None)
             llm: ChatOpenAI instance (will create if None)
             cost_tracking: Whether to track LLM costs
-            use_enhanced_formatting: Whether to use enhanced answer formatting (TASK-026)
+            use_enhanced_formatting: Whether to use enhanced answer formatting
+            enable_validation: Whether to enable answer validation (TASK-027)
         """
         super().__init__()
         self.settings = get_settings()
         self.cost_tracking_enabled = cost_tracking
         self.use_enhanced_formatting = use_enhanced_formatting
-        # self.answer_formatter = AnswerFormatter() if use_enhanced_formatting else None  # Future TASK-026
+        self.enable_validation = enable_validation
+        
+        # Initialize components
+        self.answer_formatter = AnswerFormatter() if use_enhanced_formatting else None
+        self.answer_validator = AnswerValidator() if enable_validation else None
         
         # Initialize LLM
         self.llm = llm or self._create_llm()
@@ -179,22 +186,58 @@ Answer:"""
                     output_tokens
                 )
             
+            # Validate answer if validation is enabled
+            validation_result = None
+            if self.enable_validation and self.answer_validator:
+                try:
+                    validation_result = self.answer_validator.validate_answer(
+                        answer, source_documents, question
+                    )
+                    self.logger.info(
+                        f"Answer validation: valid={validation_result.is_valid}, "
+                        f"confidence={validation_result.confidence_score:.3f}, "
+                        f"hallucination_risk={validation_result.hallucination_risk:.3f}"
+                    )
+                except Exception as e:
+                    self.logger.error(f"Answer validation failed: {e}")
+            
             # Build response
-            response = {
-                "answer": answer,
-                "sources": formatted_sources,
-                "metadata": {
-                    "question": question,
-                    "model": self.settings.openai_model,
-                    "temperature": self.settings.openai_temperature,
-                    "processing_time_seconds": processing_time,
-                    "cost_usd": total_cost,
-                    "sources_count": len(source_documents),
-                    "timestamp": datetime.now().isoformat(),
-                    "retrieval_method": "hybrid"
-                },
-                "provenance": self._extract_provenance(source_documents)
-            }
+            if self.use_enhanced_formatting and self.answer_formatter:
+                # Use enhanced formatting (includes validation results)
+                response = self.answer_formatter.format_structured_response(
+                    question=question,
+                    qa_result=result,
+                    processing_time=processing_time,
+                    cost=total_cost,
+                    validation_result=validation_result
+                )
+            else:
+                # Use basic formatting
+                response = {
+                    "answer": answer,
+                    "sources": formatted_sources,
+                    "metadata": {
+                        "question": question,
+                        "model": self.settings.openai_model,
+                        "temperature": self.settings.openai_temperature,
+                        "processing_time_seconds": processing_time,
+                        "cost_usd": total_cost,
+                        "sources_count": len(source_documents),
+                        "timestamp": datetime.now().isoformat(),
+                        "retrieval_method": "hybrid"
+                    },
+                    "provenance": self._extract_provenance(source_documents)
+                }
+                
+                # Add validation results if available
+                if validation_result:
+                    response["validation"] = {
+                        "is_valid": validation_result.is_valid,
+                        "confidence_score": validation_result.confidence_score,
+                        "hallucination_risk": validation_result.hallucination_risk,
+                        "clinical_safety_flags": validation_result.clinical_safety_flags,
+                        "validation_flags": validation_result.validation_flags
+                    }
             
             self.logger.info(
                 f"Question answered in {processing_time:.2f}s, "
@@ -309,7 +352,8 @@ Answer:"""
 
 def get_qa_chain(retriever: Optional[HybridRetriever] = None,
                 llm: Optional[ChatOpenAI] = None,
-                cost_tracking: bool = True) -> QAChain:
+                cost_tracking: bool = True,
+                enable_validation: bool = True) -> QAChain:
     """
     Factory function to create configured QA chain instance.
     
@@ -317,6 +361,7 @@ def get_qa_chain(retriever: Optional[HybridRetriever] = None,
         retriever: Optional retriever instance
         llm: Optional LLM instance
         cost_tracking: Whether to enable cost tracking
+        enable_validation: Whether to enable answer validation
         
     Returns:
         Configured QAChain instance
@@ -324,5 +369,6 @@ def get_qa_chain(retriever: Optional[HybridRetriever] = None,
     return QAChain(
         retriever=retriever,
         llm=llm,
-        cost_tracking=cost_tracking
+        cost_tracking=cost_tracking,
+        enable_validation=enable_validation
     )
