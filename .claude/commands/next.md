@@ -1,4 +1,4 @@
-Read CLAUDE.md and identify the next uncompleted task
+Read CLAUDE.md and identify the next task to work on - ask whether user wants you to to the first inprogress or the first todo
 
 First, think deeply about:
 
