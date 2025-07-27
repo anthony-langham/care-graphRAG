@@ -296,11 +296,19 @@ This file contains the detailed task list for the Care-GraphRAG project. It was 
   - **FEATURES**: Specialized hallucination detection prompts
   - **TESTING**: Comprehensive test suite demonstrates all validation types
 
-- [todo] **TASK-027h**: Create blind clinical test cases
-  - Develop known clinical scenarios without expected answers
-  - Create test cases for age-specific treatment protocols
-  - Extract without showing expected clinical outcomes
-  - Measure accuracy against verified NICE guidelines
+- [done] **TASK-027h**: Create blind clinical test cases ✅
+  - ✅ Develop known clinical scenarios without expected answers
+  - ✅ Create test cases for age-specific treatment protocols
+  - ✅ Extract without showing expected clinical outcomes
+  - ✅ Measure accuracy against verified NICE guidelines
+  - **IMPLEMENTED**: Created BlindClinicalTestCases class with 6 unbiased scenarios
+  - **IMPLEMENTED**: Created comprehensive test suite with 13 passing tests
+  - **FEATURES**: Age-specific (45 vs 56 vs 82), ethnicity-specific, and comorbidity scenarios
+  - **FEATURES**: Bias detection framework for systematic extraction issues
+  - **FEATURES**: Validation against hidden NICE guideline expectations
+  - **FEATURES**: Export functionality for blind testing integration
+  - **DEMO**: Full demonstration script showing bias detection in action
+  - **TESTING**: Successfully detects age bias, ethnicity bias, and complexity bias
 
 - [todo] **TASK-027i**: Implement false positive detection tests
   - Include irrelevant medical texts in test suite

@@ -1,0 +1,51 @@
+{
+  "metadata": {
+    "created": "2025-07-27T20:02:52.902499+00:00",
+    "total_scenarios": 6,
+    "description": "Blind clinical test cases for unbiased extraction validation"
+  },
+  "scenarios": [
+    {
+      "id": "BLIND_001",
+      "type": "age_specific_under_55",
+      "patient_age": 45,
+      "ethnicity": "other",
+      "clinical_text": "\n            Patient presents with newly diagnosed hypertension. \n            Blood pressure readings consistently above 140/90 mmHg on multiple occasions.\n            No known drug allergies or contraindications.\n            Patient is of European descent.\n            No diabetes, kidney disease, or heart failure.\n            Seeking guidance on initial antihypertensive therapy.\n            "
+    },
+    {
+      "id": "BLIND_002",
+      "type": "age_specific_over_55",
+      "patient_age": 56,
+      "ethnicity": "other",
+      "clinical_text": "\n            Individual with elevated blood pressure requiring treatment initiation.\n            Sustained hypertension documented over 3 months.\n            No significant past medical history.\n            Patient is of European background.\n            Normal kidney function and no cardiovascular disease.\n            Looking for appropriate first-line therapy recommendation.\n            "
+    },
+    {
+      "id": "BLIND_003",
+      "type": "ethnicity_specific_black",
+      "patient_age": 48,
+      "ethnicity": "black_african_caribbean",
+      "clinical_text": "\n            Patient of Black African heritage with newly diagnosed hypertension.\n            Blood pressure persistently elevated despite lifestyle modifications.\n            No known allergies or medical contraindications.\n            Normal renal function and no diabetes.\n            Requires initiation of antihypertensive medication.\n            "
+    },
+    {
+      "id": "BLIND_004",
+      "type": "age_specific_elderly",
+      "patient_age": 82,
+      "ethnicity": "other",
+      "clinical_text": "\n            Elderly patient with hypertension requiring careful management.\n            Blood pressure control needed with consideration of fall risk.\n            Patient lives independently but has some frailty concerns.\n            No major cardiovascular events or kidney disease.\n            Seeking age-appropriate antihypertensive therapy.\n            "
+    },
+    {
+      "id": "BLIND_005",
+      "type": "comorbidity_diabetes",
+      "patient_age": 52,
+      "ethnicity": "other",
+      "clinical_text": "\n            Patient with both hypertension and type 2 diabetes mellitus.\n            Blood pressure control needed with renal protective benefits.\n            HbA1c well controlled on metformin.\n            No proteinuria or reduced eGFR.\n            Dual indication for antihypertensive choice.\n            "
+    },
+    {
+      "id": "BLIND_006",
+      "type": "comorbidity_heart_failure",
+      "patient_age": 61,
+      "ethnicity": "other",
+      "clinical_text": "\n            Patient with hypertension and heart failure with reduced ejection fraction.\n            LVEF 35% on echocardiogram.\n            Currently on optimal heart failure therapy.\n            Blood pressure requires additional control.\n            Needs therapy that benefits both conditions.\n            "
+    }
+  ]
+}
