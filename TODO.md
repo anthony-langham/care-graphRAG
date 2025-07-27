@@ -204,11 +204,16 @@ This file contains the detailed task list for the Care-GraphRAG project. It was 
 
 ### Phase 7a: Unbiased Knowledge Graph Extraction
 
-- [todo] **TASK-027a**: Remove extraction bias from current prompts
-  - Remove specific clinical examples from MEDICAL_ENTITY_PROMPT
-  - Replace biased examples with generic extraction guidelines
-  - Focus on "what is mentioned" not "what should be there"
-  - Audit current graph_builder.py for confirmation bias
+- [done] **TASK-027a**: Remove extraction bias from current prompts ✅
+  - ✅ Removed specific clinical examples from MEDICAL_ENTITY_PROMPT
+  - ✅ Replaced biased examples with generic extraction guidelines
+  - ✅ Focused on "what is mentioned" not "what should be there"
+  - ✅ Audited and updated graph_builder.py to remove confirmation bias
+  - **IMPLEMENTED**: Rewrote extraction prompt to be discovery-based
+  - **CREATED**: unbiased_extraction_prompts.py with multiple validation prompts
+  - **CREATED**: unbiased_graph_builder.py with multi-pass extraction
+  - **CREATED**: test_unbiased_extraction.py for demonstration
+  - **UPDATED**: graph_builder.py with generic entity/relationship types
 
 - [todo] **TASK-027b**: Create generic medical extraction prompts
   - Design unbiased prompt template for entity extraction
