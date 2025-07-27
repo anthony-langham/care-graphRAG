@@ -35,38 +35,42 @@ Building an explainable, low-cost GraphRAG system for UK NICE Clinical Knowledge
 - **Management Scripts**: Comprehensive suite for graph building, data management, and analysis
 
 ### 📋 Next Steps
-- **TASK-028**: Test fixtures and validation dataset creation
 - **TASK-032**: Lambda function structure for API development
 - **TASK-029**: Comprehensive unit test implementation
 - **TASK-030**: Validation suite with golden queries and benchmarks
-- **TASK-027b+**: Multi-model consensus extraction framework development
 
 ## Project Structure
 
 ```
 care-graphRAG/
-├── functions/           # Lambda handlers
-│   ├── query.py        # Main QA endpoint
-│   ├── sync.py         # Scheduled scraper
-│   └── health.py       # Health check endpoint
-├── src/                # Core logic
-│   ├── __init__.py
+├── src/                # Core source code
 │   ├── scraper.py      # NICE website scraper
 │   ├── graph_builder.py # MongoDB graph construction
 │   ├── vector_store.py # MongoDB Atlas vector search
-│   ├── retriever.py    # Graph-first retrieval
 │   ├── hybrid_retriever.py # Hybrid retrieval system
 │   ├── qa_chain.py     # Question-answering system
+│   ├── db/             # Database connections
 │   └── monitoring/     # Performance tracking
-│       ├── retrieval_monitor.py
-│       └── cost_tracker.py
-├── layers/
-│   └── python/         # Lambda layer dependencies
-├── tests/              # Test suite
-├── config/             # Configuration management
-├── sst.config.ts       # SST serverless configuration
-├── package.json        # Node.js dependencies for SST
-└── requirements.txt    # Python dependencies
+├── tests/              # Comprehensive test suite
+│   ├── fixtures/       # Test data and mock factories ✅ TASK-028
+│   ├── examples/       # Example usage of test fixtures
+│   ├── integration/    # Integration tests
+│   └── test_*.py       # Unit tests for all modules
+├── scripts/            # Utility and management scripts
+│   ├── build_graph.py  # Graph building
+│   ├── populate_*.py   # Data population
+│   └── test_*.py       # Component testing scripts
+├── demos/              # Demo and quick test scripts
+│   ├── demo_test_fixtures.py # Test fixtures demonstration
+│   └── quick_test_*.py # Quick validation scripts
+├── functions/          # AWS Lambda handlers
+│   ├── query.py        # Main QA endpoint
+│   ├── sync.py         # Scheduled scraper
+│   └── health.py       # Health check
+├── validation_scripts/ # Accuracy validation
+├── data/              # Data files and outputs
+├── docs/              # Project documentation
+└── config/            # Configuration management
 ```
 
 ## Setup
@@ -174,14 +178,35 @@ python scripts/graph_visualizer.py         # Create interactive network visualiz
 
 ### Testing
 
+#### Comprehensive Test Suite ✅ TASK-028
 ```bash
-# Test complete pipeline
-python scripts/test_complete_pipeline.py
+# All tests
+python3 -m pytest tests/ -v
 
-# Test individual components
-python scripts/test_scraper.py
-python scripts/test_graph_builder.py
-python scripts/test_retriever_with_mock_data.py
+# Test fixtures validation
+python3 -m pytest tests/test_fixtures_validation.py -v
+
+# Unit tests only
+python3 -m pytest tests/ -k "not integration" -v
+
+# Integration tests
+python3 -m pytest tests/integration/ -v
+
+# Specific component
+python3 -m pytest tests/test_hybrid_retriever.py -v
+```
+
+#### Demo Scripts
+```bash
+# Test fixtures demonstration
+python3 demos/demo_test_fixtures.py
+
+# Quick unbiased extraction tests
+python3 demos/quick_test_blind.py
+python3 demos/quick_test_adversarial.py
+
+# Clinical accuracy validation
+python3 validation_scripts/validate_extraction_with_blind_tests.py
 ```
 
 ### Detailed Instructions
