@@ -4,5 +4,5 @@ make sure readme.md is up to date (should be a redacted claude.md)
 save all the open files
 git add edited files
 then git commit -m <a detailed update>
-never include co-authored by claude in the message
+DO NOT include include co-authored by claude in the message
 then ask for permission to git push
