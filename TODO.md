@@ -215,11 +215,17 @@ This file contains the detailed task list for the Care-GraphRAG project. It was 
   - **CREATED**: test_unbiased_extraction.py for demonstration
   - **UPDATED**: graph_builder.py with generic entity/relationship types
 
-- [todo] **TASK-027b**: Create generic medical extraction prompts
-  - Design unbiased prompt template for entity extraction
-  - Remove predetermined relationship examples
-  - Use broad entity categories without leading examples
-  - Implement "discovery-based" extraction approach
+- [done] **TASK-027b**: Create generic medical extraction prompts ✅
+  - ✅ Design unbiased prompt template for entity extraction
+  - ✅ Remove predetermined relationship examples  
+  - ✅ Use broad entity categories without leading examples
+  - ✅ Implement "discovery-based" extraction approach
+  - **IMPLEMENTED**: Created GenericExtractionPrompts class with 4 extraction modes
+  - **IMPLEMENTED**: Created DiscoveryExtractor with comprehensive unbiased extraction
+  - **FEATURES**: Blind, Discovery, Generic, and Validation extraction modes
+  - **FEATURES**: Multi-pass extraction, cross-validation, adversarial validation
+  - **FEATURES**: False positive detection for non-medical content
+  - **TESTING**: Quick test suite confirms bias removal and functionality
 
 - [todo] **TASK-027c**: Implement blind extraction process
   - Create generic entity types (Medical_Entity, Patient_Criteria, Treatment_Step)
