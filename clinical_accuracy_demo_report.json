@@ -1,0 +1,108 @@
+{
+  "overall_metrics": {
+    "entity_precision": {
+      "metric_type": "entity_precision",
+      "value": 1.0,
+      "confidence_interval": null,
+      "details": {
+        "model_values": [
+          1.0,
+          1.0
+        ]
+      },
+      "entity_breakdown": null
+    },
+    "entity_recall": {
+      "metric_type": "entity_recall",
+      "value": 1.0,
+      "confidence_interval": null,
+      "details": {
+        "model_values": [
+          1.0,
+          1.0
+        ]
+      },
+      "entity_breakdown": null
+    }
+  },
+  "entity_metrics": {
+    "medication": {
+      "entity_precision": 1.0,
+      "entity_recall": 0.5
+    },
+    "condition": {
+      "entity_precision": 1.0,
+      "entity_recall": 1.0
+    },
+    "patient_group": {
+      "entity_precision": 1.0,
+      "entity_recall": 1.0
+    },
+    "treatment_protocol": {
+      "entity_precision": 1.0,
+      "entity_recall": 0.5
+    },
+    "age_criteria": {
+      "entity_precision": 1.0,
+      "entity_recall": 0.5
+    },
+    "ethnicity_criteria": {
+      "entity_precision": 1.0,
+      "entity_recall": 1.0
+    },
+    "clinical_decision": {
+      "entity_precision": 1.0,
+      "entity_recall": 1.0
+    },
+    "dosage": {
+      "entity_precision": 1.0,
+      "entity_recall": 1.0
+    },
+    "contraindication": {
+      "entity_precision": 1.0,
+      "entity_recall": 1.0
+    },
+    "side_effect": {
+      "entity_precision": 1.0,
+      "entity_recall": 1.0
+    }
+  },
+  "consensus_metrics": {
+    "consensus_score": 0.09090909090909091,
+    "entity_consensus": 0.18181818181818182,
+    "relationship_consensus": 0.0,
+    "agreement_rate": 0.09090909090909091,
+    "min_agreement": 0.09090909090909091,
+    "max_agreement": 0.09090909090909091,
+    "consistency": 1.0
+  },
+  "false_positive_analysis": {
+    "false_positive_rate": 0.0,
+    "specificity": 1.0,
+    "precision_on_irrelevant": 1.0,
+    "false_positive_count": 0,
+    "total_extractions": 21
+  },
+  "clinical_safety_score": 0.18181818181818185,
+  "recommendations": [
+    "Low consensus between models. Consider majority voting or additional validation steps.",
+    "Clinical safety score below threshold. Review extraction accuracy and implement additional safety checks.",
+    "Significant disagreement between models detected. Consider using ensemble methods or expert validation."
+  ],
+  "model_comparison": {
+    "gpt-4o-mini": {
+      "entity_precision": 1.0,
+      "entity_recall": 1.0,
+      "relationship_precision": 1.0,
+      "relationship_recall": 0.4444444444444444,
+      "clinical_accuracy": 0.0
+    },
+    "claude-3-sonnet": {
+      "entity_precision": 1.0,
+      "entity_recall": 1.0,
+      "relationship_precision": 0.75,
+      "relationship_recall": 0.3333333333333333,
+      "clinical_accuracy": 0.0
+    }
+  }
+}
