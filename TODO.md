@@ -283,11 +283,18 @@ This file contains the detailed task list for the Care-GraphRAG project. It was 
   - **FEATURES**: Integration with MongoDB graph storage with validation metadata
   - **TESTING**: Comprehensive test suite demonstrates bias removal and accuracy
 
-- [todo] **TASK-027g**: Build validation prompt templates
-  - Create standardized validation prompts for claim verification
-  - Include confidence scoring (High/Medium/Low)
-  - Require specific text quotations for support/contradiction
-  - Design prompts to detect extraction hallucinations
+- [done] **TASK-027g**: Build validation prompt templates ✅
+  - ✅ Create standardized validation prompts for claim verification
+  - ✅ Include confidence scoring (High/Medium/Low/None)
+  - ✅ Require specific text quotations for support/contradiction
+  - ✅ Design prompts to detect extraction hallucinations
+  - **IMPLEMENTED**: Created ValidationPromptTemplates class with 4 validation types
+  - **IMPLEMENTED**: Updated AdversarialValidator to use standardized templates
+  - **FEATURES**: Strict evidence, semantic inference, contradiction focus, completeness check
+  - **FEATURES**: Medical-specific validation with clinical safety guidelines
+  - **FEATURES**: Configurable validation criteria for different use cases
+  - **FEATURES**: Specialized hallucination detection prompts
+  - **TESTING**: Comprehensive test suite demonstrates all validation types
 
 - [todo] **TASK-027h**: Create blind clinical test cases
   - Develop known clinical scenarios without expected answers
