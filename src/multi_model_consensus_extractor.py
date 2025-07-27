@@ -93,14 +93,19 @@ class MultiModelConsensusExtractor(LoggerMixin):
         # Anthropic Claude Opus
         if enable_anthropic_claude and ANTHROPIC_AVAILABLE:
             try:
-                # Note: Requires ANTHROPIC_API_KEY environment variable
-                self.models[ModelProvider.ANTHROPIC_CLAUDE_OPUS] = ChatAnthropic(
-                    model_name="claude-3-opus-20240229",
-                    temperature=temperature,
-                    timeout=timeout_seconds
-                )
-                self.model_weights[ModelProvider.ANTHROPIC_CLAUDE_OPUS] = 1.2  # Slightly higher weight
-                self.logger.info("Initialized Anthropic Claude Opus")
+                # Check if API key is available
+                anthropic_api_key = getattr(self.settings, 'anthropic_api_key', None)
+                if not anthropic_api_key or anthropic_api_key == "your_anthropic_api_key_here":
+                    self.logger.warning("Anthropic API key not configured properly")
+                else:
+                    self.models[ModelProvider.ANTHROPIC_CLAUDE_OPUS] = ChatAnthropic(
+                        model_name="claude-3-opus-20240229",
+                        temperature=temperature,
+                        timeout=timeout_seconds,
+                        anthropic_api_key=anthropic_api_key
+                    )
+                    self.model_weights[ModelProvider.ANTHROPIC_CLAUDE_OPUS] = 1.2  # Slightly higher weight
+                    self.logger.info("Initialized Anthropic Claude Opus")
             except Exception as e:
                 self.logger.warning(f"Failed to initialize Anthropic Claude Opus: {str(e)}")
         elif enable_anthropic_claude and not ANTHROPIC_AVAILABLE:
@@ -177,24 +182,24 @@ RELATIONSHIP TYPES (use these exactly):
 - contains: Inclusion or containment
 
 OUTPUT FORMAT (JSON):
-{
-  "model_info": {
+{{
+  "model_info": {{
     "model_name": "your model identifier",
     "extraction_timestamp": "ISO timestamp",
     "confidence_level": "HIGH/MEDIUM/LOW"
-  },
+  }},
   "entities": [
-    {
+    {{
       "id": "E1",
       "text": "exact text from source",
       "category": "selected category from list above",
       "context": "surrounding sentence",
       "confidence": "HIGH/MEDIUM/LOW",
       "extraction_evidence": "why this is a distinct entity"
-    }
+    }}
   ],
   "relationships": [
-    {
+    {{
       "id": "R1",
       "source_entity_id": "E1",
       "target_entity_id": "E2",
@@ -203,9 +208,9 @@ OUTPUT FORMAT (JSON):
       "evidence_sentence": "complete sentence containing relationship",
       "confidence": "HIGH/MEDIUM/LOW",
       "directionality": "directional/bidirectional/unclear"
-    }
+    }}
   ]
-}
+}}
 
 IMPORTANT: Use the exact categories and relationship types listed above for consistency across models.
 """
