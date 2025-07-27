@@ -269,11 +269,19 @@ This file contains the detailed task list for the Care-GraphRAG project. It was 
   - **FEATURES**: Comprehensive statistics tracking across models
   - **TESTING**: Full framework operational (Claude/O3 require API keys)
 
-- [todo] **TASK-027f**: Implement adversarial validation framework
-  - Use one model to extract, another to validate claims
-  - Create validation prompt: "Does source text support this claim?"
-  - Implement independent fact-checking pipeline
-  - Score confidence based on cross-model agreement
+- [done] **TASK-027f**: Implement adversarial validation framework ✅
+  - ✅ Use one model to extract, another to validate claims
+  - ✅ Create validation prompt: "Does source text support this claim?"
+  - ✅ Implement independent fact-checking pipeline
+  - ✅ Score confidence based on cross-model agreement
+  - **IMPLEMENTED**: Created AdversarialValidator with independent extraction and validation
+  - **IMPLEMENTED**: Created AdversarialGraphBuilder for MongoDB integration
+  - **FEATURES**: Separate extraction and validation models to prevent confirmation bias
+  - **FEATURES**: Structured validation prompts requiring specific text evidence
+  - **FEATURES**: Confidence scoring based on validation agreement/disagreement
+  - **FEATURES**: False positive and hallucination detection with detailed reporting
+  - **FEATURES**: Integration with MongoDB graph storage with validation metadata
+  - **TESTING**: Comprehensive test suite demonstrates bias removal and accuracy
 
 - [todo] **TASK-027g**: Build validation prompt templates
   - Create standardized validation prompts for claim verification
