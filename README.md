@@ -15,6 +15,8 @@ Building an explainable, low-cost GraphRAG system for UK NICE Clinical Knowledge
 - **Retrieval System**: Hybrid graph-first retrieval with vector fallback
 - **Monitoring**: Comprehensive metrics tracking for performance and costs
 - **QA Chain**: Complete question-answering system with clinical safety prompting
+- **Answer Formatting**: Confidence scoring and provenance tracking
+- **Answer Validation**: Hallucination detection and source verification
 
 ### 🎯 Current Capabilities
 - **Enhanced Data Pipeline**: NICE Guidelines → Advanced Medical Knowledge Graph → Hybrid Retrieval → QA Chain
@@ -37,6 +39,7 @@ Building an explainable, low-cost GraphRAG system for UK NICE Clinical Knowledge
 - **TASK-032**: Lambda function structure for API development
 - **TASK-029**: Comprehensive unit test implementation
 - **TASK-030**: Validation suite with golden queries and benchmarks
+- **TASK-027b+**: Multi-model consensus extraction framework development
 
 ## Project Structure
 
