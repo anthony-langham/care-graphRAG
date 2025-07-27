@@ -202,6 +202,98 @@ This file contains the detailed task list for the Care-GraphRAG project. It was 
   - **INTEGRATION**: Integrated into QA chain with enhanced formatting support
   - **TESTING**: Full test suite with 9 passing tests
 
+### Phase 7a: Unbiased Knowledge Graph Extraction
+
+- [todo] **TASK-027a**: Remove extraction bias from current prompts
+  - Remove specific clinical examples from MEDICAL_ENTITY_PROMPT
+  - Replace biased examples with generic extraction guidelines
+  - Focus on "what is mentioned" not "what should be there"
+  - Audit current graph_builder.py for confirmation bias
+
+- [todo] **TASK-027b**: Create generic medical extraction prompts
+  - Design unbiased prompt template for entity extraction
+  - Remove predetermined relationship examples
+  - Use broad entity categories without leading examples
+  - Implement "discovery-based" extraction approach
+
+- [todo] **TASK-027c**: Implement blind extraction process
+  - Create generic entity types (Medical_Entity, Patient_Criteria, Treatment_Step)
+  - Remove all specific clinical guidance from prompts
+  - Let models discover relationships organically
+  - Separate entity discovery from relationship inference
+
+- [todo] **TASK-027d**: Implement independent relationship discovery
+  - Separate entity extraction from relationship extraction phases
+  - Use different prompts/models for each extraction phase
+  - Cross-validate relationships against source text
+  - Implement multi-pass extraction pipeline
+
+- [todo] **TASK-027e**: Create multi-model consensus extraction
+  - Implement extraction with GPT-4o-mini, Claude Opus, and O3
+  - Compare results for cross-model consistency
+  - Flag discrepancies for manual review
+  - Only accept relationships confirmed by multiple models
+
+- [todo] **TASK-027f**: Implement adversarial validation framework
+  - Use one model to extract, another to validate claims
+  - Create validation prompt: "Does source text support this claim?"
+  - Implement independent fact-checking pipeline
+  - Score confidence based on cross-model agreement
+
+- [todo] **TASK-027g**: Build validation prompt templates
+  - Create standardized validation prompts for claim verification
+  - Include confidence scoring (High/Medium/Low)
+  - Require specific text quotations for support/contradiction
+  - Design prompts to detect extraction hallucinations
+
+- [todo] **TASK-027h**: Create blind clinical test cases
+  - Develop known clinical scenarios without expected answers
+  - Create test cases for age-specific treatment protocols
+  - Extract without showing expected clinical outcomes
+  - Measure accuracy against verified NICE guidelines
+
+- [todo] **TASK-027i**: Implement false positive detection tests
+  - Include irrelevant medical texts in test suite
+  - Test if system hallucinates non-existent clinical rules
+  - Create deliberately misleading or incomplete text tests
+  - Validate precision vs recall trade-offs
+
+- [todo] **TASK-027j**: Design clinical accuracy metrics framework
+  - Implement precision/recall calculations for medical extractions
+  - Create clinical_accuracy metric for treatment scenarios
+  - Track false positive rates on irrelevant content
+  - Design metrics for cross-model consensus scoring
+
+- [todo] **TASK-027k**: Rebuild extraction pipeline architecture
+  - Refactor graph_builder.py to remove biased prompts
+  - Implement UnbiasedExtractor class with validation framework
+  - Create multi-pass extraction process (entity → relationship → validation)
+  - Add source text verification layer
+
+- [todo] **TASK-027l**: Implement multi-pass extraction process
+  - Pass 1: Entity discovery (unbiased prompts)
+  - Pass 2: Relationship discovery (independent validation)
+  - Pass 3: Cross-model validation and consensus building
+  - Pass 4: Source text verification and confidence scoring
+
+- [todo] **TASK-027m**: Create clinical scenario test framework
+  - Implement test cases for age-specific hypertension treatment
+  - Create validation tests for 56-year-old vs 45-year-old protocols
+  - Design test framework for multiple clinical domains
+  - Include edge cases and complex decision trees
+
+- [todo] **TASK-027n**: Implement false positive test suite
+  - Create tests with diabetes guidelines (no hypertension content)
+  - Test incomplete medical sentences and fragments
+  - Include non-medical texts to test specificity
+  - Design tests for extraction hallucination detection
+
+- [todo] **TASK-027o**: Validate against ground truth clinical knowledge
+  - Test extraction against verified NICE guidelines
+  - Validate CCB vs ACE inhibitor age-specific protocols
+  - Verify treatment algorithm extraction accuracy
+  - Measure clinical safety of extracted recommendations
+
 ### Phase 8: Testing & Validation
 
 - [todo] **TASK-028**: Create test fixtures
