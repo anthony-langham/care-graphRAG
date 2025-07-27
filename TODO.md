@@ -240,11 +240,19 @@ This file contains the detailed task list for the Care-GraphRAG project. It was 
   - **FEATURES**: Multi-stage extraction (entities → relationships → validation)
   - **TESTING**: Quick test confirms domain-blind functionality
 
-- [todo] **TASK-027d**: Implement independent relationship discovery
-  - Separate entity extraction from relationship extraction phases
-  - Use different prompts/models for each extraction phase
-  - Cross-validate relationships against source text
-  - Implement multi-pass extraction pipeline
+- [done] **TASK-027d**: Implement independent relationship discovery ✅
+  - ✅ Separate entity extraction from relationship extraction phases
+  - ✅ Use different prompts/models for each extraction phase
+  - ✅ Cross-validate relationships against source text
+  - ✅ Implement multi-pass extraction pipeline
+  - **IMPLEMENTED**: Created IndependentRelationshipExtractor with 4 extraction phases
+  - **IMPLEMENTED**: Created MultiPhaseGraphBuilder for MongoDB integration
+  - **FEATURES**: Complete phase separation with different models per phase
+  - **FEATURES**: Entity-only, Relationship-only, Validation-only, Cross-validation phases
+  - **FEATURES**: JSON-structured extraction with strict phase isolation
+  - **FEATURES**: Validation filtering to remove rejected extractions
+  - **FEATURES**: Cross-validation between multiple extraction attempts
+  - **TESTING**: Phase separation verified, no contamination between phases
 
 - [todo] **TASK-027e**: Create multi-model consensus extraction
   - Implement extraction with GPT-4o-mini, Claude Opus, and O3
