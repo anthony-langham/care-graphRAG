@@ -362,3 +362,57 @@ sst console  # Opens SST console for monitoring
 - Use `maxPoolSize=1` to respect Lambda constraints
 - Implement connection retry logic
 - Monitor connection metrics in CloudWatch
+
+## File Organization
+
+The project has been reorganized for better structure and maintainability:
+
+### Directory Structure
+
+- **`src/`** - Core source code with all main components
+- **`tests/`** - Comprehensive test suite with fixtures and examples
+  - `fixtures/` - Test data and mock factories (TASK-028 ✅)
+  - `examples/` - Usage examples for test fixtures
+  - `integration/` - Integration tests for component interactions
+- **`scripts/`** - Utility scripts for graph building and management
+- **`demos/`** - Demo scripts and quick test utilities
+- **`functions/`** - AWS Lambda function handlers
+- **`validation_scripts/`** - Clinical accuracy validation tools
+- **`data/`** - Data files, reports, and visualizations
+- **`docs/`** - Project documentation
+- **`config/`** - Configuration management
+
+### Benefits of Organization
+
+- **Clean root directory** - only essential config files
+- **Logical separation** - tests, demos, scripts in dedicated folders
+- **Easy navigation** - clear purpose for each directory
+- **Scalable structure** - supports future growth
+- **Standard conventions** - follows Python packaging best practices
+
+### Running Tests
+
+```bash
+# All tests
+python3 -m pytest tests/ -v
+
+# Test fixtures validation
+python3 -m pytest tests/test_fixtures_validation.py -v
+
+# Unit tests only  
+python3 -m pytest tests/ -k "not integration" -v
+
+# Integration tests
+python3 -m pytest tests/integration/ -v
+```
+
+### Demo Scripts
+
+```bash
+# Test fixtures demonstration
+python3 demos/demo_test_fixtures.py
+
+# Quick unbiased extraction validation
+python3 demos/quick_test_blind.py
+python3 demos/quick_test_adversarial.py
+```
