@@ -187,10 +187,10 @@ export default {
 - **QA Testing**: `test_qa_chain.py` - Test question-answering system with sample queries
 
 ### 📋 NEXT PRIORITIES:
-- TASK-028: Create test fixtures (validation dataset)
 - TASK-032: Create Lambda function structure (API development)
 - TASK-029: Implement unit tests (comprehensive test coverage)
 - TASK-030: Create validation suite (golden queries and benchmarks)
+- TASK-061: Implement granular source attribution (after API development)
 
 ## Detailed TODO List
 
@@ -212,6 +212,7 @@ The detailed task list is maintained in `TODO.md` for all project tasks (TASK-00
 - **Advanced Graph Building**: Enhanced document processing with structured extraction
 - **Database Management**: Index optimization and cluster analysis tools
 - **SSL Certificate Fix**: Resolved LangChain MongoDB SSL verification issues
+- **Granular Source Attribution Analysis**: Comprehensive analysis of NICE page structure and implementation plan for paragraph-level citation precision (documented in `docs/granular-source-attribution.md`)
 
 - Regular security audits
 

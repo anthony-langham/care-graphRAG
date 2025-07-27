@@ -38,6 +38,7 @@ Building an explainable, low-cost GraphRAG system for UK NICE Clinical Knowledge
 - **TASK-032**: Lambda function structure for API development
 - **TASK-029**: Comprehensive unit test implementation
 - **TASK-030**: Validation suite with golden queries and benchmarks
+- **TASK-061**: Granular source attribution for paragraph-level precision
 
 ## Project Structure
 

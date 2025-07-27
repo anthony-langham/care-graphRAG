@@ -590,6 +590,18 @@ This file contains the detailed task list for the Care-GraphRAG project. It was 
   - Multi-region considerations
   - SLA documentation
 
+### Phase 18: Source Attribution Enhancement
+
+- [todo] **TASK-061**: Implement granular source attribution
+  - **PRIORITY**: Implement after API development (TASK-032-035)
+  - Enhanced scraper to preserve HTML structure and XPath locations
+  - Improved chunking strategy for paragraph-level precision
+  - Text fragment URL generation (#section:~:text=content)
+  - Context preservation for navigation guidance
+  - Enhanced source attribution in answer formatter
+  - **GOAL**: Paragraph-level precision for clinical verification
+  - **DOCUMENTATION**: See `docs/granular-source-attribution.md`
+
 ## Future Work (Extended)
 
 ### From Code Review Suggestions
