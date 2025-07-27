@@ -227,11 +227,18 @@ This file contains the detailed task list for the Care-GraphRAG project. It was 
   - **FEATURES**: False positive detection for non-medical content
   - **TESTING**: Quick test suite confirms bias removal and functionality
 
-- [todo] **TASK-027c**: Implement blind extraction process
-  - Create generic entity types (Medical_Entity, Patient_Criteria, Treatment_Step)
-  - Remove all specific clinical guidance from prompts
-  - Let models discover relationships organically
-  - Separate entity discovery from relationship inference
+- [done] **TASK-027c**: Implement blind extraction process ✅
+  - ✅ Create generic entity types (Entity, Concept, Item, Group, Action, etc.)
+  - ✅ Remove all specific clinical guidance from prompts
+  - ✅ Let models discover relationships organically
+  - ✅ Separate entity discovery from relationship inference
+  - **IMPLEMENTED**: Created BlindExtractor with 10 generic entity types
+  - **IMPLEMENTED**: Created OrganicGraphBuilder for MongoDB integration
+  - **FEATURES**: JSON-structured extraction with validation framework
+  - **FEATURES**: Generic relationship types (relates_to, part_of, leads_to, etc.)
+  - **FEATURES**: Domain-agnostic prompts with zero temperature for consistency
+  - **FEATURES**: Multi-stage extraction (entities → relationships → validation)
+  - **TESTING**: Quick test confirms domain-blind functionality
 
 - [todo] **TASK-027d**: Implement independent relationship discovery
   - Separate entity extraction from relationship extraction phases
