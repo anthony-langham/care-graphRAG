@@ -13,6 +13,11 @@ from enum import Enum
 
 from config.settings import get_settings
 from config.logging import LoggerMixin, log_performance
+from src.validation_prompt_templates import (
+    ValidationPromptTemplates, 
+    ValidationType, 
+    ValidationCriteria
+)
 
 
 class ValidationResult(Enum):
@@ -46,7 +51,8 @@ class AdversarialValidator(LoggerMixin):
                  validation_model: str = "gpt-4o-mini",
                  require_exact_quotes: bool = True,
                  confidence_threshold: float = 0.7,
-                 max_validation_attempts: int = 2):
+                 max_validation_attempts: int = 2,
+                 validation_type: ValidationType = ValidationType.STRICT_EVIDENCE):
         """
         Initialize adversarial validator.
         
@@ -56,6 +62,7 @@ class AdversarialValidator(LoggerMixin):
             require_exact_quotes: Require exact text quotes for validation
             confidence_threshold: Minimum confidence for accepting claims
             max_validation_attempts: Maximum validation attempts per claim
+            validation_type: Type of validation approach to use
         """
         super().__init__()
         self.settings = get_settings()
@@ -65,6 +72,20 @@ class AdversarialValidator(LoggerMixin):
         self.require_exact_quotes = require_exact_quotes
         self.confidence_threshold = confidence_threshold
         self.max_validation_attempts = max_validation_attempts
+        self.validation_type = validation_type
+        
+        # Initialize validation prompt templates
+        self.prompt_templates = ValidationPromptTemplates()
+        
+        # Configure validation criteria
+        self.validation_criteria = ValidationCriteria(
+            evidence_quote_required=require_exact_quotes,
+            evidence_location_required=True,
+            reasoning_required=True,
+            contradiction_check=True,
+            confidence_justification=True,
+            hallucination_detection=True
+        )
         
         # Import OpenAI for LLM calls
         try:
@@ -95,6 +116,7 @@ class AdversarialValidator(LoggerMixin):
         
         self.logger.info(f"Initialized AdversarialValidator: extraction={extraction_model}, validation={validation_model}")
         self.logger.info(f"Require exact quotes: {require_exact_quotes}, confidence threshold: {confidence_threshold}")
+        self.logger.info(f"Validation type: {validation_type.value}")
 
     async def adversarial_extraction_and_validation(self, 
                                                    source_text: str,
@@ -391,49 +413,117 @@ Do not infer or add medical knowledge not present in the source.
         return base_prompt
 
     def _build_validation_prompt(self, source_text: str, claim_type: str, claim: Dict[str, Any]) -> str:
-        """Build prompt for validating a specific claim."""
+        """Build prompt for validating a specific claim using standardized templates."""
         
         if claim_type == "entity":
-            claim_description = f"Entity: '{claim.get('text', '')}' (category: {claim.get('category', 'unknown')})"
+            return self.prompt_templates.get_entity_validation_prompt(
+                source_text=source_text,
+                entity=claim,
+                validation_type=self.validation_type,
+                criteria=self.validation_criteria
+            )
         else:  # relationship
-            claim_description = f"Relationship: {claim.get('source_entity_id', '')} --{claim.get('relationship_type', '')}--> {claim.get('target_entity_id', '')}"
+            return self.prompt_templates.get_relationship_validation_prompt(
+                source_text=source_text,
+                relationship=claim,
+                validation_type=self.validation_type,
+                criteria=self.validation_criteria
+            )
+
+    async def detect_hallucinations(self, 
+                                   source_text: str, 
+                                   extracted_entities: List[Dict[str, Any]], 
+                                   extracted_relationships: List[Dict[str, Any]]) -> Dict[str, Any]:
+        """
+        Detect hallucinated extractions using specialized prompt templates.
         
-        validation_prompt = f"""
-You are fact-checking an extracted claim against source text.
-
-Source Text:
-{source_text}
-
-Claim to Validate:
-{claim_description}
-
-Your task: Determine if this claim is supported by the source text.
-
-Respond in JSON format:
-{{
-  "result": "SUPPORTED|CONTRADICTED|UNSUPPORTED|AMBIGUOUS",
-  "confidence": "HIGH|MEDIUM|LOW|NONE",
-  "evidence_quote": "exact_quote_from_source_that_supports_or_contradicts",
-  "evidence_location": "approximate_position_in_text",
-  "reasoning": "explanation_of_your_validation_decision",
-  "contradictory_evidence": "any_text_that_contradicts_the_claim"
-}}
-
-Validation Rules:
-1. SUPPORTED: Claim is directly stated or clearly implied in source text
-2. CONTRADICTED: Source text contradicts the claim
-3. UNSUPPORTED: No evidence found in source text
-4. AMBIGUOUS: Evidence is unclear or conflicting
-
-Confidence Levels:
-- HIGH: Exact textual match or very clear statement
-- MEDIUM: Clear paraphrase or strong implication  
-- LOW: Weak evidence requiring inference
-- NONE: No supporting evidence found
-
-{"CRITICAL: You must provide exact quotes from the source text." if self.require_exact_quotes else ""}
-"""
-        return validation_prompt
+        Args:
+            source_text: Original source text
+            extracted_entities: List of extracted entities to check
+            extracted_relationships: List of extracted relationships to check
+            
+        Returns:
+            Dictionary with hallucination detection results
+        """
+        self.logger.debug(f"Running hallucination detection on {len(extracted_entities)} entities and {len(extracted_relationships)} relationships")
+        
+        # Combine all extracted items for hallucination detection
+        all_items = []
+        for entity in extracted_entities:
+            all_items.append({
+                "text": entity.get("text", ""),
+                "id": entity.get("id", ""),
+                "type": "entity",
+                "category": entity.get("category", "")
+            })
+        
+        for relationship in extracted_relationships:
+            all_items.append({
+                "text": f"{relationship.get('source_entity_id', '')} -> {relationship.get('relationship_type', '')} -> {relationship.get('target_entity_id', '')}",
+                "id": relationship.get("id", ""),
+                "type": "relationship",
+                "relationship_type": relationship.get("relationship_type", "")
+            })
+        
+        try:
+            # Generate hallucination detection prompt
+            hallucination_prompt = self.prompt_templates.get_hallucination_detection_prompt(
+                source_text=source_text,
+                extracted_items=all_items,
+                criteria=self.validation_criteria
+            )
+            
+            if not self.openai_client:
+                raise ValueError("OpenAI client not available")
+            
+            response = await self.openai_client.chat.completions.create(
+                model=self.validation_model,
+                messages=[
+                    {"role": "system", "content": "You are a hallucination detector for medical information extraction. Be extremely conservative."},
+                    {"role": "user", "content": hallucination_prompt}
+                ],
+                temperature=0.0,
+                max_tokens=2000
+            )
+            
+            content = response.choices[0].message.content
+            hallucination_data = json.loads(content)
+            
+            # Process hallucination results
+            results = hallucination_data.get("hallucination_results", [])
+            summary = hallucination_data.get("summary", {})
+            
+            hallucinated_items = [item for item in results if item.get("status") == "HALLUCINATION"]
+            supported_items = [item for item in results if item.get("status") == "SUPPORTED"]
+            ambiguous_items = [item for item in results if item.get("status") == "AMBIGUOUS"]
+            
+            self.stats["hallucinations_detected"] += len(hallucinated_items)
+            
+            return {
+                "success": True,
+                "total_items_checked": len(all_items),
+                "supported_items": len(supported_items),
+                "hallucinated_items": len(hallucinated_items),
+                "ambiguous_items": len(ambiguous_items),
+                "hallucination_rate": len(hallucinated_items) / max(len(all_items), 1),
+                "detailed_results": results,
+                "summary": summary,
+                "hallucinated_entities": [item for item in hallucinated_items if item.get("type") == "entity"],
+                "hallucinated_relationships": [item for item in hallucinated_items if item.get("type") == "relationship"],
+                "raw_response": content
+            }
+            
+        except Exception as e:
+            self.logger.error(f"Hallucination detection failed: {str(e)}")
+            return {
+                "success": False,
+                "error": str(e),
+                "total_items_checked": len(all_items),
+                "supported_items": 0,
+                "hallucinated_items": 0,
+                "ambiguous_items": 0,
+                "hallucination_rate": 0.0
+            }
 
     def _combine_extraction_and_validation(self, 
                                           extraction_result: Dict[str, Any],
