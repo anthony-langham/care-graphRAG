@@ -153,11 +153,17 @@ export default {
 
 **Phase 7: QA Chain** - COMPLETE
 - ✅ **TASK-025**: QA chain setup with RetrievalQA and GPT-4o-mini
+- ✅ **TASK-026**: Answer formatting with confidence scoring and provenance
+- ✅ **TASK-027**: Answer validation with hallucination detection
 - Medical-focused prompt template with clinical safety guidelines ✓
 - Hybrid retrieval integration with source attribution ✓
 - Cost tracking and performance monitoring ✓
 - Comprehensive error handling and edge case management ✓
 - Clinical question answering operational ✓
+
+**Phase 7a: Unbiased Knowledge Graph Extraction** - IN PROGRESS
+- ✅ **TASK-027a**: Removal of extraction bias from clinical prompts
+- 🚧 **TASK-027b to 027o**: Multi-model consensus extraction framework (planned)
 
 ### 🚧 CURRENT STATUS:
 - **Core System**: FULLY OPERATIONAL with comprehensive script suite
