@@ -17,6 +17,9 @@ class Settings(BaseSettings):
     openai_model: str = Field(default="gpt-4o-mini", env="OPENAI_MODEL")
     openai_temperature: float = Field(default=0.0, env="OPENAI_TEMPERATURE")
     
+    # Anthropic Configuration (for Claude models)
+    anthropic_api_key: Optional[str] = Field(default=None, env="ANTHROPIC_API_KEY")
+    
     # MongoDB Configuration
     mongodb_uri: str = Field(..., env="MONGODB_URI")
     mongodb_db_name: str = Field(default="ckshtn", env="MONGODB_DB_NAME")
