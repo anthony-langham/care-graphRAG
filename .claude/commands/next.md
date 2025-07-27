@@ -15,3 +15,4 @@ Then provide:
 4. Ask if I want to start this task
 
 Be concise but thorough in your analysis.
+Do not include coauthored by CC in commit -m
