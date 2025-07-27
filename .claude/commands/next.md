@@ -12,7 +12,6 @@ Then provide:
 1. The task number and title
 2. A one-line summary of what needs to be done
 3. Key implementation considerations (2-3 bullet points)
-4. Ask if I want to start this task
 
 Be concise but thorough in your analysis.
 Do not include coauthored by CC in commit -m
