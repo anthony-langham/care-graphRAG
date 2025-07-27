@@ -23,110 +23,59 @@ class GraphBuilder(LoggerMixin):
     Builds and manages the knowledge graph in MongoDB using LangChain.
     """
     
-    # Valid entity types for medical content extraction
+    # Valid entity types for unbiased medical content extraction
     VALID_ENTITY_TYPES = [
-        "Condition", "Treatment", "Medication", "Dosage", "Symptom", 
-        "Risk_Factor", "Complication", "Guideline", "Recommendation",
-        "Patient_Group", "Contraindication", "Side_Effect", "Procedure",
-        "Investigation", "Monitoring", "Lifestyle", "Prevention",
-        "Treatment_Algorithm", "Age_Criteria", "Ethnicity_Criteria", 
-        "Drug_Class", "Clinical_Decision", "Treatment_Sequence", "Target"
+        "Medical_Concept", "Intervention", "Substance", "Population",
+        "Measurement", "Temporal", "Recommendation", "Outcome",
+        "Process", "Attribute", "Location", "Organization",
+        "Clinical_Entity", "Document", "Guideline_Reference"
     ]
     
-    # Custom medical entity extraction prompt
+    # Unbiased medical entity extraction prompt
     MEDICAL_ENTITY_PROMPT = """
-You are a medical knowledge extraction expert analyzing UK NICE clinical guidelines.
-Extract entities and relationships from clinical text with special focus on treatment algorithms and clinical decision pathways.
+You are analyzing clinical text. Extract entities and relationships that are explicitly mentioned.
 
-ENTITY TYPES TO EXTRACT (use these exact labels):
+EXTRACTION PRINCIPLES:
+1. Extract ONLY what is explicitly stated in the text
+2. Do not assume or infer entities based on medical knowledge
+3. Do not look for specific patterns - discover what's there
+4. Maintain the exact terminology used in the source text
+5. Focus on discovery rather than confirmation
 
-CORE CLINICAL ENTITIES:
-- Condition: Medical conditions, diseases, syndromes (e.g., "hypertension", "diabetes")
-- Treatment: Therapeutic interventions (e.g., "antihypertensive therapy", "lifestyle modification")
-- Medication: Specific drugs or drug classes (e.g., "ACE inhibitor", "amlodipine", "diuretic")
-- Drug_Class: Medication categories (e.g., "ACE inhibitors", "calcium channel blockers", "beta blockers")
-- Dosage: Medication dosages and frequencies (e.g., "5mg daily", "twice daily")
-- Symptom: Clinical signs and symptoms (e.g., "chest pain", "shortness of breath")
-- Risk_Factor: Risk factors for conditions (e.g., "smoking", "obesity", "family history")
-- Complication: Disease complications (e.g., "stroke", "heart failure", "kidney disease")
-- Target: Clinical targets or thresholds (e.g., "blood pressure <140/90", "clinic BP 180/120")
+GENERAL ENTITY CATEGORIES:
+- Medical_Concept: Any medical term, condition, or clinical concept
+- Intervention: Any action, treatment, or therapeutic approach mentioned
+- Substance: Any drug, medication, or chemical compound
+- Population: Any group of people or patient category
+- Measurement: Any clinical measurement, test, or assessment
+- Temporal: Any time-related information (duration, frequency, timing)
+- Recommendation: Any guidance, advice, or suggested action
+- Outcome: Any result, effect, or consequence mentioned
+- Process: Any procedure, pathway, or sequence described
+- Attribute: Any characteristic, property, or quality mentioned
 
-DECISION-MAKING ENTITIES:
-- Treatment_Algorithm: Step-by-step treatment pathways (e.g., "Step 1 treatment", "first-line therapy")
-- Clinical_Decision: Decision points in treatment (e.g., "if ACE inhibitor not tolerated", "if patient aged over 55")
-- Age_Criteria: Age-based treatment decisions (e.g., "under 55 years", "55 years or over")
-- Ethnicity_Criteria: Ethnicity-based guidance (e.g., "black African or African-Caribbean family origin")
-- Patient_Group: Specific patient populations (e.g., "type 2 diabetes patients", "pregnant women")
-- Treatment_Sequence: Treatment order/progression (e.g., "first line", "if not tolerated", "add to existing")
-
-CLINICAL GUIDANCE:
-- Guideline: Specific clinical guidelines (e.g., "NICE CKS", "first-line treatment")
-- Recommendation: Clinical recommendations (e.g., "monitor blood pressure", "lifestyle advice")
-- Contraindication: Contraindications or cautions (e.g., "pregnancy", "renal impairment")
-- Side_Effect: Adverse effects (e.g., "dry cough", "ankle swelling")
-- Procedure: Medical procedures (e.g., "blood pressure measurement", "ECG")
-- Investigation: Diagnostic tests (e.g., "blood test", "urine dipstick")
-- Monitoring: Monitoring requirements (e.g., "annual review", "blood pressure monitoring")
-- Lifestyle: Lifestyle interventions (e.g., "diet modification", "exercise", "salt reduction")
-- Prevention: Preventive measures (e.g., "cardiovascular risk assessment")
-
-RELATIONSHIP TYPES TO EXTRACT (use these exact labels):
-
-TREATMENT RELATIONSHIPS:
-- TREATS: Treatment treats condition (e.g., ACE inhibitor TREATS hypertension)
-- FIRST_LINE_FOR: First-line treatment for patient group (e.g., ACE inhibitor FIRST_LINE_FOR under_55_non_black)
-- ALTERNATIVE_TO: Alternative treatment option (e.g., ARB ALTERNATIVE_TO ACE inhibitor)
-- PRESCRIBED_FOR: Medication prescribed for condition (e.g., amlodipine PRESCRIBED_FOR hypertension)
-- CONTRAINDICATED_FOR: Treatment contraindicated for condition/group (e.g., ACE inhibitor CONTRAINDICATED_FOR pregnancy)
-
-DECISION RELATIONSHIPS:
-- APPLIES_TO: Criteria applies to patient group (e.g., age_under_55 APPLIES_TO non_black_patients)
-- IF_NOT_TOLERATED: Alternative if treatment not tolerated (e.g., ARB IF_NOT_TOLERATED ACE_inhibitor)
-- CONDITIONAL_ON: Treatment conditional on criteria (e.g., CCB_first_line CONDITIONAL_ON age_over_55)
-- ESCALATES_TO: Treatment progression (e.g., dual_therapy ESCALATES_TO triple_therapy)
-- REQUIRES_ASSESSMENT: Decision requires assessment (e.g., specialist_referral REQUIRES_ASSESSMENT severe_hypertension)
-
-CLINICAL RELATIONSHIPS:
-- CAUSES: Risk factor causes condition (e.g., smoking CAUSES hypertension)
-- ASSOCIATED_WITH: General association (e.g., obesity ASSOCIATED_WITH hypertension)
-- REQUIRES: Treatment requires monitoring (e.g., diuretic REQUIRES electrolyte_monitoring)
-- MONITORS: Investigation monitors condition (e.g., blood pressure monitoring MONITORS hypertension)
-- PREVENTS: Intervention prevents condition (e.g., lifestyle modification PREVENTS cardiovascular disease)
-- RECOMMENDS: Guideline recommends treatment (e.g., NICE_CKS RECOMMENDS ACE_inhibitor)
-- INCLUDES: Category includes item (e.g., antihypertensive INCLUDES ACE_inhibitor)
-- AFFECTS: Condition affects group (e.g., hypertension AFFECTS elderly_patients)
-- INDICATES: Symptom indicates condition (e.g., chest_pain INDICATES cardiovascular_risk)
-- DIAGNOSED_BY: Condition diagnosed by test (e.g., hypertension DIAGNOSED_BY blood_pressure_measurement)
+GENERAL RELATIONSHIP TYPES:
+- RELATES_TO: General relationship between any two entities
+- APPLIES_TO: When something is relevant to something else
+- RESULTS_IN: When one thing leads to another
+- MEASURED_BY: When something is assessed by something else
+- OCCURS_WITH: When things happen together
+- MODIFIES: When one thing changes or affects another
+- PRECEDES: When one thing comes before another
+- FOLLOWS: When one thing comes after another
+- USED_FOR: When something is used for a purpose
+- INDICATED_BY: When something indicates or suggests something else
 
 EXTRACTION RULES:
-1. Extract only entities explicitly mentioned in the text
-2. Use the exact entity type labels provided above
-3. Be precise with medical terminology - prefer specific terms over generic ones
-4. Focus on clinically relevant entities and relationships
-5. Ensure relationships are directionally correct and clinically meaningful
-6. Do not infer entities not explicitly stated in the text
-7. Maintain clinical accuracy - if unsure, omit rather than guess
+1. Use the exact text from the source - do not paraphrase
+2. Do not categorize based on your medical knowledge
+3. Let the text guide the extraction, not preconceptions
+4. If unsure about a category, use the most general one
+5. Extract relationships only when explicitly stated
+6. Do not create relationships based on medical inference
+7. Maintain clinical accuracy without adding interpretation
 
-SPECIAL FOCUS ON TREATMENT ALGORITHMS:
-8. Extract age criteria (e.g., "under 55 years", "55 years or over") as Age_Criteria entities
-9. Extract ethnicity criteria (e.g., "black African or African-Caribbean family origin") as Ethnicity_Criteria entities
-10. Extract conditional logic (e.g., "If ACE inhibitor not tolerated, offer ARB") as Clinical_Decision entities
-11. Extract treatment sequences and steps (e.g., "Step 1 treatment", "first line") as Treatment_Algorithm entities
-12. Extract specific drug classes mentioned (e.g., "ACE inhibitors", "calcium channel blockers") as Drug_Class entities
-13. Create relationships that capture decision logic: FIRST_LINE_FOR, CONDITIONAL_ON, IF_NOT_TOLERATED, ALTERNATIVE_TO
-14. Link patient characteristics to treatment recommendations using APPLIES_TO relationships
-
-EXAMPLES OF ENHANCED EXTRACTION:
-- Text: "Offer ACE inhibitor first line for people under 55 years not of black African origin"
-- Extract: "ACE inhibitor" (Drug_Class), "under 55 years" (Age_Criteria), "not of black African origin" (Ethnicity_Criteria)
-- Relationships: ACE_inhibitor FIRST_LINE_FOR under_55_non_black_patients
-
-- Text: "If ACE inhibitor not tolerated due to cough, offer ARB"
-- Extract: "ACE inhibitor not tolerated" (Clinical_Decision), "cough" (Side_Effect), "ARB" (Drug_Class)
-- Relationships: ARB IF_NOT_TOLERATED ACE_inhibitor, cough CAUSES ACE_inhibitor_intolerance
-
-IMPORTANT: This is for UK clinical practice following NICE guidelines. 
-Maintain high precision over high recall - accuracy is critical for patient safety.
+Remember: You are a neutral observer extracting what is written, not a medical expert interpreting meaning.
 """
     
     def __init__(self):
@@ -163,11 +112,10 @@ Maintain high precision over high recall - accuracy is critical for patient safe
                 max_depth=3,
                 allowed_entity_types=self.VALID_ENTITY_TYPES,
                 allowed_relationship_types=[
-                    "TREATS", "CAUSES", "ASSOCIATED_WITH", "CONTRAINDICATED_FOR",
-                    "REQUIRES", "MONITORS", "PREVENTS", "RECOMMENDS", "INCLUDES",
-                    "AFFECTS", "INDICATES", "PRESCRIBED_FOR", "DIAGNOSED_BY",
-                    "FIRST_LINE_FOR", "ALTERNATIVE_TO", "APPLIES_TO", "IF_NOT_TOLERATED",
-                    "CONDITIONAL_ON", "ESCALATES_TO", "REQUIRES_ASSESSMENT"
+                    "RELATES_TO", "APPLIES_TO", "RESULTS_IN", "MEASURED_BY",
+                    "OCCURS_WITH", "MODIFIES", "PRECEDES", "FOLLOWS",
+                    "USED_FOR", "INDICATED_BY", "CONTAINS", "PART_OF",
+                    "MENTIONED_IN", "DESCRIBED_AS", "ASSOCIATED_WITH"
                 ],
                 validate=True,
                 validation_action="warn"
@@ -178,19 +126,18 @@ Maintain high precision over high recall - accuracy is critical for patient safe
             self.logger.error(f"Failed to initialize MongoDB Graph Store: {e}")
             raise
         
-        # Initialize graph transformer with custom medical prompt
+        # Initialize graph transformer with unbiased extraction
         self.graph_transformer = LLMGraphTransformer(
             llm=self.llm,
             allowed_nodes=self.VALID_ENTITY_TYPES,
             allowed_relationships=[
-                "TREATS", "CAUSES", "ASSOCIATED_WITH", "CONTRAINDICATED_FOR",
-                "REQUIRES", "MONITORS", "PREVENTS", "RECOMMENDS", "INCLUDES",
-                "AFFECTS", "INDICATES", "PRESCRIBED_FOR", "DIAGNOSED_BY",
-                "FIRST_LINE_FOR", "ALTERNATIVE_TO", "APPLIES_TO", "IF_NOT_TOLERATED",
-                "CONDITIONAL_ON", "ESCALATES_TO", "REQUIRES_ASSESSMENT"
+                "RELATES_TO", "APPLIES_TO", "RESULTS_IN", "MEASURED_BY",
+                "OCCURS_WITH", "MODIFIES", "PRECEDES", "FOLLOWS",
+                "USED_FOR", "INDICATED_BY", "CONTAINS", "PART_OF",
+                "MENTIONED_IN", "DESCRIBED_AS", "ASSOCIATED_WITH"
             ],
             node_properties=["description", "category", "confidence", "source_section"],
-            relationship_properties=["strength", "evidence_level", "source_section", "clinical_significance"]
+            relationship_properties=["context", "source_text", "confidence_score"]
         )
         
         # Apply custom medical extraction prompt
