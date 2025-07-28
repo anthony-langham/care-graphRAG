@@ -31,23 +31,58 @@ export default {
       // API Lambda with optimized settings
       const api = new Api(stack, "api", {
         routes: {
-          "POST /query": "functions/query.handler",
-          "GET /health": "functions/health.handler", // Health check doesn't need auth
+          "POST /query": {
+            function: {
+              handler: "functions/query.handler",
+              runtime: "python3.11",
+              layers: [layer],
+              timeout: 30, // 30s for queries as per CLAUDE.md
+              memorySize: 1024, // Start with 1024MB, adjust based on CloudWatch metrics
+              reservedConcurrentExecutions: 20, // Limit concurrent queries for cost control
+              environment: {
+                MONGODB_DB_NAME: process.env.MONGODB_DB_NAME || "ckshtn",
+                MONGODB_GRAPH_COLLECTION: process.env.MONGODB_GRAPH_COLLECTION || "kg",
+                MONGODB_VECTOR_COLLECTION: process.env.MONGODB_VECTOR_COLLECTION || "chunks",
+                QUERY_TIMEOUT_SECONDS: "25", // 5s buffer for Lambda processing
+                MAX_CONTEXT_TOKENS: "2000",
+                OPENAI_MODEL: "gpt-4o-mini",
+                OPENAI_TEMPERATURE: "0.1",
+                // Lambda-specific optimizations
+                PYTHONPATH: "/opt/python:/var/task",
+                AWS_LAMBDA_EXEC_WRAPPER: "/opt/otel-instrument", // For X-Ray tracing
+              },
+              bind: [MONGODB_URI, OPENAI_API_KEY],
+            },
+          },
+          "GET /health": {
+            function: {
+              handler: "functions/health.handler",
+              runtime: "python3.11",
+              layers: [layer],
+              timeout: 15, // Shorter timeout for health checks
+              memorySize: 512, // Less memory needed for health checks
+              reservedConcurrentExecutions: 5, // Lower concurrency for health checks
+              environment: {
+                MONGODB_DB_NAME: process.env.MONGODB_DB_NAME || "ckshtn",
+                MONGODB_GRAPH_COLLECTION: process.env.MONGODB_GRAPH_COLLECTION || "kg",
+                MONGODB_VECTOR_COLLECTION: process.env.MONGODB_VECTOR_COLLECTION || "chunks",
+                // Lambda-specific optimizations
+                PYTHONPATH: "/opt/python:/var/task",
+              },
+              bind: [MONGODB_URI, OPENAI_API_KEY],
+            },
+          },
         },
         defaults: {
           function: {
             runtime: "python3.11",
             layers: [layer],
-            timeout: 30, // 30s for queries as per CLAUDE.md
-            memorySize: 1024, // Start with 1024MB, adjust based on CloudWatch metrics
             environment: {
-              MONGODB_DB_NAME: process.env.MONGODB_DB_NAME || "ckshtn",
-              MONGODB_GRAPH_COLLECTION: process.env.MONGODB_GRAPH_COLLECTION || "kg",
-              MONGODB_VECTOR_COLLECTION: process.env.MONGODB_VECTOR_COLLECTION || "chunks",
-              // Lambda-specific optimizations
+              // Default environment variables for all functions
               PYTHONPATH: "/opt/python:/var/task",
+              LOG_LEVEL: "INFO",
+              ENVIRONMENT: "production",
             },
-            bind: [MONGODB_URI, OPENAI_API_KEY],
           },
         },
         cors: {
@@ -110,21 +145,31 @@ export default {
         ApiKeyId: apiKey.keyId,
       });
 
-      // Scheduled sync
+      // Scheduled sync with optimized Lambda settings
       new Cron(stack, "sync", {
-        schedule: "rate(7 days)",
+        schedule: "rate(7 days)", // Weekly sync as per CLAUDE.md
         job: {
           function: {
             handler: "functions/sync.scheduled_handler",
             runtime: "python3.11",
             layers: [layer],
             timeout: 300, // 5 minutes for sync as per CLAUDE.md
-            memorySize: 1024,
+            memorySize: 2048, // Higher memory for sync operations (scraping, processing)
+            reservedConcurrentExecutions: 1, // Only one sync at a time
             environment: {
               MONGODB_DB_NAME: process.env.MONGODB_DB_NAME || "ckshtn",
               MONGODB_GRAPH_COLLECTION: process.env.MONGODB_GRAPH_COLLECTION || "kg",
               MONGODB_VECTOR_COLLECTION: process.env.MONGODB_VECTOR_COLLECTION || "chunks",
+              MONGODB_AUDIT_COLLECTION: process.env.MONGODB_AUDIT_COLLECTION || "audit_log",
+              SYNC_TIMEOUT_SECONDS: "280", // 20s buffer for Lambda processing
+              BATCH_SIZE: "50", // Process chunks in batches
+              OPENAI_MODEL: "gpt-4o-mini",
+              OPENAI_TEMPERATURE: "0.0", // Zero temperature for consistent extraction
+              // Lambda-specific optimizations
               PYTHONPATH: "/opt/python:/var/task",
+              LOG_LEVEL: "INFO",
+              ENVIRONMENT: "production",
+              AWS_LAMBDA_EXEC_WRAPPER: "/opt/otel-instrument", // For X-Ray tracing
             },
             bind: [MONGODB_URI, OPENAI_API_KEY],
           },
