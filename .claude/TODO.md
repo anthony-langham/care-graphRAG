@@ -33,11 +33,11 @@ Created: 2025-07-28
   [X] Adapt existing FastAPI endpoints for Lambda
   [X] Ensure proper request/response handling
 
-[ ] **TASK-044**: Configure Lambda settings (memory, timeout, concurrency)
-  [ ] Set appropriate memory allocation (1024MB initial)
-  [ ] Configure 30s timeout for query functions
-  [ ] Configure 5min timeout for sync functions
-  [ ] Set concurrency limits
+[X] **TASK-044**: Configure Lambda settings (memory, timeout, concurrency)
+  [X] Set appropriate memory allocation (1024MB initial)
+  [X] Configure 30s timeout for query functions
+  [X] Configure 5min timeout for sync functions
+  [X] Set concurrency limits
 
 [ ] **TASK-045**: Setup monitoring with CloudWatch and X-Ray
   [ ] Enable CloudWatch logging for all functions
