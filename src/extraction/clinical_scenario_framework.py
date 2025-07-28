@@ -22,12 +22,12 @@ from test_clinical_scenario_framework import (
 )
 
 # Import our extraction components
-from src.extraction.unbiased_extractor import UnbiasedExtractor
-from src.extraction.multi_pass_extractor import MultiPassExtractor
-from src.extraction.adversarial_validator import AdversarialValidator
+from src.unbiased_extractor import UnbiasedExtractor
+from src.multi_pass_extractor import MultiPassExtractor
+from src.adversarial_validator import AdversarialValidator
 from src.graph_builder import GraphBuilder
 from src.db.mongo_client import get_mongo_client
-from src.config.settings import Settings
+from config.settings import Settings
 
 logger = logging.getLogger(__name__)
 

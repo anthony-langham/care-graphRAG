@@ -1,0 +1,102 @@
+{
+  "report_metadata": {
+    "report_type": "TASK-027o Ground Truth Clinical Validation",
+    "generated_date": "2025-07-28T14:56:08.398798",
+    "nice_guideline_version": "CKS Hypertension 2024",
+    "validation_framework_version": "1.0"
+  },
+  "nice_guideline_validation": {
+    "total_scenarios": 5,
+    "scenarios_validated": 5,
+    "guideline_compliance_rate": 0.6,
+    "clinical_safety_scores": [
+      0.10000000000000009,
+      0.4,
+      0.0,
+      0.4,
+      0.7
+    ],
+    "detailed_results": [
+      {
+        "scenario": "Young Adult (Non-African)",
+        "correct_first_line": true,
+        "safety_score": 0.10000000000000009,
+        "accuracy_score": 0.7
+      },
+      {
+        "scenario": "Older Adult",
+        "correct_first_line": false,
+        "safety_score": 0.4,
+        "accuracy_score": 0.3
+      },
+      {
+        "scenario": "African/Caribbean Patient",
+        "correct_first_line": false,
+        "safety_score": 0.0,
+        "accuracy_score": 0.2
+      },
+      {
+        "scenario": "Patient with Diabetes",
+        "correct_first_line": true,
+        "safety_score": 0.4,
+        "accuracy_score": 0.8
+      },
+      {
+        "scenario": "Patient with Heart Failure",
+        "correct_first_line": true,
+        "safety_score": 0.7,
+        "accuracy_score": 0.8999999999999999
+      }
+    ]
+  },
+  "ccb_ace_protocol_validation": {
+    "total_tests": 4,
+    "correct_protocols": 3,
+    "results": [
+      {
+        "test": "Age 35 (Should prefer ACE/ARB)",
+        "correct": true,
+        "ground_truth": [
+          "ace_inhibitor",
+          "arb"
+        ],
+        "issues": []
+      },
+      {
+        "test": "Age 56 (Should prefer CCB)",
+        "correct": true,
+        "ground_truth": [
+          "ccb"
+        ],
+        "issues": []
+      },
+      {
+        "test": "Age 45 + African (Should prefer CCB)",
+        "correct": false,
+        "ground_truth": [
+          "labetalol",
+          "nifedipine_mr",
+          "methyldopa"
+        ],
+        "issues": [
+          "Should recommend CCB but doesn't"
+        ]
+      },
+      {
+        "test": "Age 65 + Diabetes (ACE/ARB preferred despite age)",
+        "correct": true,
+        "ground_truth": [
+          "ace_inhibitor",
+          "arb"
+        ],
+        "issues": []
+      }
+    ]
+  },
+  "overall_assessment": {
+    "nice_compliance": 0.6,
+    "protocol_accuracy": 0.75,
+    "avg_clinical_safety": 0.32,
+    "clinical_status": "POOR - Major revisions required before clinical use"
+  }
+}
