@@ -31,7 +31,9 @@ class LambdaSettings(BaseModel):
     # Performance Configuration
     max_requests_per_minute: int = Field(default=60)
     query_timeout_seconds: int = Field(default=25)  # Lambda timeout - 5s buffer
+    sync_timeout_seconds: int = Field(default=280)  # Sync timeout - 20s buffer
     max_context_tokens: int = Field(default=2000)
+    batch_size: int = Field(default=50)  # Batch size for processing
     
     # Graph Configuration
     graph_max_depth: int = Field(default=3)
@@ -58,7 +60,9 @@ class LambdaSettings(BaseModel):
             'aws_region': os.environ.get('AWS_REGION', 'eu-west-2'),
             'max_requests_per_minute': int(os.environ.get('MAX_REQUESTS_PER_MINUTE', '60')),
             'query_timeout_seconds': int(os.environ.get('QUERY_TIMEOUT_SECONDS', '25')),
+            'sync_timeout_seconds': int(os.environ.get('SYNC_TIMEOUT_SECONDS', '280')),
             'max_context_tokens': int(os.environ.get('MAX_CONTEXT_TOKENS', '2000')),
+            'batch_size': int(os.environ.get('BATCH_SIZE', '50')),
             'graph_max_depth': int(os.environ.get('GRAPH_MAX_DEPTH', '3')),
             'graph_max_entities': int(os.environ.get('GRAPH_MAX_ENTITIES', '20')),
             'vector_search_k': int(os.environ.get('VECTOR_SEARCH_K', '10')),
