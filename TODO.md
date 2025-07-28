@@ -465,11 +465,17 @@ This file contains the detailed task list for the Care-GraphRAG project. It was 
       }
   ```
 
-- [todo] **TASK-033**: Implement QA endpoint
-  - Request/response models
-  - Error handling
-  - Input validation
-  - Timeout handling
+- [done] **TASK-033**: Implement QA endpoint ✅
+  - ✅ Request/response models with Pydantic v2 validation
+  - ✅ Comprehensive error handling (400, 408, 500 status codes)
+  - ✅ Input validation (question length, max_sources range)
+  - ✅ Timeout handling with asyncio and configurable timeouts (25s default)
+  - ✅ Lambda-optimized MongoDB connection reuse
+  - ✅ Health check endpoint with system information
+  - ✅ CORS middleware for web frontend integration
+  - **IMPLEMENTED**: Complete FastAPI endpoint with structured request/response models
+  - **FEATURES**: Async timeout wrapper, comprehensive error handling, Lambda optimization
+  - **TESTING**: Full test suite with 17 passing tests covering all error scenarios
 - [todo] **TASK-034**: Add authentication
   - API Gateway API keys
   - Usage plan configuration
