@@ -219,15 +219,25 @@ export default {
 - **Serverless Deployment**: `scripts/setup-aws-secrets.sh` - Configure AWS Secrets Manager
 - **Lambda Testing**: `functions/test_lambda_handlers.py` - Validate Lambda function integration
 
-### 📋 NEXT PRIORITIES:
+### 📋 NEXT PRIORITIES (Plan v002):
 
-- Phase 2: Frontend Integration with care.engineering
-- Phase 3: Testing and validation
-- Production deployment and go-live
+**Phase 9: Staging Deployment & API Provisioning**
+- TASK-046: Deploy staging environment (`sst deploy --stage dev`)
+- TASK-047: Configure development API access for frontend team
+- TASK-048: Staging environment validation and testing
+
+**Phase 10: Frontend Integration** (care.engineering repository)
+- TASK-201 to TASK-207: Complete frontend integration (15-20 dev days)
+- Reference: `docs/care-engineering-frontend.md` for comprehensive specifications
+
+**Phase 11-13: Testing, Production & Monitoring**
+- Integration testing and security review
+- Production deployment and go-live validation
+- Performance monitoring and optimization
 
 ## Detailed TODO List
 
-The detailed task list is maintained in `TODO.md` for all project tasks (TASK-001 through TASK-060) and future work items.
+The detailed task list is maintained in `TODO.md` for all project tasks through TASK-056 (backend) and TASK-201 to TASK-207 (frontend) based on plan-v002.md comprehensive deployment strategy.
 
 ### Recent Major Achievements:
 
