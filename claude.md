@@ -104,35 +104,41 @@ export default {
 ### ✅ COMPLETED PHASES:
 
 **Phase 0: Project Setup** - COMPLETE
+
 - Repository initialization ✓
-- Project structure ✓  
+- Project structure ✓
 - Python environment ✓
 - Configuration templates ✓
 
 **Phase 1: MongoDB Atlas Setup** - COMPLETE
+
 - Atlas account and cluster ✓
 - Security configuration ✓
 - Database and collections ✓
 - Connection testing ✓
 
 **Phase 2: Core Infrastructure** - COMPLETE
+
 - Configuration management ✓
 - Logging infrastructure ✓
 - MongoDB connector ✓
 
 **Phase 3: Web Scraping** - COMPLETE
+
 - NICE scraper implementation ✓
 - HTML parsing ✓
 - Content chunking ✓
 - Deduplication system ✓
 
-**Phase 4: Graph Building** - COMPLETE  
+**Phase 4: Graph Building** - COMPLETE
+
 - LangChain graph store setup ✓
 - Medical entity extraction ✓
 - Document processing pipeline ✓
 - Graph persistence ✓
 
 **Phase 6: Retrieval System** - COMPLETE
+
 - ✅ **TASK-022**: Graph-first retriever implemented and operational
 - ✅ **TASK-023**: Hybrid retrieval implemented with graph-first and vector fallback
 - ✅ **TASK-024**: Retrieval monitoring system implemented
@@ -143,6 +149,7 @@ export default {
 - Monitoring and metrics tracking operational ✓
 
 **Phase 5: Vector Store** - COMPLETE
+
 - ✅ **TASK-020**: Vector collection setup with MongoDB Atlas search indexes
 - ✅ **TASK-021**: Vector store implementation with OpenAI embeddings
 - Atlas Vector Search index configuration ✓
@@ -152,6 +159,7 @@ export default {
 - Integration with hybrid retrieval system ✓
 
 **Phase 7: QA Chain** - COMPLETE
+
 - ✅ **TASK-025**: QA chain setup with RetrievalQA and GPT-4o-mini
 - ✅ **TASK-026**: Answer formatting with confidence scoring and provenance
 - ✅ **TASK-027**: Answer validation with hallucination detection
@@ -162,10 +170,12 @@ export default {
 - Clinical question answering operational ✓
 
 **Phase 7a: Unbiased Knowledge Graph Extraction** - IN PROGRESS
+
 - ✅ **TASK-027a to 027l**: Extraction bias removal and multi-model framework COMPLETE
 - 🚧 **TASK-027m to 027o**: Clinical validation framework (in progress)
 
 ### 🚧 CURRENT STATUS:
+
 - **Core System**: FULLY OPERATIONAL with comprehensive script suite
 - **Data Pipeline**: Enhanced scraping → advanced chunking → optimized graph building → hybrid retrieval → QA chain
 - **QA System**: Complete question-answering pipeline with clinical safety prompting
@@ -180,6 +190,7 @@ export default {
 - **Clinical Validation**: Working on test framework for clinical scenario validation
 
 ### 🛠️ AVAILABLE SCRIPTS:
+
 - **Graph Building**: `build_graph.py`, `enhanced_graph_builder.py`, `quick_enhanced_graph.py`
 - **Data Management**: `simple_populate.py`, `structured_extraction.py`
 - **Content Management**: `rescrape_management.py`, `llm_html_graph_builder.py`
@@ -189,6 +200,7 @@ export default {
 - **QA Testing**: `test_qa_chain.py` - Test question-answering system with sample queries
 
 ### 📋 NEXT PRIORITIES:
+
 - Complete Phase 7a: TASK-027m, 027n, 027o (clinical validation framework)
 - TASK-032: Create Lambda function structure (API development)
 - TASK-029: Implement unit tests (comprehensive test coverage)
@@ -200,6 +212,7 @@ export default {
 The detailed task list is maintained in `TODO.md` for all project tasks (TASK-001 through TASK-060) and future work items.
 
 ### Recent Major Achievements:
+
 - **Vector Store Implementation**: Complete MongoDB Atlas vector search with OpenAI embeddings
 - **Vector Collection Setup**: Automated Atlas search index configuration and MongoDB optimization
 - **Hybrid Retrieval System**: Implemented graph-first retrieval with vector search fallback
@@ -225,13 +238,14 @@ The detailed task list is maintained in `TODO.md` for all project tasks (TASK-00
 
 Each task should follow:
 
-1. planning
-2. Update TODO.md to mark task as [inprogress]
-3. Complete implementation
-4. Write/update tests
-5. Update documentation
-6. Update TODO.md to mark task as complete `[done]`)
-7. Commit with message: `TASK-XXX: Brief description`
+1. ultrathink planning switch to Opus model
+2. switch to sonnet 4
+3. Update TODO.md to mark task as [inprogress]
+4. Complete implementation
+5. Write/update tests
+6. Update documentation
+7. Update TODO.md to mark task as complete `[done]`)
+8. Commit with message: `TASK-XXX: Brief description` - reference the files and their location in the project
 
 ## Notes for Claude Code
 
@@ -248,21 +262,24 @@ Each task should follow:
 **MANDATORY: Follow TDD practices for all new code**
 
 ### TDD Workflow:
+
 1. **Red**: Write failing test first
 2. **Green**: Write minimal code to pass the test
 3. **Refactor**: Improve code while keeping tests green
 4. **Repeat**: For each new feature or change
 
 ### Design for Testability:
+
 - **Dependency Injection**: Pass dependencies as constructor parameters, not hardcoded imports
 - **Interface Segregation**: Keep classes focused on single responsibilities
 - **Mock-Friendly Design**: Avoid complex object creation in constructors
 - **Error Handling**: Design methods to handle both real and mock objects gracefully
 
 ### Example: Good Testable Design
+
 ```python
 class HybridRetriever:
-    def __init__(self, 
+    def __init__(self,
                  graph_store=None,
                  mongo_client=None,           # Injectable dependency
                  embedding_generator=None):   # Injectable dependency
@@ -272,15 +289,16 @@ class HybridRetriever:
 ```
 
 ### Test Structure:
+
 ```python
 class TestClassName(unittest.TestCase):
     def setUp(self):
         # Create mocks for all external dependencies
         self.mock_dependency = Mock()
-        
+
         # Inject mocks into class under test
         self.instance = ClassName(dependency=self.mock_dependency)
-    
+
     def test_specific_behavior(self):
         # Arrange: Set up test data and mock behavior
         # Act: Call the method under test
@@ -288,6 +306,7 @@ class TestClassName(unittest.TestCase):
 ```
 
 ### Red Flags (Avoid These):
+
 - ❌ Creating real database connections in tests
 - ❌ Making HTTP calls in unit tests
 - ❌ Hardcoding dependencies in constructors
@@ -296,6 +315,7 @@ class TestClassName(unittest.TestCase):
 - ❌ Large, complex test setup methods
 
 ### Green Flags (Do These):
+
 - ✅ Mock all external dependencies
 - ✅ Test behavior, not implementation
 - ✅ Write tests first (Red-Green-Refactor)
@@ -304,6 +324,7 @@ class TestClassName(unittest.TestCase):
 - ✅ One assertion per test (when possible)
 
 ### Test Categories:
+
 1. **Unit Tests**: Test individual methods in isolation (with mocks)
 2. **Integration Tests**: Test component interactions (with real dependencies)
 3. **End-to-End Tests**: Test complete user workflows
@@ -403,7 +424,7 @@ python3 -m pytest tests/ -v
 # Test fixtures validation
 python3 -m pytest tests/test_fixtures_validation.py -v
 
-# Unit tests only  
+# Unit tests only
 python3 -m pytest tests/ -k "not integration" -v
 
 # Integration tests
