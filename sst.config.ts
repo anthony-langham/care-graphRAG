@@ -22,7 +22,7 @@ export default {
         routes: {
           "POST /query": {
             function: {
-              handler: "functions/query.handler",
+              handler: "functions/minimal_query.handler",
               runtime: "python3.11",
               timeout: "30 seconds",
               memorySize: "1024 MB",
@@ -37,15 +37,13 @@ export default {
                 OPENAI_TEMPERATURE: "0.1",
                 LOG_LEVEL: "INFO",
                 ENVIRONMENT: "production",
-                // X-Ray tracing
-                _X_AMZN_TRACE_ID: process.env._X_AMZN_TRACE_ID || "",
               },
               bind: [MONGODB_URI, OPENAI_API_KEY],
             },
           },
           "GET /health": {
             function: {
-              handler: "functions/health.handler",
+              handler: "functions/minimal_health.handler",
               runtime: "python3.11",
               timeout: "15 seconds",
               memorySize: "512 MB",
@@ -56,8 +54,6 @@ export default {
                 MONGODB_VECTOR_COLLECTION: process.env.MONGODB_VECTOR_COLLECTION || "chunks",
                 LOG_LEVEL: "INFO",
                 ENVIRONMENT: "production",
-                // X-Ray tracing
-                _X_AMZN_TRACE_ID: process.env._X_AMZN_TRACE_ID || "",
               },
               bind: [MONGODB_URI, OPENAI_API_KEY],
             },
@@ -104,34 +100,34 @@ export default {
         XRayTraces: `https://eu-west-2.console.aws.amazon.com/xray/home?region=eu-west-2#/traces`,
       });
 
-      // Scheduled sync with optimized Lambda settings
-      new Cron(stack, "sync", {
-        schedule: "rate(7 days)", // Weekly sync as per CLAUDE.md
-        job: {
-          function: {
-            handler: "functions/sync.scheduled_handler",
-            runtime: "python3.11",
-            timeout: "5 minutes", // 5 minutes for sync as per CLAUDE.md
-            memorySize: "2048 MB", // Higher memory for sync operations
-            tracing: "active", // Enable X-Ray tracing for sync function
-            environment: {
-              MONGODB_DB_NAME: process.env.MONGODB_DB_NAME || "ckshtn",
-              MONGODB_GRAPH_COLLECTION: process.env.MONGODB_GRAPH_COLLECTION || "kg",
-              MONGODB_VECTOR_COLLECTION: process.env.MONGODB_VECTOR_COLLECTION || "chunks",
-              MONGODB_AUDIT_COLLECTION: process.env.MONGODB_AUDIT_COLLECTION || "audit_log",
-              SYNC_TIMEOUT_SECONDS: "280", // 20s buffer for Lambda processing
-              BATCH_SIZE: "50", // Process chunks in batches
-              OPENAI_MODEL: "gpt-4o-mini",
-              OPENAI_TEMPERATURE: "0.0", // Zero temperature for consistent extraction
-              LOG_LEVEL: "INFO",
-              ENVIRONMENT: "production",
-              // X-Ray tracing
-              _X_AMZN_TRACE_ID: process.env._X_AMZN_TRACE_ID || "",
-            },
-            bind: [MONGODB_URI, OPENAI_API_KEY],
-          },
-        },
-      });
+      // Note: Sync cron function temporarily disabled for initial deployment
+      // Will be re-enabled after successful API deployment
+      // new Cron(stack, "sync", {
+      //   schedule: "rate(7 days)", // Weekly sync as per CLAUDE.md
+      //   job: {
+      //     function: {
+      //       handler: "functions/sync.scheduled_handler",
+      //       runtime: "python3.11",
+      //       timeout: "5 minutes", // 5 minutes for sync as per CLAUDE.md
+      //       memorySize: "2048 MB", // Higher memory for sync operations
+      //       tracing: "active", // Enable X-Ray tracing for sync function
+      //       install: ["requirements-lambda.txt"],
+      //       environment: {
+      //         MONGODB_DB_NAME: process.env.MONGODB_DB_NAME || "ckshtn",
+      //         MONGODB_GRAPH_COLLECTION: process.env.MONGODB_GRAPH_COLLECTION || "kg",
+      //         MONGODB_VECTOR_COLLECTION: process.env.MONGODB_VECTOR_COLLECTION || "chunks",
+      //         MONGODB_AUDIT_COLLECTION: process.env.MONGODB_AUDIT_COLLECTION || "audit_log",
+      //         SYNC_TIMEOUT_SECONDS: "280", // 20s buffer for Lambda processing
+      //         BATCH_SIZE: "50", // Process chunks in batches
+      //         OPENAI_MODEL: "gpt-4o-mini",
+      //         OPENAI_TEMPERATURE: "0.0", // Zero temperature for consistent extraction
+      //         LOG_LEVEL: "INFO",
+      //         ENVIRONMENT: "production",
+      //       },
+      //       bind: [MONGODB_URI, OPENAI_API_KEY],
+      //     },
+      //   },
+      // });
     });
   },
 } satisfies SSTConfig;
