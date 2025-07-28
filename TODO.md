@@ -358,11 +358,17 @@ This file contains the detailed task list for the Care-GraphRAG project. It was 
   - **FEATURES**: Complete pass isolation to prevent bias propagation
   - **TESTING**: Full test suite and demonstration scripts created
 
-- [todo] **TASK-027m**: Create clinical scenario test framework
-  - Implement test cases for age-specific hypertension treatment
-  - Create validation tests for 56-year-old vs 45-year-old protocols
-  - Design test framework for multiple clinical domains
-  - Include edge cases and complex decision trees
+- [done] **TASK-027m**: Create clinical scenario test framework ✅
+  - ✅ Implemented test cases for age-specific hypertension treatment
+  - ✅ Created validation tests for 56-year-old vs 45-year-old protocols  
+  - ✅ Designed test framework for multiple clinical domains
+  - ✅ Included edge cases and complex decision trees
+  - **IMPLEMENTED**: Created ClinicalScenarioTestFramework with 10 comprehensive scenarios
+  - **IMPLEMENTED**: Created ClinicalScenarioValidator for extraction integration
+  - **FEATURES**: Age/ethnicity-specific validation, contraindication detection, safety scoring
+  - **FEATURES**: Multi-method comparison, clinical appropriateness checks, detailed reporting
+  - **TESTING**: Full test suite with 13 passing tests
+  - **DEMO**: Created demo script showing clinical validation in action
 
 - [todo] **TASK-027n**: Implement false positive test suite
   - Create tests with diabetes guidelines (no hypertension content)
