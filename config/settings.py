@@ -27,6 +27,12 @@ class Settings(BaseSettings):
     mongodb_vector_collection: str = Field(default="chunks", env="MONGODB_VECTOR_COLLECTION")
     mongodb_audit_collection: str = Field(default="audit_log", env="MONGODB_AUDIT_COLLECTION")
     
+    # Redis Configuration (for authentication and rate limiting)
+    redis_host: str = Field(default="localhost", env="REDIS_HOST")
+    redis_port: int = Field(default=6379, env="REDIS_PORT")
+    redis_password: Optional[str] = Field(default=None, env="REDIS_PASSWORD")
+    redis_db: int = Field(default=0, env="REDIS_DB")
+    
     # Application Configuration
     log_level: str = Field(default="INFO", env="LOG_LEVEL")
     environment: str = Field(default="development", env="ENVIRONMENT")
