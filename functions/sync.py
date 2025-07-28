@@ -22,7 +22,7 @@ sys.path.append('/opt/python')  # Lambda layer path
 sys.path.append(os.path.dirname(os.path.dirname(__file__)))  # Project root
 
 from config.logging import setup_logging
-from config.settings import get_settings
+from config.lambda_settings import get_lambda_settings
 
 # Setup logging for Lambda
 setup_logging()

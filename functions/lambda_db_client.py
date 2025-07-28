@@ -10,10 +10,16 @@ Based on CLAUDE.md Lambda/MongoDB considerations:
 """
 
 import os
+import sys
 import logging
 from typing import Optional
 from pymongo import MongoClient
 from pymongo.errors import ServerSelectionTimeoutError
+
+# Add project root to path for imports
+sys.path.append(os.path.dirname(os.path.dirname(__file__)))
+
+from src.utils.secrets import get_mongodb_uri
 
 logger = logging.getLogger(__name__)
 
@@ -34,9 +40,12 @@ def get_lambda_db_client() -> MongoClient:
     if _mongo_client is None:
         logger.info("Initializing MongoDB client for Lambda")
         
-        mongodb_uri = os.environ.get('MONGODB_URI')
-        if not mongodb_uri:
-            raise ValueError("MONGODB_URI environment variable not set")
+        # Get MongoDB URI from AWS Secrets Manager via SST Config.Secret
+        try:
+            mongodb_uri = get_mongodb_uri()
+        except Exception as e:
+            logger.error(f"Failed to retrieve MongoDB URI from secrets: {str(e)}")
+            raise ValueError(f"Cannot connect to MongoDB: {str(e)}")
         
         try:
             # Lambda-optimized connection settings

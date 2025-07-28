@@ -20,7 +20,7 @@ sys.path.append('/opt/python')  # Lambda layer path
 sys.path.append(os.path.dirname(os.path.dirname(__file__)))  # Project root
 
 from config.logging import setup_logging
-from config.settings import get_settings
+from config.lambda_settings import get_lambda_settings
 
 # Setup logging for Lambda
 setup_logging()
@@ -54,16 +54,28 @@ async def health_check():
     try:
         logger.info("Performing health check")
         
-        # Get settings
-        settings = get_settings()
+        # Get Lambda settings
+        settings = get_lambda_settings()
         
         # Perform health checks
         checks = {
             "environment": "ok",
             "configuration": "ok",
-            "mongodb_config": "ok" if settings.mongodb_uri else "missing",
-            "openai_config": "ok" if settings.openai_api_key else "missing"
+            "lambda_context": settings.get_lambda_context_info()
         }
+        
+        # Test secrets access
+        try:
+            mongodb_uri = settings.mongodb_uri
+            checks["mongodb_config"] = "ok" if mongodb_uri else "missing"
+        except Exception as e:
+            checks["mongodb_config"] = f"error: {str(e)}"
+            
+        try:
+            openai_key = settings.openai_api_key
+            checks["openai_config"] = "ok" if openai_key else "missing"
+        except Exception as e:
+            checks["openai_config"] = f"error: {str(e)}"
         
         # Test MongoDB connection (Lambda-optimized)
         try:

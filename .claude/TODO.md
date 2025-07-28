@@ -18,20 +18,20 @@ Created: 2025-07-28
   [X] Build Python dependencies layer
   [X] Configure layer deployment
 
-[ ] **TASK-041**: Configure API Gateway with CORS
-  [ ] Setup API Gateway routes
-  [ ] Configure CORS headers for care.engineering
-  [ ] Setup authentication (API keys/usage plans)
+[X] **TASK-041**: Configure API Gateway with CORS
+  [X] Setup API Gateway routes
+  [X] Configure CORS headers for care.engineering
+  [X] Setup authentication (API keys/usage plans)
 
-[ ] **TASK-042**: Setup environment config and secrets
-  [ ] Configure MongoDB connection string in AWS Secrets Manager
-  [ ] Configure OpenAI API key in AWS Secrets Manager
-  [ ] Setup environment variables for Lambda functions
+[X] **TASK-042**: Setup environment config and secrets
+  [X] Configure MongoDB connection string in AWS Secrets Manager
+  [X] Configure OpenAI API key in AWS Secrets Manager
+  [X] Setup environment variables for Lambda functions
 
-[ ] **TASK-043**: Implement Lambda handlers with FastAPI adapter
-  [ ] Install and configure Mangum for FastAPI-Lambda adapter
-  [ ] Adapt existing FastAPI endpoints for Lambda
-  [ ] Ensure proper request/response handling
+[X] **TASK-043**: Implement Lambda handlers with FastAPI adapter
+  [X] Install and configure Mangum for FastAPI-Lambda adapter
+  [X] Adapt existing FastAPI endpoints for Lambda
+  [X] Ensure proper request/response handling
 
 [ ] **TASK-044**: Configure Lambda settings (memory, timeout, concurrency)
   [ ] Set appropriate memory allocation (1024MB initial)
