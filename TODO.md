@@ -346,11 +346,17 @@ This file contains the detailed task list for the Care-GraphRAG project. It was 
   - **TESTING**: Full test suite with 10 unit tests covering all extraction passes
   - **DEMO**: Created demo script showing comparison between standard and unbiased extraction
 
-- [todo] **TASK-027l**: Implement multi-pass extraction process
-  - Pass 1: Entity discovery (unbiased prompts)
-  - Pass 2: Relationship discovery (independent validation)
-  - Pass 3: Cross-model validation and consensus building
-  - Pass 4: Source text verification and confidence scoring
+- [done] **TASK-027l**: Implement multi-pass extraction process ✅
+  - ✅ Pass 1: Entity discovery (unbiased prompts)
+  - ✅ Pass 2: Relationship discovery (independent validation)
+  - ✅ Pass 3: Cross-model validation and consensus building
+  - ✅ Pass 4: Source text verification and confidence scoring
+  - **IMPLEMENTED**: Created MultiPassExtractor with comprehensive 4-pass process
+  - **FEATURES**: Unbiased entity discovery, independent relationship extraction
+  - **FEATURES**: Multi-model consensus validation with configurable thresholds
+  - **FEATURES**: Precise source position tracking for paragraph-level citations
+  - **FEATURES**: Complete pass isolation to prevent bias propagation
+  - **TESTING**: Full test suite and demonstration scripts created
 
 - [todo] **TASK-027m**: Create clinical scenario test framework
   - Implement test cases for age-specific hypertension treatment
