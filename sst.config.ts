@@ -1,7 +1,5 @@
 import { SSTConfig } from "sst";
-import { Api, LayerVersion, Cron, Config } from "sst/constructs";
-import { Code, Runtime } from "aws-cdk-lib/aws-lambda";
-import { ApiKey, UsagePlan, Period, MethodOptions } from "aws-cdk-lib/aws-apigateway";
+import { Api, Cron, Config } from "sst/constructs";
 
 export default {
   config(_input) {
@@ -13,20 +11,11 @@ export default {
   stacks(app) {
     app.stack(function API({ stack }) {
       // Secrets for secure credential storage
-      const MONGODB_URI = new Config.Secret(stack, "MONGODB_URI", {
-        description: "MongoDB Atlas connection string for NICE CKS GraphRAG",
-      });
-      
-      const OPENAI_API_KEY = new Config.Secret(stack, "OPENAI_API_KEY", {
-        description: "OpenAI API key for GPT-4o-mini model access",
-      });
+      const MONGODB_URI = new Config.Secret(stack, "MONGODB_URI");
+      const OPENAI_API_KEY = new Config.Secret(stack, "OPENAI_API_KEY");
 
-      // Lambda Layer for dependencies
-      const layer = new LayerVersion(stack, "PythonDeps", {
-        code: Code.fromAsset("layers/python"),
-        compatibleRuntimes: [Runtime.PYTHON_3_11],
-        description: "Python dependencies for NICE CKS GraphRAG Lambda functions",
-      });
+      // Lambda Layer for dependencies - SST manages this automatically
+      // Layer files should be in layers/python/ directory
 
       // API Lambda with optimized settings
       const api = new Api(stack, "api", {
@@ -35,10 +24,9 @@ export default {
             function: {
               handler: "functions/query.handler",
               runtime: "python3.11",
-              layers: [layer],
-              timeout: 30, // 30s for queries as per CLAUDE.md
-              memorySize: 1024, // Start with 1024MB, adjust based on CloudWatch metrics
-              reservedConcurrentExecutions: 20, // Limit concurrent queries for cost control
+              timeout: "30 seconds",
+              memorySize: "1024 MB",
+              tracing: "active", // Enable X-Ray tracing
               environment: {
                 MONGODB_DB_NAME: process.env.MONGODB_DB_NAME || "ckshtn",
                 MONGODB_GRAPH_COLLECTION: process.env.MONGODB_GRAPH_COLLECTION || "kg",
@@ -47,9 +35,10 @@ export default {
                 MAX_CONTEXT_TOKENS: "2000",
                 OPENAI_MODEL: "gpt-4o-mini",
                 OPENAI_TEMPERATURE: "0.1",
-                // Lambda-specific optimizations
-                PYTHONPATH: "/opt/python:/var/task",
-                AWS_LAMBDA_EXEC_WRAPPER: "/opt/otel-instrument", // For X-Ray tracing
+                LOG_LEVEL: "INFO",
+                ENVIRONMENT: "production",
+                // X-Ray tracing
+                _X_AMZN_TRACE_ID: process.env._X_AMZN_TRACE_ID || "",
               },
               bind: [MONGODB_URI, OPENAI_API_KEY],
             },
@@ -58,16 +47,17 @@ export default {
             function: {
               handler: "functions/health.handler",
               runtime: "python3.11",
-              layers: [layer],
-              timeout: 15, // Shorter timeout for health checks
-              memorySize: 512, // Less memory needed for health checks
-              reservedConcurrentExecutions: 5, // Lower concurrency for health checks
+              timeout: "15 seconds",
+              memorySize: "512 MB",
+              tracing: "active", // Enable X-Ray tracing
               environment: {
                 MONGODB_DB_NAME: process.env.MONGODB_DB_NAME || "ckshtn",
                 MONGODB_GRAPH_COLLECTION: process.env.MONGODB_GRAPH_COLLECTION || "kg",
                 MONGODB_VECTOR_COLLECTION: process.env.MONGODB_VECTOR_COLLECTION || "chunks",
-                // Lambda-specific optimizations
-                PYTHONPATH: "/opt/python:/var/task",
+                LOG_LEVEL: "INFO",
+                ENVIRONMENT: "production",
+                // X-Ray tracing
+                _X_AMZN_TRACE_ID: process.env._X_AMZN_TRACE_ID || "",
               },
               bind: [MONGODB_URI, OPENAI_API_KEY],
             },
@@ -76,13 +66,7 @@ export default {
         defaults: {
           function: {
             runtime: "python3.11",
-            layers: [layer],
-            environment: {
-              // Default environment variables for all functions
-              PYTHONPATH: "/opt/python:/var/task",
-              LOG_LEVEL: "INFO",
-              ENVIRONMENT: "production",
-            },
+            tracing: "active", // Enable X-Ray tracing for all functions
           },
         },
         cors: {
@@ -97,52 +81,27 @@ export default {
         },
       });
 
-      // API Key authentication for production security
-      const apiKey = new ApiKey(stack, "ApiKey", {
-        apiKeyName: "care-engineering-api-key",
-        description: "API key for care.engineering to access NICE CKS GraphRAG",
-      });
+      // Note: API Key authentication can be configured manually in AWS Console
+      // SST v2 has limited support for complex API Gateway configurations
 
-      // Usage plan with rate limiting for cost control
-      const usagePlan = new UsagePlan(stack, "UsagePlan", {
-        name: "care-engineering-usage-plan",
-        description: "Usage plan for care.engineering NICE CKS GraphRAG access",
-        throttle: {
-          rateLimit: 10, // 10 requests per second
-          burstLimit: 20, // 20 request burst capacity
-        },
-        quota: {
-          limit: 10000, // 10,000 requests per day
-          period: Period.DAY,
-        },
-      });
+      // CloudWatch monitoring setup
+      // Note: CloudWatch log groups are automatically created by AWS Lambda
+      // Manual configuration needed for:
+      // 1. Log retention policies (set to 30 days for query, 7 days for health, 90 days for sync)
+      // 2. CloudWatch alarms (error rates, duration thresholds)
+      // 3. CloudWatch dashboard (Lambda metrics visualization)
+      //
+      // Recommended manual setup in AWS Console:
+      // - Query function error alarm: >5 errors in 5 minutes
+      // - Query duration alarm: average >25 seconds
+      // - Sync function error alarm: any errors
+      // - Dashboard with Lambda metrics: invocations, errors, duration
 
-      // Associate the API key with the usage plan
-      usagePlan.addApiKey(apiKey);
-
-      // Add API stages to the usage plan and configure API key auth
-      if (api.cdk && api.cdk.restApi) {
-        usagePlan.addApiStage({
-          api: api.cdk.restApi,
-          stage: api.cdk.restApi.deploymentStage,
-        });
-
-        // Configure API key requirement for /query endpoint
-        const queryResource = api.cdk.restApi.root.getResource("query");
-        if (queryResource) {
-          const postMethod = queryResource.getMethod("POST");
-          if (postMethod) {
-            // Update the method to require API key
-            const cfnMethod = postMethod.node.defaultChild as any;
-            cfnMethod.apiKeyRequired = true;
-          }
-        }
-      }
-
-      // Output the API key ID for retrieval
+      // Output the API URL for integration
       stack.addOutputs({
         ApiUrl: api.url,
-        ApiKeyId: apiKey.keyId,
+        CloudWatchDashboard: `https://eu-west-2.console.aws.amazon.com/cloudwatch/home?region=eu-west-2#dashboards:`,
+        XRayTraces: `https://eu-west-2.console.aws.amazon.com/xray/home?region=eu-west-2#/traces`,
       });
 
       // Scheduled sync with optimized Lambda settings
@@ -152,10 +111,9 @@ export default {
           function: {
             handler: "functions/sync.scheduled_handler",
             runtime: "python3.11",
-            layers: [layer],
-            timeout: 300, // 5 minutes for sync as per CLAUDE.md
-            memorySize: 2048, // Higher memory for sync operations (scraping, processing)
-            reservedConcurrentExecutions: 1, // Only one sync at a time
+            timeout: "5 minutes", // 5 minutes for sync as per CLAUDE.md
+            memorySize: "2048 MB", // Higher memory for sync operations
+            tracing: "active", // Enable X-Ray tracing for sync function
             environment: {
               MONGODB_DB_NAME: process.env.MONGODB_DB_NAME || "ckshtn",
               MONGODB_GRAPH_COLLECTION: process.env.MONGODB_GRAPH_COLLECTION || "kg",
@@ -165,11 +123,10 @@ export default {
               BATCH_SIZE: "50", // Process chunks in batches
               OPENAI_MODEL: "gpt-4o-mini",
               OPENAI_TEMPERATURE: "0.0", // Zero temperature for consistent extraction
-              // Lambda-specific optimizations
-              PYTHONPATH: "/opt/python:/var/task",
               LOG_LEVEL: "INFO",
               ENVIRONMENT: "production",
-              AWS_LAMBDA_EXEC_WRAPPER: "/opt/otel-instrument", // For X-Ray tracing
+              // X-Ray tracing
+              _X_AMZN_TRACE_ID: process.env._X_AMZN_TRACE_ID || "",
             },
             bind: [MONGODB_URI, OPENAI_API_KEY],
           },
