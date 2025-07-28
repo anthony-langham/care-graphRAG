@@ -17,6 +17,7 @@ Building an explainable, low-cost GraphRAG system for UK NICE Clinical Knowledge
 - **QA Chain**: Complete question-answering system with clinical safety prompting
 - **Answer Formatting**: Confidence scoring and provenance tracking
 - **Answer Validation**: Hallucination detection and source verification
+- **Unit Testing**: Comprehensive test suite with 59 passing tests and TDD approach
 
 ### 🎯 Current Capabilities
 - **Enhanced Data Pipeline**: NICE Guidelines → Advanced Medical Knowledge Graph → Hybrid Retrieval → QA Chain
@@ -33,11 +34,12 @@ Building an explainable, low-cost GraphRAG system for UK NICE Clinical Knowledge
 - **SSL Security**: MongoDB Atlas connections secured and operational
 - **Graph Storage**: Persistent medical knowledge graphs in MongoDB
 - **Management Scripts**: Comprehensive suite for graph building, data management, and analysis
+- **Test Coverage**: Full LLM mocking and dependency injection for reliable testing
 
 ### 📋 Next Steps
 - **TASK-032**: Lambda function structure for API development
-- **TASK-029**: Comprehensive unit test implementation
 - **TASK-030**: Validation suite with golden queries and benchmarks
+- **TASK-031**: Integration testing for end-to-end flow validation
 - **TASK-061**: Granular source attribution for paragraph-level precision
 
 ## Project Structure
