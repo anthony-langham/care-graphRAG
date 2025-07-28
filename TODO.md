@@ -334,11 +334,17 @@ This file contains the detailed task list for the Care-GraphRAG project. It was 
   - **TESTING**: Full test suite with 30 passing tests covering all metric types
   - **DEMO**: Complete demonstration script with realistic hypertension treatment scenarios
 
-- [todo] **TASK-027k**: Rebuild extraction pipeline architecture
-  - Refactor graph_builder.py to remove biased prompts
-  - Implement UnbiasedExtractor class with validation framework
-  - Create multi-pass extraction process (entity → relationship → validation)
-  - Add source text verification layer
+- [done] **TASK-027k**: Rebuild extraction pipeline architecture ✅
+  - ✅ Refactored graph_builder.py to use UnbiasedExtractor optionally
+  - ✅ Implemented UnbiasedExtractor class with full validation framework
+  - ✅ Created multi-pass extraction process (entity → relationship → validation → verification)
+  - ✅ Added source text verification layer with position tracking
+  - **IMPLEMENTED**: Created UnbiasedExtractor with 4-pass extraction process
+  - **FEATURES**: Discovery-based entity extraction, independent validation, source verification
+  - **FEATURES**: Confidence scoring, fallback parsers, comprehensive error handling
+  - **INTEGRATION**: GraphBuilder now supports both standard and unbiased extraction modes
+  - **TESTING**: Full test suite with 10 unit tests covering all extraction passes
+  - **DEMO**: Created demo script showing comparison between standard and unbiased extraction
 
 - [todo] **TASK-027l**: Implement multi-pass extraction process
   - Pass 1: Entity discovery (unbiased prompts)

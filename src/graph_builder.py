@@ -16,6 +16,7 @@ from langchain_mongodb.graphrag.graph import MongoDBGraphStore
 from config.settings import get_settings
 from config.logging import LoggerMixin, log_performance
 from src.db.mongo_client import get_mongo_client
+from src.unbiased_extractor import UnbiasedExtractor
 
 
 class GraphBuilder(LoggerMixin):
@@ -78,9 +79,14 @@ EXTRACTION RULES:
 Remember: You are a neutral observer extracting what is written, not a medical expert interpreting meaning.
 """
     
-    def __init__(self):
-        """Initialize the graph builder with MongoDB Graph Store and OpenAI for entity extraction."""
+    def __init__(self, use_unbiased_extraction: bool = True):
+        """Initialize the graph builder with MongoDB Graph Store and OpenAI for entity extraction.
+        
+        Args:
+            use_unbiased_extraction: Whether to use the UnbiasedExtractor for multi-pass extraction
+        """
         self.settings = get_settings()
+        self.use_unbiased_extraction = use_unbiased_extraction
         
         # Initialize MongoDB client
         try:
@@ -97,6 +103,14 @@ Remember: You are a neutral observer extracting what is written, not a medical e
             temperature=0,  # Deterministic extraction
             openai_api_key=self.settings.openai_api_key
         )
+        
+        # Initialize UnbiasedExtractor if enabled
+        if self.use_unbiased_extraction:
+            self.unbiased_extractor = UnbiasedExtractor(
+                model_name="gpt-4o-mini",
+                temperature=0.0
+            )
+            self.logger.info("UnbiasedExtractor initialized for multi-pass extraction")
         
         # Initialize MongoDBGraphStore with the LLM
         try:
@@ -143,7 +157,8 @@ Remember: You are a neutral observer extracting what is written, not a medical e
         # Apply custom medical extraction prompt
         self._configure_medical_extraction_prompt()
         
-        self.logger.info("GraphBuilder initialized with MongoDB Graph Store and OpenAI for entity extraction")
+        extraction_method = "unbiased multi-pass" if self.use_unbiased_extraction else "standard"
+        self.logger.info(f"GraphBuilder initialized with MongoDB Graph Store and {extraction_method} extraction")
     
     def _configure_medical_extraction_prompt(self) -> None:
         """Configure custom medical entity extraction prompt."""
@@ -182,6 +197,10 @@ Remember: You are a neutral observer extracting what is written, not a medical e
         try:
             # Convert chunks to LangChain Documents
             documents = self._chunks_to_documents(chunks)
+            
+            # If using unbiased extraction, process documents first
+            if self.use_unbiased_extraction:
+                documents = self._process_with_unbiased_extraction(documents)
             
             # Add documents to MongoDB Graph Store (handles entity extraction and persistence)
             persistence_results = self._add_documents_to_store(documents, chunks)
@@ -230,6 +249,58 @@ Remember: You are a neutral observer extracting what is written, not a medical e
                 "error": str(e),
                 "documents_processed": 0
             }
+    
+    def _process_with_unbiased_extraction(self, documents: List[Document]) -> List[Document]:
+        """
+        Process documents using UnbiasedExtractor for multi-pass extraction.
+        
+        Args:
+            documents: List of LangChain Document objects
+            
+        Returns:
+            List of documents with enhanced extraction metadata
+        """
+        self.logger.info(f"Processing {len(documents)} documents with UnbiasedExtractor")
+        processed_documents = []
+        
+        for i, doc in enumerate(documents):
+            try:
+                self.logger.debug(f"Processing document {i+1}/{len(documents)}: {doc.metadata.get('chunk_id', 'unknown')}")
+                
+                # Extract using multi-pass approach
+                extraction_result = self.unbiased_extractor.extract(
+                    text=doc.page_content,
+                    chunk_metadata=doc.metadata
+                )
+                
+                # Add extraction results to document metadata
+                doc.metadata['unbiased_extraction'] = {
+                    'entities': extraction_result['entities'],
+                    'relationships': extraction_result['relationships'],
+                    'metadata': extraction_result['metadata'],
+                    'validation_report': extraction_result['validation_report']
+                }
+                
+                # Add extraction method marker
+                doc.metadata['extraction_method'] = 'unbiased_multi_pass'
+                
+                # Log extraction summary
+                self.logger.info(
+                    f"Document {doc.metadata.get('chunk_id', 'unknown')}: "
+                    f"{len(extraction_result['entities'])} entities, "
+                    f"{len(extraction_result['relationships'])} relationships extracted"
+                )
+                
+                processed_documents.append(doc)
+                
+            except Exception as e:
+                self.logger.error(f"Failed to process document {doc.metadata.get('chunk_id', 'unknown')} with UnbiasedExtractor: {e}")
+                # Add document without extraction on failure
+                doc.metadata['extraction_method'] = 'failed'
+                processed_documents.append(doc)
+        
+        self.logger.info(f"UnbiasedExtractor processed {len(processed_documents)} documents")
+        return processed_documents
     
     def _chunks_to_documents(self, chunks: List[Dict[str, Any]]) -> List[Document]:
         """
@@ -944,7 +1015,7 @@ Remember: You are a neutral observer extracting what is written, not a medical e
             }
 
 
-def build_graph_from_chunks(chunks: List[Dict[str, Any]]) -> Dict[str, Any]:
+def build_graph_from_chunks(chunks: List[Dict[str, Any]], use_unbiased_extraction: bool = True) -> Dict[str, Any]:
     """
     Convenience function to build graph from chunks.
     
@@ -954,5 +1025,5 @@ def build_graph_from_chunks(chunks: List[Dict[str, Any]]) -> Dict[str, Any]:
     Returns:
         Dictionary with build results
     """
-    builder = GraphBuilder()
+    builder = GraphBuilder(use_unbiased_extraction=use_unbiased_extraction)
     return builder.build_graph_from_chunks(chunks)
