@@ -25,6 +25,7 @@ from src.qa_chain import get_qa_chain
 from src.monitoring.cost_tracker import CostTracker
 from src.auth.middleware import APIKeyAuthMiddleware
 from config.logging import setup_logging
+from config.lambda_settings import get_lambda_settings
 
 # Setup logging for Lambda
 setup_logging()
@@ -164,8 +165,9 @@ async def query_endpoint(request: QueryRequest):
     """
     start_time = time.time()
     
-    # Timeout configuration (25s for Lambda, leaving 5s buffer for response processing)
-    timeout_seconds = int(os.environ.get('QUERY_TIMEOUT_SECONDS', '25'))
+    # Get Lambda-optimized settings
+    settings = get_lambda_settings()
+    timeout_seconds = settings.query_timeout_seconds
     
     try:
         logger.info(f"Processing query: {request.question[:100]}...")

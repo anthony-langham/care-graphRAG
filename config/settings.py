@@ -1,12 +1,16 @@
 """
 Configuration management for Care-GraphRAG using Pydantic.
 Handles environment variable validation and default values.
+Supports both development (env vars) and Lambda (AWS Secrets Manager) environments.
 """
 
 import os
+import logging
 from typing import Optional
 from pydantic import Field, field_validator
 from pydantic_settings import BaseSettings
+
+logger = logging.getLogger(__name__)
 
 
 class Settings(BaseSettings):
