@@ -162,8 +162,8 @@ export default {
 - Clinical question answering operational ✓
 
 **Phase 7a: Unbiased Knowledge Graph Extraction** - IN PROGRESS
-- ✅ **TASK-027a**: Removal of extraction bias from clinical prompts
-- 🚧 **TASK-027b to 027o**: Multi-model consensus extraction framework (planned)
+- ✅ **TASK-027a to 027l**: Extraction bias removal and multi-model framework COMPLETE
+- 🚧 **TASK-027m to 027o**: Clinical validation framework (in progress)
 
 ### 🚧 CURRENT STATUS:
 - **Core System**: FULLY OPERATIONAL with comprehensive script suite
@@ -176,6 +176,8 @@ export default {
 - **API Integration**: OpenAI GPT-4o-mini working for entity extraction and QA
 - **MongoDB Atlas**: Connected and storing graph data successfully
 - **Development Tools**: Complete set of utility scripts for management and analysis
+- **Unbiased Extraction**: Multi-model consensus extraction framework operational
+- **Clinical Validation**: Working on test framework for clinical scenario validation
 
 ### 🛠️ AVAILABLE SCRIPTS:
 - **Graph Building**: `build_graph.py`, `enhanced_graph_builder.py`, `quick_enhanced_graph.py`
@@ -187,6 +189,7 @@ export default {
 - **QA Testing**: `test_qa_chain.py` - Test question-answering system with sample queries
 
 ### 📋 NEXT PRIORITIES:
+- Complete Phase 7a: TASK-027m, 027n, 027o (clinical validation framework)
 - TASK-032: Create Lambda function structure (API development)
 - TASK-029: Implement unit tests (comprehensive test coverage)
 - TASK-030: Create validation suite (golden queries and benchmarks)
