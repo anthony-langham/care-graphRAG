@@ -2,7 +2,10 @@
   "permissions": {
     "allow": [
       "Bash(source:*)",
-      "Bash(python:*)"
+      "Bash(python:*)",
+      "Bash(ls:*)",
+      "Bash(grep:*)",
+      "Bash(chmod:*)"
     ],
     "deny": []
   }

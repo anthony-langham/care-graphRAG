@@ -15,6 +15,7 @@ export default {
       const layer = new LayerVersion(stack, "PythonDeps", {
         code: Code.fromAsset("layers/python"),
         compatibleRuntimes: [Runtime.PYTHON_3_11],
+        description: "Python dependencies for NICE CKS GraphRAG Lambda functions",
       });
 
       // API Lambda with optimized settings
@@ -53,7 +54,7 @@ export default {
         schedule: "rate(7 days)",
         job: {
           function: {
-            handler: "functions/sync.handler",
+            handler: "functions/sync.scheduled_handler",
             runtime: "python3.11",
             layers: [layer],
             timeout: 300, // 5 minutes for sync as per CLAUDE.md
