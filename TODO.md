@@ -416,12 +416,15 @@ This file contains the detailed task list for the Care-GraphRAG project. It was 
   - **FEATURES**: Injectable mock objects for MongoDB, OpenAI, LangChain components
   - **FEATURES**: Realistic NICE guideline-based clinical questions with confidence scoring
   - **TESTING**: Full validation suite with 14 passing tests, comprehensive usage examples
-- [todo] **
-  TASK-029**: Implement unit tests
-  - Test scraper components
-  - Test graph operations
-  - Test retrieval logic
-  - Mock LLM calls
+- [done] **TASK-029**: Implement unit tests ✅
+  - ✅ Test scraper components (30 tests in test_scraper_unit.py)
+  - ✅ Test graph operations (16 tests in test_graph_builder_unit.py)
+  - ✅ Test retrieval logic (13 tests in test_retriever_unit_fixed.py)
+  - ✅ Mock LLM calls (comprehensive mocking of OpenAI ChatGPT, MongoDB, and external dependencies)
+  - **IMPLEMENTED**: Complete unit test suite with 59 passing tests
+  - **FEATURES**: TDD approach with dependency injection, comprehensive error handling tests
+  - **COVERAGE**: Tests scraper HTML parsing, graph building, entity extraction, retrieval logic
+  - **MOCKING**: All LLM calls, MongoDB connections, and external APIs properly mocked
 - [blocked] **TASK-030**: Create validation suite
   - 10 golden queries
   - Expected answers
