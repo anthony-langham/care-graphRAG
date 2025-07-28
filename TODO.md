@@ -422,7 +422,7 @@ This file contains the detailed task list for the Care-GraphRAG project. It was 
   - Test graph operations
   - Test retrieval logic
   - Mock LLM calls
-- [todo] **TASK-030**: Create validation suite
+- [blocked] **TASK-030**: Create validation suite
   - 10 golden queries
   - Expected answers
   - Accuracy metrics
@@ -435,7 +435,7 @@ This file contains the detailed task list for the Care-GraphRAG project. It was 
 
 ### Phase 9: API Development
 
-- [todo] **TASK-032**: Create Lambda function structure
+- [done] **TASK-032**: Create Lambda function structure ✅
 
   ```python
   # functions/query.py
