@@ -17,7 +17,7 @@ export default {
         compatibleRuntimes: [Runtime.PYTHON_3_11],
       });
 
-      // API Lambda
+      // API Lambda with optimized settings
       const api = new Api(stack, "api", {
         routes: {
           "POST /query": "functions/query.handler",
@@ -27,13 +27,24 @@ export default {
           function: {
             runtime: "python3.11",
             layers: [layer],
-            timeout: 30,
-            memorySize: 1024,
+            timeout: 30, // 30s for queries as per CLAUDE.md
+            memorySize: 1024, // Start with 1024MB, adjust based on CloudWatch metrics
             environment: {
-              MONGODB_URI: process.env.MONGODB_URI,
-              OPENAI_API_KEY: process.env.OPENAI_API_KEY,
+              MONGODB_URI: process.env.MONGODB_URI!,
+              OPENAI_API_KEY: process.env.OPENAI_API_KEY!,
+              MONGODB_DB_NAME: process.env.MONGODB_DB_NAME || "ckshtn",
+              MONGODB_GRAPH_COLLECTION: process.env.MONGODB_GRAPH_COLLECTION || "kg",
+              MONGODB_VECTOR_COLLECTION: process.env.MONGODB_VECTOR_COLLECTION || "chunks",
+              // Lambda-specific optimizations
+              PYTHONPATH: "/opt/python:/var/task",
             },
           },
+        },
+        cors: {
+          allowCredentials: true,
+          allowHeaders: ["content-type", "authorization"],
+          allowMethods: ["GET", "POST", "OPTIONS"],
+          allowOrigins: ["*"], // Configure appropriately for production
         },
       });
 
@@ -43,8 +54,18 @@ export default {
         job: {
           function: {
             handler: "functions/sync.handler",
+            runtime: "python3.11",
             layers: [layer],
-            timeout: 300, // 5 minutes for sync
+            timeout: 300, // 5 minutes for sync as per CLAUDE.md
+            memorySize: 1024,
+            environment: {
+              MONGODB_URI: process.env.MONGODB_URI!,
+              OPENAI_API_KEY: process.env.OPENAI_API_KEY!,
+              MONGODB_DB_NAME: process.env.MONGODB_DB_NAME || "ckshtn",
+              MONGODB_GRAPH_COLLECTION: process.env.MONGODB_GRAPH_COLLECTION || "kg",
+              MONGODB_VECTOR_COLLECTION: process.env.MONGODB_VECTOR_COLLECTION || "chunks",
+              PYTHONPATH: "/opt/python:/var/task",
+            },
           },
         },
       });
