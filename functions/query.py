@@ -23,6 +23,7 @@ sys.path.append(os.path.dirname(os.path.dirname(__file__)))  # Project root
 
 from src.qa_chain import get_qa_chain
 from src.monitoring.cost_tracker import CostTracker
+from src.auth.middleware import APIKeyAuthMiddleware
 from config.logging import setup_logging
 
 # Setup logging for Lambda
@@ -44,6 +45,9 @@ app.add_middleware(
     allow_methods=["*"],
     allow_headers=["*"],
 )
+
+# Add API key authentication middleware
+app.add_middleware(APIKeyAuthMiddleware)
 
 # Global QA chain instance for connection reuse
 _qa_chain = None
