@@ -1,0 +1,105 @@
+# SST ignore file - exclude directories from Lambda bundling
+
+# Python
+__pycache__/
+*.py[cod]
+*$py.class
+*.so
+.Python
+build/
+develop-eggs/
+dist/
+downloads/
+eggs/
+.eggs/
+lib/
+lib64/
+parts/
+sdist/
+var/
+wheels/
+*.egg-info/
+.installed.cfg
+*.egg
+MANIFEST
+
+# Virtual environments
+venv/
+env/
+ENV/
+.venv/
+
+# IDE
+.vscode/
+.idea/
+*.swp
+*.swo
+*~
+
+# Tests
+.pytest_cache/
+htmlcov/
+.tox/
+.coverage
+.coverage.*
+.cache
+nosetests.xml
+coverage.xml
+*.cover
+.hypothesis/
+
+# Local development
+.env
+.env.local
+.env.production
+*.log
+
+# Git
+.git/
+.gitignore
+
+# Documentation
+docs/
+*.md
+
+# Data files
+data/
+*.json
+*.csv
+*.xlsx
+*.html
+
+# Scripts and demos
+scripts/
+demos/
+validation_scripts/
+
+# Test files
+tests/
+test_*.py
+
+# Node modules (for SST itself)
+node_modules/
+package*.json
+
+# SST build artifacts
+.sst/
+.build/
+
+# Temporary files
+*.tmp
+tmp/
+temp/
+
+# Source code (we only need functions/)
+src/
+config/
+
+# Other project files
+tsconfig.json
+sst.config.ts
+requirements-*.txt
+layers/
+
+# Mac
+.DS_Store
