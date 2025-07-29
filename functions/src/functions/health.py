@@ -12,16 +12,9 @@ from fastapi import FastAPI
 from fastapi.responses import JSONResponse
 from mangum import Mangum
 
-# Import SST Resource for v3 secrets access
-try:
-    from sst import Resource
-    # Get secrets from SST v3
-    MONGODB_URI = Resource.MongoDbUri.value
-    OPENAI_API_KEY = Resource.OpenAiApiKey.value
-except ImportError:
-    # Fallback for local development
-    MONGODB_URI = os.getenv("MONGODB_URI")
-    OPENAI_API_KEY = os.getenv("OPENAI_API_KEY")
+# Environment variable access (secrets will be configured properly after deployment)
+MONGODB_URI = os.getenv("MONGODB_URI", "not-configured")
+OPENAI_API_KEY = os.getenv("OPENAI_API_KEY", "not-configured")
 
 # Configure logging
 logging.basicConfig(level=logging.INFO)
@@ -36,8 +29,8 @@ async def health_check():
     try:
         # Check environment variables
         env_check = {
-            "mongodb_uri_configured": bool(MONGODB_URI),
-            "openai_key_configured": bool(OPENAI_API_KEY),
+            "mongodb_uri_configured": MONGODB_URI != "not-configured",
+            "openai_key_configured": OPENAI_API_KEY != "not-configured",
             "environment": os.getenv("ENVIRONMENT", "unknown"),
             "sst_version": "v3"
         }

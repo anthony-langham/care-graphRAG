@@ -14,16 +14,9 @@ from fastapi.middleware.cors import CORSMiddleware
 from mangum import Mangum
 from pydantic import BaseModel
 
-# Import SST Resource for v3 secrets access
-try:
-    from sst import Resource
-    # Get secrets from SST v3
-    MONGODB_URI = Resource.MongoDbUri.value
-    OPENAI_API_KEY = Resource.OpenAiApiKey.value
-except ImportError:
-    # Fallback for local development
-    MONGODB_URI = os.getenv("MONGODB_URI")
-    OPENAI_API_KEY = os.getenv("OPENAI_API_KEY")
+# Environment variable access (secrets will be configured properly after deployment)
+MONGODB_URI = os.getenv("MONGODB_URI", "not-configured")
+OPENAI_API_KEY = os.getenv("OPENAI_API_KEY", "not-configured")
 
 # Configure logging
 logging.basicConfig(level=logging.INFO)
@@ -74,8 +67,8 @@ async def query_endpoint(request: QueryRequest):
         metadata={
             "deployment_stage": "staging",
             "handler_type": "minimal",
-            "mongodb_configured": bool(MONGODB_URI),
-            "openai_configured": bool(OPENAI_API_KEY),
+            "mongodb_configured": MONGODB_URI != "not-configured",
+            "openai_configured": OPENAI_API_KEY != "not-configured",
             "sst_version": "v3"
         }
     )
