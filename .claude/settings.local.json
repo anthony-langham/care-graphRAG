@@ -5,7 +5,12 @@
       "Bash(python:*)",
       "Bash(ls:*)",
       "Bash(grep:*)",
-      "Bash(chmod:*)"
+      "Bash(chmod:*)",
+      "Bash(npx sst deploy:*)",
+      "Bash(mkdir:*)",
+      "Bash(cp:*)",
+      "Bash(export:*)",
+      "Bash(uv:*)"
     ],
     "deny": []
   }
