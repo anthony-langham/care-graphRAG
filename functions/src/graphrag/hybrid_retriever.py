@@ -13,6 +13,7 @@ from langchain_core.retrievers import BaseRetriever
 from langchain_openai import ChatOpenAI
 from langchain_mongodb.graphrag.graph import MongoDBGraphStore
 from pymongo.collection import Collection
+from pydantic import Field
 
 from .mongo_client import get_mongo_client
 
@@ -25,11 +26,33 @@ class HybridRetriever(BaseRetriever):
     Combines graph-first retrieval with vector search fallback.
     """
     
+    # Pydantic field definitions
+    max_depth: int = Field(default=3, description="Maximum graph traversal depth")
+    similarity_threshold: float = Field(default=0.7, description="Minimum similarity score for results")
+    max_results: int = Field(default=10, description="Maximum number of results to return") 
+    vector_weight: float = Field(default=0.3, description="Weight for vector results in hybrid scoring (0-1)")
+    graph_weight: float = Field(default=0.7, description="Weight for graph results (computed)")
+    
+    # MongoDB configuration fields
+    db_name: str = Field(default="ckshtn", description="MongoDB database name")
+    graph_collection_name: str = Field(default="kg", description="Graph collection name")
+    vector_collection_name: str = Field(default="chunks", description="Vector collection name")
+    
+    # Internal components (not serialized)
+    mongo_client: Any = Field(default=None, exclude=True)
+    graph_store: Any = Field(default=None, exclude=True)
+    
+    class Config:
+        """Pydantic configuration."""
+        arbitrary_types_allowed = True
+        validate_assignment = True
+    
     def __init__(self, 
                  max_depth: int = 3,
                  similarity_threshold: float = 0.7,
                  max_results: int = 10,
-                 vector_weight: float = 0.3):
+                 vector_weight: float = 0.3,
+                 **kwargs):
         """
         Initialize the hybrid retriever.
         
@@ -39,22 +62,24 @@ class HybridRetriever(BaseRetriever):
             max_results: Maximum number of results to return
             vector_weight: Weight for vector results in hybrid scoring (0-1)
         """
-        super().__init__()
+        # Set MongoDB configuration from environment
+        db_name = os.environ.get('MONGODB_DB_NAME', 'ckshtn')
+        graph_collection_name = os.environ.get('MONGODB_GRAPH_COLLECTION', 'kg')
+        vector_collection_name = os.environ.get('MONGODB_VECTOR_COLLECTION', 'chunks')
         
-        self.max_depth = max_depth
-        self.similarity_threshold = similarity_threshold
-        self.max_results = max_results
-        self.vector_weight = vector_weight
-        self.graph_weight = 1.0 - vector_weight
-        
-        # MongoDB configuration
-        self.db_name = os.environ.get('MONGODB_DB_NAME', 'ckshtn')
-        self.graph_collection_name = os.environ.get('MONGODB_GRAPH_COLLECTION', 'kg')
-        self.vector_collection_name = os.environ.get('MONGODB_VECTOR_COLLECTION', 'chunks')
+        super().__init__(
+            max_depth=max_depth,
+            similarity_threshold=similarity_threshold,
+            max_results=max_results,
+            vector_weight=vector_weight,
+            graph_weight=1.0 - vector_weight,
+            db_name=db_name,
+            graph_collection_name=graph_collection_name,
+            vector_collection_name=vector_collection_name,
+            **kwargs
+        )
         
         # Initialize components
-        self._mongo_client = None
-        self.graph_store = None
         self._initialize_components()
         
         logger.info(
@@ -66,7 +91,7 @@ class HybridRetriever(BaseRetriever):
         """Initialize MongoDB client and graph store."""
         try:
             # Initialize MongoDB client
-            self._mongo_client = get_mongo_client()
+            self.mongo_client = get_mongo_client()
             
             # Initialize OpenAI LLM for entity extraction
             openai_api_key = os.environ.get('OPENAI_API_KEY')
@@ -81,11 +106,10 @@ class HybridRetriever(BaseRetriever):
             
             # Initialize graph store
             self.graph_store = MongoDBGraphStore(
-                connection_string=self._mongo_client.mongodb_uri,
+                connection_string=self.mongo_client.mongodb_uri,
                 database_name=self.db_name,
                 collection_name=self.graph_collection_name,
-                entity_extraction_model=llm,
-                max_depth=self.max_depth
+                entity_extraction_model=llm
             )
             
             logger.info("MongoDB Graph Store initialized for retrieval")
@@ -217,11 +241,12 @@ class HybridRetriever(BaseRetriever):
                 found_entity = self._find_entity_variations(entity_name)
                 
                 if found_entity:
-                    # Get related entities
+                    # Get related entities using similarity search (fallback approach)
                     try:
-                        related = self.graph_store.related_entities(
-                            found_entity.get("name", entity_name),
-                            max_depth=self.max_depth
+                        # Use similarity search as LangChain MongoDB GraphStore approach
+                        related = self.graph_store.similarity_search(
+                            entity_name, 
+                            k=self.max_results
                         )
                     except:
                         related = []
@@ -251,9 +276,16 @@ class HybridRetriever(BaseRetriever):
         
         for variation in entity_variations:
             try:
-                found_entity = self.graph_store.find_entity_by_name(variation)
-                if found_entity:
-                    return found_entity
+                # Use similarity search to find entity variations
+                results = self.graph_store.similarity_search(variation, k=1)
+                if results:
+                    # Convert Document to entity-like dict
+                    doc = results[0]
+                    return {
+                        "name": variation,
+                        "type": doc.metadata.get("entity_type", "Entity"),
+                        "properties": doc.metadata
+                    }
             except:
                 continue
         
@@ -372,7 +404,7 @@ class HybridRetriever(BaseRetriever):
         """
         try:
             # Get vector collection
-            vector_collection = self._mongo_client.get_vector_collection()
+            vector_collection = self.mongo_client.get_vector_collection()
             
             # Simple text search as fallback (no vector embeddings in Lambda)
             query_terms = query.lower().split()

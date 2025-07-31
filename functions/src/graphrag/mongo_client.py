@@ -79,7 +79,7 @@ class MongoDBClient:
                 # Compression
                 compressors="snappy,zlib",
                 readPreference="secondaryPreferred",
-                # SSL settings
+                # SSL settings for macOS (matches main codebase)
                 tlsCAFile=certifi.where()
             )
             
