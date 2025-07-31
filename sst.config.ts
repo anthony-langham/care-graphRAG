@@ -102,6 +102,19 @@ export default $config({
       },
     });
 
+    // Environment test endpoint (temporary for debugging)
+    api.route("GET /env-test", {
+      handler: "functions/src/functions/env_test.handler",
+      link: [mongodbUri, openaiApiKey],
+      runtime: "python3.11",
+      timeout: "30 seconds",
+      memory: "1024 MB",
+      environment: {
+        MONGODB_DB_NAME: process.env.MONGODB_DB_NAME || "ckshtn",
+        ENVIRONMENT: $app.stage,
+      },
+    });
+
     // Output the API URL and monitoring links
     return {
       ApiUrl: api.url,

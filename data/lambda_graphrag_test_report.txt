@@ -1,0 +1,60 @@
+============================================================
+LAMBDA GRAPHRAG INTEGRATION TEST REPORT
+============================================================
+Test Date: 2025-07-31 21:26:41
+Environment: development
+
+OVERALL STATUS: ✗ SOME TESTS FAILED
+
+ENVIRONMENT_VARIABLES: ✓ PASSED
+
+MONGODB_CONNECTION: ✗ FAILED
+
+GRAPHRAG_COMPONENTS: ✗ FAILED
+
+END_TO_END_QUERIES: ✗ FAILED
+
+RESPONSE_TIME_PERFORMANCE: ✗ FAILED
+
+DETAILED RESULTS:
+----------------------------------------
+
+ENVIRONMENT_VARIABLES:
+{
+  "required_missing": [],
+  "optional_missing": [
+    "MONGODB_AUDIT_COLLECTION"
+  ],
+  "all_present": [
+    "MONGODB_URI",
+    "OPENAI_API_KEY",
+    "MONGODB_DB_NAME",
+    "MONGODB_GRAPH_COLLECTION",
+    "MONGODB_VECTOR_COLLECTION"
+  ]
+}
+
+MONGODB_CONNECTION:
+{
+  "status": "unhealthy",
+  "error": "SSL handshake failed: ac-q94w31e-shard-00-00.zpheutx.mongodb.net:27017: [SSL: TLSV1_ALERT_INTERNAL_ERROR] tlsv1 alert internal error (_ssl.c:1020) (configured timeouts: socketTimeoutMS: 5000.0ms, connectTimeoutMS: 5000.0ms),SSL handshake failed: ac-q94w31e-shard-00-02.zpheutx.mongodb.net:27017: [SSL: TLSV1_ALERT_INTERNAL_ERROR] tlsv1 alert internal error (_ssl.c:1020) (configured timeouts: socketTimeoutMS: 5000.0ms, connectTimeoutMS: 5000.0ms),SSL handshake failed: ac-q94w31e-shard-00-01.zpheutx.mongodb.net:27017: [SSL: TLSV1_ALERT_INTERNAL_ERROR] tlsv1 alert internal error (_ssl.c:1020) (configured timeouts: socketTimeoutMS: 5000.0ms, connectTimeoutMS: 5000.0ms), Timeout: 5.0s, Topology Description: <TopologyDescription id: 688bd17bcd314be016ef46e4, topology_type: ReplicaSetNoPrimary, servers: [<ServerDescription ('ac-q94w31e-shard-00-00.zpheutx.mongodb.net', 27017) server_type: Unknown, rtt: None, error=AutoReconnect('SSL handshake failed: ac-q94w31e-shard-00-00.zpheutx.mongodb.net:27017: [SSL: TLSV1_ALERT_INTERNAL_ERROR] tlsv1 alert internal error (_ssl.c:1020) (configured timeouts: socketTimeoutMS: 5000.0ms, connectTimeoutMS: 5000.0ms)')>, <ServerDescription ('ac-q94w31e-shard-00-01.zpheutx.mongodb.net', 27017) server_type: Unknown, rtt: None, error=AutoReconnect('SSL handshake failed: ac-q94w31e-shard-00-01.zpheutx.mongodb.net:27017: [SSL: TLSV1_ALERT_INTERNAL_ERROR] tlsv1 alert internal error (_ssl.c:1020) (configured timeouts: socketTimeoutMS: 5000.0ms, connectTimeoutMS: 5000.0ms)')>, <ServerDescription ('ac-q94w31e-shard-00-02.zpheutx.mongodb.net', 27017) server_type: Unknown, rtt: None, error=AutoReconnect('SSL handshake failed: ac-q94w31e-shard-00-02.zpheutx.mongodb.net:27017: [SSL: TLSV1_ALERT_INTERNAL_ERROR] tlsv1 alert internal error (_ssl.c:1020) (configured timeouts: socketTimeoutMS: 5000.0ms, connectTimeoutMS: 5000.0ms)')>]>",
+  "error_type": "ServerSelectionTimeoutError"
+}
+
+GRAPHRAG_COMPONENTS:
+{
+  "mongo_client": "\u2713 PASSED",
+  "config": "\u2713 PASSED",
+  "hybrid_retriever": "\u2717 FAILED: \"HybridRetriever\" object has no field \"max_depth\"",
+  "qa_chain": "\u2717 FAILED: \"HybridRetriever\" object has no field \"max_depth\""
+}
+
+END_TO_END_QUERIES:
+{
+  "setup_error": "\"HybridRetriever\" object has no field \"max_depth\""
+}
+
+RESPONSE_TIME_PERFORMANCE:
+{
+  "setup_error": "\"HybridRetriever\" object has no field \"max_depth\""
+}
