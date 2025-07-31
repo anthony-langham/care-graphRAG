@@ -45,15 +45,30 @@ export default $config({
       timeout: "30 seconds",
       memory: $app.stage === "production" ? "2048 MB" : "1024 MB",
       environment: {
+        // MongoDB Configuration
         MONGODB_DB_NAME: process.env.MONGODB_DB_NAME || "ckshtn",
         MONGODB_GRAPH_COLLECTION: process.env.MONGODB_GRAPH_COLLECTION || "kg",
         MONGODB_VECTOR_COLLECTION: process.env.MONGODB_VECTOR_COLLECTION || "chunks",
+        MONGODB_AUDIT_COLLECTION: process.env.MONGODB_AUDIT_COLLECTION || "audit_log",
+        MONGODB_TIMEOUT_MS: "5000",
+        
+        // OpenAI Configuration
+        OPENAI_MODEL: "gpt-4o-mini",
+        OPENAI_TEMPERATURE: "0.0",
+        
+        // Query & Performance Configuration
         QUERY_TIMEOUT_SECONDS: "25",
         MAX_CONTEXT_TOKENS: "2000",
-        OPENAI_MODEL: "gpt-4o-mini",
-        OPENAI_TEMPERATURE: "0.1",
+        MAX_RESULTS: "10",
+        SIMILARITY_THRESHOLD: "0.7",
+        MAX_DEPTH: "3",
+        VECTOR_WEIGHT: "0.3",
+        
+        // Application Configuration
         LOG_LEVEL: $app.stage === "production" ? "WARNING" : "INFO",
         ENVIRONMENT: $app.stage,
+        
+        // Authentication & Rate Limiting
         RATE_LIMIT_ENABLED: $app.stage === "production" ? "true" : "false",
         RATE_LIMIT_REQUESTS: "10",
         RATE_LIMIT_WINDOW: "60",
@@ -69,9 +84,18 @@ export default $config({
       timeout: "15 seconds",
       memory: "512 MB",
       environment: {
+        // MongoDB Configuration
         MONGODB_DB_NAME: process.env.MONGODB_DB_NAME || "ckshtn",
         MONGODB_GRAPH_COLLECTION: process.env.MONGODB_GRAPH_COLLECTION || "kg",
         MONGODB_VECTOR_COLLECTION: process.env.MONGODB_VECTOR_COLLECTION || "chunks",
+        MONGODB_AUDIT_COLLECTION: process.env.MONGODB_AUDIT_COLLECTION || "audit_log",
+        MONGODB_TIMEOUT_MS: "5000",
+        
+        // OpenAI Configuration
+        OPENAI_MODEL: "gpt-4o-mini",
+        OPENAI_TEMPERATURE: "0.0",
+        
+        // Application Configuration
         LOG_LEVEL: $app.stage === "production" ? "WARNING" : "INFO",
         ENVIRONMENT: $app.stage,
         CHECK_DEPENDENCIES: $app.stage === "production" ? "true" : "false",
