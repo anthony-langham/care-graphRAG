@@ -12,9 +12,20 @@ from fastapi import FastAPI
 from fastapi.responses import JSONResponse
 from mangum import Mangum
 
-# Environment variable access (secrets will be configured properly after deployment)
-MONGODB_URI = os.getenv("MONGODB_URI", "not-configured")
-OPENAI_API_KEY = os.getenv("OPENAI_API_KEY", "not-configured")
+# SST v3 Secret access - try multiple possible naming patterns
+MONGODB_URI = (
+    os.getenv("MongoDbUri") or  # Direct secret name
+    os.getenv("SST_SECRET_MongoDbUri") or  # Alternative SST pattern
+    os.getenv("SST_Secret_value_MongoDbUri") or  # Original pattern
+    os.getenv("MONGODB_URI", "not-configured")  # Local development fallback
+)
+
+OPENAI_API_KEY = (
+    os.getenv("OpenAiApiKey") or  # Direct secret name
+    os.getenv("SST_SECRET_OpenAiApiKey") or  # Alternative SST pattern  
+    os.getenv("SST_Secret_value_OpenAiApiKey") or  # Original pattern
+    os.getenv("OPENAI_API_KEY", "not-configured")  # Local development fallback
+)
 
 # Configure logging
 logging.basicConfig(level=logging.INFO)

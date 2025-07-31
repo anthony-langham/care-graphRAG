@@ -14,9 +14,20 @@ from fastapi.middleware.cors import CORSMiddleware
 from mangum import Mangum
 from pydantic import BaseModel
 
-# Environment variable access (secrets will be configured properly after deployment)
-MONGODB_URI = os.getenv("MONGODB_URI", "not-configured")
-OPENAI_API_KEY = os.getenv("OPENAI_API_KEY", "not-configured")
+# SST v3 Secret access - try multiple possible naming patterns
+MONGODB_URI = (
+    os.getenv("MongoDbUri") or  # Direct secret name
+    os.getenv("SST_SECRET_MongoDbUri") or  # Alternative SST pattern
+    os.getenv("SST_Secret_value_MongoDbUri") or  # Original pattern
+    os.getenv("MONGODB_URI", "not-configured")  # Local development fallback
+)
+
+OPENAI_API_KEY = (
+    os.getenv("OpenAiApiKey") or  # Direct secret name
+    os.getenv("SST_SECRET_OpenAiApiKey") or  # Alternative SST pattern  
+    os.getenv("SST_Secret_value_OpenAiApiKey") or  # Original pattern
+    os.getenv("OPENAI_API_KEY", "not-configured")  # Local development fallback
+)
 
 # Configure logging
 logging.basicConfig(level=logging.INFO)
@@ -60,6 +71,26 @@ async def query_endpoint(request: QueryRequest):
     """
     logger.info(f"Received query: {request.question[:100]}...")
     
+    # Test MongoDB connection if configured
+    mongodb_status = "not-configured"
+    mongodb_error = None
+    
+    if MONGODB_URI and MONGODB_URI != "not-configured":
+        try:
+            import pymongo
+            from pymongo import MongoClient
+            
+            client = MongoClient(MONGODB_URI, serverSelectionTimeoutMS=5000)
+            # Test connection with ping
+            result = client.admin.command('ping')
+            client.close()
+            mongodb_status = "connected"
+            logger.info("MongoDB connection successful")
+        except Exception as e:
+            mongodb_status = "connection-failed"
+            mongodb_error = str(e)
+            logger.error(f"MongoDB connection failed: {e}")
+    
     # Placeholder response for deployment testing
     return QueryResponse(
         answer="This is a minimal deployment test response. Full GraphRAG integration will be added after successful staging deployment.",
@@ -68,6 +99,8 @@ async def query_endpoint(request: QueryRequest):
             "deployment_stage": "staging",
             "handler_type": "minimal",
             "mongodb_configured": MONGODB_URI != "not-configured",
+            "mongodb_status": mongodb_status,
+            "mongodb_error": mongodb_error,
             "openai_configured": OPENAI_API_KEY != "not-configured",
             "sst_version": "v3"
         }
