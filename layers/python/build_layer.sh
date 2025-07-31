@@ -11,7 +11,7 @@ rm -rf python/
 mkdir -p python/
 
 # Install dependencies to python/ directory
-pip install -r requirements.txt -t python/ --no-cache-dir
+pip3 install -r requirements.txt -t python/ --no-cache-dir
 
 # Remove unnecessary files to reduce layer size
 echo "Cleaning up layer files..."

@@ -10,7 +10,8 @@
       "Bash(mkdir:*)",
       "Bash(cp:*)",
       "Bash(export:*)",
-      "Bash(uv:*)"
+      "Bash(uv:*)",
+      "Bash(./build_layer.sh:*)"
     ],
     "deny": []
   }
