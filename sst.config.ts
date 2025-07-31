@@ -32,13 +32,18 @@ export default $config({
       },
     });
 
+    // API Key secret for production authentication
+    const apiKey = $app.stage === "production" ? new sst.Secret("ApiKey") : null;
+
     // Query endpoint
     api.route("POST /query", {
-      handler: "functions/src/functions/query.handler",
-      link: [mongodbUri, openaiApiKey],
+      handler: $app.stage === "production" 
+        ? "functions/src/functions/query_prod.handler"
+        : "functions/src/functions/query.handler",
+      link: [mongodbUri, openaiApiKey, ...(apiKey ? [apiKey] : [])],
       runtime: "python3.11",
       timeout: "30 seconds",
-      memory: "1024 MB",
+      memory: $app.stage === "production" ? "2048 MB" : "1024 MB",
       environment: {
         MONGODB_DB_NAME: process.env.MONGODB_DB_NAME || "ckshtn",
         MONGODB_GRAPH_COLLECTION: process.env.MONGODB_GRAPH_COLLECTION || "kg",
@@ -47,8 +52,12 @@ export default $config({
         MAX_CONTEXT_TOKENS: "2000",
         OPENAI_MODEL: "gpt-4o-mini",
         OPENAI_TEMPERATURE: "0.1",
-        LOG_LEVEL: "INFO",
+        LOG_LEVEL: $app.stage === "production" ? "WARNING" : "INFO",
         ENVIRONMENT: $app.stage,
+        RATE_LIMIT_ENABLED: $app.stage === "production" ? "true" : "false",
+        RATE_LIMIT_REQUESTS: "10",
+        RATE_LIMIT_WINDOW: "60",
+        API_KEY: $app.stage === "production" ? "222bfcbcf7d6875344681c6f2fcac133b6907fb2aa5ba7b71a54d603b11b10fc" : "",
       },
     });
 
@@ -63,8 +72,9 @@ export default $config({
         MONGODB_DB_NAME: process.env.MONGODB_DB_NAME || "ckshtn",
         MONGODB_GRAPH_COLLECTION: process.env.MONGODB_GRAPH_COLLECTION || "kg",
         MONGODB_VECTOR_COLLECTION: process.env.MONGODB_VECTOR_COLLECTION || "chunks",
-        LOG_LEVEL: "INFO",
+        LOG_LEVEL: $app.stage === "production" ? "WARNING" : "INFO",
         ENVIRONMENT: $app.stage,
+        CHECK_DEPENDENCIES: $app.stage === "production" ? "true" : "false",
       },
     });
 
