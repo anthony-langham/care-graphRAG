@@ -31,8 +31,8 @@ except ImportError:
         return decorator
 
 # Import GraphRAG components
-from ..graphrag.qa_chain import QAChain
-from ..graphrag.config import GraphRAGConfig
+from graphrag.qa_chain import QAChain
+from graphrag.config import GraphRAGConfig
 
 # Environment configuration
 ENVIRONMENT = os.getenv("ENVIRONMENT", "dev")
@@ -203,7 +203,7 @@ def get_cache_key(question: str) -> str:
     """Generate cache key for a question."""
     return f"q:{question.lower().strip()}"
 
-@subsegment('cache_lookup')
+# @subsegment('cache_lookup')
 def get_cached_response(question: str) -> Optional[Dict[str, Any]]:
     """Get cached response if available and not expired."""
     cache_key = get_cache_key(question)

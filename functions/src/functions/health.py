@@ -106,9 +106,9 @@ logger.info(f"OpenAI API key configured: {OPENAI_API_KEY != 'not-configured'}")
 app = FastAPI(title="NICE GraphRAG Health", version="1.0.0")
 
 @app.get("/health")
-@subsegment('health_check')
 async def health_check():
     """Health check endpoint with X-Ray tracing"""
+    global MONGODB_URI, OPENAI_API_KEY
     try:
         # Check environment variables
         # Debug SST Resource file access
