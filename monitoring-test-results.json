@@ -1,0 +1,62 @@
+{
+  "test_timestamp": "2025-08-01T12:02:42.885777",
+  "region": "eu-west-2",
+  "stage": "production",
+  "app_name": "nice-cks-graphrag",
+  "tests": {
+    "dashboard": {
+      "status": "error",
+      "message": "'CloudWatch' object has no attribute 'describe_dashboards'"
+    },
+    "alarms": {
+      "status": "error",
+      "alarms": {
+        "nice-cks-graphrag-production-query-errors": {
+          "exists": false,
+          "error": "An error occurred (AccessDenied) when calling the DescribeAlarms operation: User: arn:aws:iam::146409062658:user/sst-deploy-user is not authorized to perform: cloudwatch:DescribeAlarms on resource: arn:aws:cloudwatch:eu-west-2:146409062658:alarm:nice-cks-graphrag-production-query-errors because no identity-based policy allows the cloudwatch:DescribeAlarms action"
+        },
+        "nice-cks-graphrag-production-query-duration": {
+          "exists": false,
+          "error": "An error occurred (AccessDenied) when calling the DescribeAlarms operation: User: arn:aws:iam::146409062658:user/sst-deploy-user is not authorized to perform: cloudwatch:DescribeAlarms on resource: arn:aws:cloudwatch:eu-west-2:146409062658:alarm:nice-cks-graphrag-production-query-duration because no identity-based policy allows the cloudwatch:DescribeAlarms action"
+        },
+        "nice-cks-graphrag-production-health-failures": {
+          "exists": false,
+          "error": "An error occurred (AccessDenied) when calling the DescribeAlarms operation: User: arn:aws:iam::146409062658:user/sst-deploy-user is not authorized to perform: cloudwatch:DescribeAlarms on resource: arn:aws:cloudwatch:eu-west-2:146409062658:alarm:nice-cks-graphrag-production-health-failures because no identity-based policy allows the cloudwatch:DescribeAlarms action"
+        },
+        "nice-cks-graphrag-production-api-5xx-errors": {
+          "exists": false,
+          "error": "An error occurred (AccessDenied) when calling the DescribeAlarms operation: User: arn:aws:iam::146409062658:user/sst-deploy-user is not authorized to perform: cloudwatch:DescribeAlarms on resource: arn:aws:cloudwatch:eu-west-2:146409062658:alarm:nice-cks-graphrag-production-api-5xx-errors because no identity-based policy allows the cloudwatch:DescribeAlarms action"
+        }
+      }
+    },
+    "xray": {
+      "status": "error",
+      "message": "An error occurred (AccessDeniedException) when calling the GetServiceGraph operation: User: arn:aws:iam::146409062658:user/sst-deploy-user is not authorized to perform: xray:GetServiceGraph because no identity-based policy allows the xray:GetServiceGraph action"
+    },
+    "lambda_functions": {
+      "status": "error",
+      "functions": {}
+    },
+    "api_health": {
+      "status": "success",
+      "response_time_ms": 94.96879577636719,
+      "health_data": {
+        "status": "healthy",
+        "service": "nice-graphrag",
+        "version": "1.0.0",
+        "deployment_stage": "staging",
+        "environment_check": {
+          "mongodb_uri_configured": false,
+          "openai_key_configured": false,
+          "environment": "production",
+          "sst_version": "v3"
+        }
+      }
+    },
+    "metrics": {
+      "status": "error",
+      "message": "An error occurred (AccessDenied) when calling the GetMetricStatistics operation: User: arn:aws:iam::146409062658:user/sst-deploy-user is not authorized to perform: cloudwatch:GetMetricStatistics because no identity-based policy allows the cloudwatch:GetMetricStatistics action"
+    }
+  },
+  "overall_status": "error"
+}

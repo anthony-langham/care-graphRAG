@@ -147,16 +147,44 @@ def handler(event, context):
         # Check multiple possible SST v3 secret naming patterns
         mongodb_uri = None
         
-        if os.getenv("MongoDbUri"):
-            mongodb_uri = os.getenv("MongoDbUri")
-            mongodb_results["uri_source"] = "sst_direct_name"
-        elif os.getenv("SST_SECRET_MongoDbUri"):
-            mongodb_uri = os.getenv("SST_SECRET_MongoDbUri")
-            mongodb_results["uri_source"] = "sst_secret_pattern"
-        elif os.getenv("SST_Secret_value_MongoDbUri"):
-            mongodb_uri = os.getenv("SST_Secret_value_MongoDbUri")
-            mongodb_results["uri_source"] = "sst_secret_value_pattern"
-        elif os.getenv("MONGODB_URI"):
+        # Try SST v3 Resource pattern first
+        try:
+            from sst import Resource
+            mongodb_results["sst_import"] = "success"
+            
+            # Check if MongoDbUri is available
+            if hasattr(Resource, 'MongoDbUri'):
+                try:
+                    mongodb_uri = Resource.MongoDbUri.value
+                    mongodb_results["uri_source"] = "sst_resource"
+                    mongodb_results["sst_resource_mongodb"] = "found"
+                    mongodb_results["sst_resource_value_type"] = type(mongodb_uri).__name__
+                except Exception as value_error:
+                    mongodb_results["sst_resource_value_error"] = str(value_error)
+                    mongodb_results["sst_resource_mongodb"] = "found_but_error_accessing_value"
+            else:
+                mongodb_results["sst_resource_mongodb"] = "not_found"
+                mongodb_results["sst_resource_attrs"] = [attr for attr in dir(Resource) if not attr.startswith('_')][:10]
+                
+        except ImportError as e:
+            mongodb_results["sst_import"] = f"import_failed: {str(e)}"
+        except Exception as e:
+            mongodb_results["sst_resource_error"] = f"general_error: {str(e)}"
+            import traceback
+            mongodb_results["sst_resource_traceback"] = traceback.format_exc()[:500]
+        
+        # Fallback to environment variables
+        if not mongodb_uri:
+            if os.getenv("MongoDbUri"):
+                mongodb_uri = os.getenv("MongoDbUri")
+                mongodb_results["uri_source"] = "env_direct_name"
+            elif os.getenv("SST_SECRET_MongoDbUri"):
+                mongodb_uri = os.getenv("SST_SECRET_MongoDbUri")
+                mongodb_results["uri_source"] = "env_secret_pattern"
+            elif os.getenv("SST_Secret_value_MongoDbUri"):
+                mongodb_uri = os.getenv("SST_Secret_value_MongoDbUri")
+                mongodb_results["uri_source"] = "env_secret_value_pattern"
+            elif os.getenv("MONGODB_URI"):
             mongodb_uri = os.getenv("MONGODB_URI")
             mongodb_results["uri_source"] = "environment_fallback"
         else:

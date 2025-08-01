@@ -17,7 +17,10 @@ class GraphRAGConfig:
     """
     
     def __init__(self):
-        """Initialize configuration from environment variables."""
+        """Initialize configuration from environment variables and SST Resources."""
+        
+        # Try to load secrets from SST Resources first
+        self._load_secrets()
         
         # OpenAI Configuration
         self.openai_api_key = self._get_required_env("OPENAI_API_KEY")
@@ -46,6 +49,35 @@ class GraphRAGConfig:
         self.mongodb_timeout_ms = int(os.environ.get("MONGODB_TIMEOUT_MS", "5000"))
         
         logger.info(f"GraphRAG Config initialized for {self.environment} environment")
+    
+    def _load_secrets(self) -> None:
+        """Load secrets from SST environment variables if available."""
+        # SST v3 makes linked secrets available as environment variables
+        # Try different possible environment variable names
+        
+        # MongoDB URI
+        mongodb_uri = (
+            os.getenv("MongoDbUri") or  # Direct secret name
+            os.getenv("MONGODB_URI") or  # Standard environment variable
+            os.getenv("SST_Secret_MongoDbUri") or  # Alternative SST pattern
+            os.getenv("SST_RESOURCE_MongoDbUri")  # Another possible pattern
+        )
+        
+        if mongodb_uri:
+            os.environ["MONGODB_URI"] = mongodb_uri
+            logger.info("MongoDB URI loaded from SST environment variables")
+        
+        # OpenAI API Key
+        openai_api_key = (
+            os.getenv("OpenAiApiKey") or  # Direct secret name
+            os.getenv("OPENAI_API_KEY") or  # Standard environment variable
+            os.getenv("SST_Secret_OpenAiApiKey") or  # Alternative SST pattern
+            os.getenv("SST_RESOURCE_OpenAiApiKey")  # Another possible pattern
+        )
+        
+        if openai_api_key:
+            os.environ["OPENAI_API_KEY"] = openai_api_key
+            logger.info("OpenAI API key loaded from SST environment variables")
     
     def _get_required_env(self, key: str) -> str:
         """Get required environment variable or raise error."""

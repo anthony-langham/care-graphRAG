@@ -173,7 +173,7 @@ async def health_check():
             "status": "healthy",
             "service": "nice-graphrag",
             "version": "1.0.0",
-            "deployment_stage": "staging",
+            "deployment_stage": os.getenv("ENVIRONMENT", "unknown"),
             "environment_check": env_check
         }
     except Exception as e:
