@@ -15,7 +15,8 @@
       "Bash(./build_layer.sh:*)",
       "WebFetch(domain:ion.sst.dev)",
       "WebFetch(domain:sst.dev)",
-      "Bash(curl:*)"
+      "Bash(curl:*)",
+      "Bash(aws logs describe-log-groups:*)"
     ],
     "deny": []
   }

@@ -73,6 +73,33 @@ Generated: 2025-01-31T19:15:00Z
 - [X] Test end-to-end flows in production
 - [X] Configure DNS for production domains
 
+### TASK-058a: Fix Lambda Import Issues ✅ COMPLETE
+- [X] Fix relative import errors in query_prod.py (from ..graphrag to graphrag)
+- [X] Fix X-Ray decorator issues causing Lambda initialization failures
+- [X] Fix MONGODB_URI variable scoping errors in health endpoint
+- [X] Update SST config to use GraphRAG handlers for staging environment
+
+### TASK-058b: Resolve SST v3 Secrets Integration
+- [ ] Fix SST key file encoding issues ('utf-8' codec can't decode byte 0xce)
+- [ ] Identify correct SST v3 secret environment variable naming pattern
+- [ ] Test secret loading in Lambda environment with debug logging
+- [ ] Validate MongoDB URI and OpenAI API key accessibility
+- [ ] Update secret loading functions based on working pattern
+
+### TASK-058c: Complete GraphRAG Lambda Integration
+- [ ] Resolve remaining import errors preventing GraphRAG component loading
+- [ ] Test MongoDB Atlas connection from Lambda environment
+- [ ] Verify OpenAI API integration works in Lambda context
+- [ ] Test hybrid retrieval system (graph-first + vector fallback) 
+- [ ] Validate real clinical responses replace placeholder responses
+
+### TASK-058d: Production Readiness Validation
+- [ ] Confirm response times under 5 seconds for clinical queries
+- [ ] Test error handling for MongoDB connection failures
+- [ ] Verify rate limiting functionality works correctly
+- [ ] Test API key authentication for production endpoints
+- [ ] Validate CloudWatch logging and X-Ray tracing operational
+
 ### TASK-059: Post-Deployment Validation
 - [ ] Run production smoke tests
 - [ ] Verify clinical safety features
@@ -119,12 +146,31 @@ Generated: 2025-01-31T19:15:00Z
 - [ ] Create roadmap for advanced features
 - [ ] Plan clinical validation processes
 
-## This Week's Critical Path:
-1. **TASK-050**: Create Lambda-compatible GraphRAG modules
-2. **TASK-051**: Update Lambda dependencies 
-3. **TASK-052**: Integrate real GraphRAG into production handler
-4. **TASK-053**: Configure environment variables
-5. **TASK-054**: Test end-to-end integration
+## CURRENT STATUS: GraphRAG Integration Debugging (August 1, 2025)
+
+### ✅ Issues Resolved:
+- **Lambda Import Errors**: Fixed relative imports in query_prod.py (from ..graphrag to graphrag)
+- **X-Ray Tracing Issues**: Removed problematic @subsegment decorators causing initialization failures
+- **Variable Scoping**: Fixed MONGODB_URI scoping error in health endpoint with global declaration
+- **Handler Configuration**: Updated SST config to use GraphRAG handlers for staging
+
+### 🔄 Current Blocking Issues:
+1. **SST Key File Encoding**: SST key file has UTF-8 decode error preventing secret access
+2. **Secret Environment Variables**: MongoDB URI and OpenAI API key not accessible in Lambda
+3. **Import Path Issues**: Still encountering import errors when GraphRAG components load
+4. **Health Endpoint**: Returns healthy but shows `mongodb_configured: false, openai_configured: false`
+
+### 📋 Error Summary from Logs:
+- `'utf-8' codec can't decode byte 0xce in position 3: invalid continuation byte` (SST key file)
+- `Unable to import module 'functions/query_prod': attempted relative import beyond top-level package`
+- Lambda shows available env vars: `SST_KEY_FILE`, `SST_KEY`, `SST_RESOURCE_App` but can't read them
+- Health endpoint working, Query endpoint returning 500 Internal Server Error
+
+### 🎯 Next Critical Path (TASK-058b to 058d):
+1. **TASK-058b**: Fix SST v3 secrets access pattern (care.engineering fix needs verification)
+2. **TASK-058c**: Complete GraphRAG component integration in Lambda
+3. **TASK-058d**: Validate full system works with real clinical responses
+4. **TASK-059**: Production deployment validation
 
 ## Expected Outcome from GraphRAG Integration:
 - ✅ Real clinical answers from NICE CKS data instead of placeholders

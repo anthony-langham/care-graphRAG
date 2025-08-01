@@ -40,9 +40,7 @@ export default $config({
 
     // Query endpoint with enhanced monitoring
     const queryFunction = api.route("POST /query", {
-      handler: $app.stage === "production" 
-        ? "functions/src/functions/query_prod.handler"
-        : "functions/src/functions/query.handler",
+      handler: "functions/src/functions/query_prod.handler",
       link: [mongodbUri, openaiApiKey, ...(apiKey ? [apiKey] : [])],
       runtime: "python3.11",
       timeout: "30 seconds",
