@@ -45,10 +45,6 @@ export default $config({
         allowOrigins: corsOrigins,
         maxAge: "86400 seconds", // 24 hours for production
       },
-      throttle: isProduction ? {
-        rate: 100,  // requests per second
-        burst: 200, // burst capacity
-      } : undefined,
     });
 
     // Common Lambda settings
@@ -73,7 +69,6 @@ export default $config({
       ...commonLambdaSettings,
       timeout: "30 seconds",
       memory: isProduction ? "2048 MB" : "1024 MB", // More memory for production
-      reservedConcurrentExecutions: isProduction ? 10 : undefined, // Prevent runaway costs
       environment: {
         ...commonLambdaSettings.environment,
         QUERY_TIMEOUT_SECONDS: "25",
@@ -115,9 +110,6 @@ export default $config({
       });
     }
 
-    // CloudWatch Log Groups with retention
-    const logRetention = isProduction ? 30 : 7; // days
-    
     // Production monitoring: CloudWatch Dashboard
     if (isProduction) {
       // This would typically be defined using CDK constructs
@@ -128,7 +120,7 @@ export default $config({
     return {
       ApiUrl: api.url,
       Stage: $app.stage,
-      Region: $app.providers.aws.region,
+      Region: $app.providers?.aws?.region || "eu-west-2",
       CloudWatchDashboard: `https://eu-west-2.console.aws.amazon.com/cloudwatch/home?region=eu-west-2#dashboards:`,
       XRayTraces: `https://eu-west-2.console.aws.amazon.com/xray/home?region=eu-west-2#/traces`,
       LogsInsights: `https://eu-west-2.console.aws.amazon.com/cloudwatch/home?region=eu-west-2#logs-insights:`,

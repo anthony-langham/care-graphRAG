@@ -1,0 +1,42 @@
+{
+  "Version": "2012-10-17",
+  "Statement": [
+    {
+      "Sid": "InvokeLambdaFunctions",
+      "Effect": "Allow",
+      "Action": [
+        "lambda:InvokeFunction"
+      ],
+      "Resource": [
+        "arn:aws:lambda:eu-west-2:*:function:nice-cks-graphrag-*-query",
+        "arn:aws:lambda:eu-west-2:*:function:nice-cks-graphrag-*-health",
+        "arn:aws:lambda:eu-west-2:*:function:nice-cks-graphrag-*-sync"
+      ]
+    },
+    {
+      "Sid": "CloudWatchLogs",
+      "Effect": "Allow",
+      "Action": [
+        "logs:CreateLogGroup",
+        "logs:CreateLogStream",
+        "logs:PutLogEvents",
+        "logs:DescribeLogGroups",
+        "logs:DescribeLogStreams"
+      ],
+      "Resource": [
+        "arn:aws:logs:eu-west-2:*:log-group:/aws/apigateway/nice-cks-graphrag-*"
+      ]
+    },
+    {
+      "Sid": "WAFAccess",
+      "Effect": "Allow",
+      "Action": [
+        "wafv2:GetWebACL",
+        "wafv2:GetWebACLForResource"
+      ],
+      "Resource": [
+        "arn:aws:wafv2:eu-west-2:*:regional/webacl/nice-cks-graphrag-*"
+      ]
+    }
+  ]
+}
