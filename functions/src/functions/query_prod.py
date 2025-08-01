@@ -15,6 +15,21 @@ from fastapi.middleware.cors import CORSMiddleware
 from mangum import Mangum
 from pydantic import BaseModel
 
+# X-Ray tracing imports
+try:
+    from aws_xray_sdk.core import xray_recorder, patch_all
+    from aws_xray_sdk.core.models import subsegment
+    # Patch AWS SDK and other libraries for automatic tracing
+    patch_all()
+    XRAY_AVAILABLE = True
+except ImportError:
+    XRAY_AVAILABLE = False
+    # Create dummy decorator for non-production environments
+    def subsegment(name):
+        def decorator(func):
+            return func
+        return decorator
+
 # Import GraphRAG components
 from ..graphrag.qa_chain import QAChain
 from ..graphrag.config import GraphRAGConfig
@@ -33,24 +48,54 @@ logging.basicConfig(
 )
 logger = logging.getLogger(__name__)
 
+# Configure X-Ray for production
+if XRAY_AVAILABLE and ENVIRONMENT == "production":
+    logger.info("X-Ray tracing enabled for production")
+    # Configure X-Ray context for Lambda
+    xray_recorder.configure(
+        context_missing='LOG_ERROR',
+        plugins=('EC2Plugin', 'ECSPlugin'),
+        daemon_address='127.0.0.1:2000',
+        use_ssl=False
+    )
+else:
+    logger.info(f"X-Ray tracing disabled (available: {XRAY_AVAILABLE}, env: {ENVIRONMENT})")
+
+# Load secrets using SST v3 environment variable pattern
+# SST v3 makes linked secrets available as environment variables
+
+# Try different possible environment variable names for MongoDB URI
+mongodb_uri = (
+    os.getenv("MongoDbUri") or  # Direct secret name
+    os.getenv("MONGODB_URI") or  # Standard environment variable
+    os.getenv("SST_Secret_MongoDbUri") or  # Alternative SST pattern
+    os.getenv("SST_RESOURCE_MongoDbUri")  # Another possible pattern
+)
+
+# Try different possible environment variable names for OpenAI API Key  
+openai_api_key = (
+    os.getenv("OpenAiApiKey") or  # Direct secret name
+    os.getenv("OPENAI_API_KEY") or  # Standard environment variable
+    os.getenv("SST_Secret_OpenAiApiKey") or  # Alternative SST pattern
+    os.getenv("SST_RESOURCE_OpenAiApiKey")  # Another possible pattern
+)
+
 # Load API key for production
 API_KEY = None
 if ENVIRONMENT == "production":
-    # Try environment variable first (set by SST link)
-    API_KEY = os.getenv("SST_Secret_value_ApiKey")
-    if not API_KEY:
-        # Fallback to direct env var
-        API_KEY = os.getenv("API_KEY")
-    
+    API_KEY = (
+        os.getenv("ApiKey") or  # Direct secret name
+        os.getenv("API_KEY") or  # Standard environment variable
+        os.getenv("SST_Secret_ApiKey") or  # Alternative SST pattern
+        os.getenv("SST_RESOURCE_ApiKey")  # Another possible pattern
+    )
     if API_KEY:
         logger.info(f"API key loaded successfully (length: {len(API_KEY)})")
     else:
         logger.warning("No API key found for production environment")
 
-# Set up GraphRAG environment variables
-# SST links provide secrets with SST_Secret_value_ prefix
-mongodb_uri = os.getenv("SST_Secret_value_MongoDbUri") or os.getenv("MONGODB_URI")
-openai_api_key = os.getenv("SST_Secret_value_OpenAiApiKey") or os.getenv("OPENAI_API_KEY")
+logger.info(f"MongoDB URI configured: {bool(mongodb_uri)}")
+logger.info(f"OpenAI API key configured: {bool(openai_api_key)}")
 
 if mongodb_uri:
     os.environ["MONGODB_URI"] = mongodb_uri
@@ -158,6 +203,7 @@ def get_cache_key(question: str) -> str:
     """Generate cache key for a question."""
     return f"q:{question.lower().strip()}"
 
+@subsegment('cache_lookup')
 def get_cached_response(question: str) -> Optional[Dict[str, Any]]:
     """Get cached response if available and not expired."""
     cache_key = get_cache_key(question)
@@ -254,8 +300,9 @@ async def query_endpoint(
         start_time = time.time()
         logger.info("Processing query with GraphRAG...")
         
-        # Call GraphRAG QA chain
-        graphrag_response = qa_chain.query(request.question)
+        # Call GraphRAG QA chain with X-Ray tracing
+        with subsegment('graphrag_query'):
+            graphrag_response = qa_chain.query(request.question)
         
         # Extract and format response data
         answer = graphrag_response.get("answer", "")
