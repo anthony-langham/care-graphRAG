@@ -1,0 +1,39 @@
+# Production Environment Configuration Template for care.engineering
+# Copy this file to .env.production in your Next.js project
+# DO NOT commit the actual .env.production file to version control
+
+# GraphRAG API Configuration
+NEXT_PUBLIC_GRAPHRAG_API_URL=https://nk0lprzxu7.execute-api.eu-west-2.amazonaws.com
+NEXT_PUBLIC_GRAPHRAG_API_KEY=your-production-api-key-here
+
+# Feature Flags
+NEXT_PUBLIC_ENABLE_GRAPHRAG=true
+NEXT_PUBLIC_SHOW_CONFIDENCE_SCORES=true
+NEXT_PUBLIC_MAX_SOURCES=5
+NEXT_PUBLIC_ENABLE_QUERY_CACHING=true
+NEXT_PUBLIC_CACHE_TTL_MINUTES=30
+
+# Clinical Safety
+NEXT_PUBLIC_SHOW_CLINICAL_DISCLAIMER=true
+NEXT_PUBLIC_REQUIRE_DISCLAIMER_ACCEPTANCE=true
+
+# Performance
+NEXT_PUBLIC_QUERY_TIMEOUT_MS=30000
+NEXT_PUBLIC_ENABLE_PERFORMANCE_MONITORING=true
+
+# Error Tracking (if using Sentry)
+NEXT_PUBLIC_SENTRY_DSN=your-sentry-dsn-here
+SENTRY_AUTH_TOKEN=your-sentry-auth-token
+SENTRY_ORG=care-engineering
+SENTRY_PROJECT=care-frontend
+
+# Analytics (if using Google Analytics)
+NEXT_PUBLIC_GA_MEASUREMENT_ID=your-ga-id-here
+
+# API Rate Limiting
+NEXT_PUBLIC_RATE_LIMIT_REQUESTS=10
+NEXT_PUBLIC_RATE_LIMIT_WINDOW_SECONDS=60
+
+# Debug (set to false in production)
+NEXT_PUBLIC_DEBUG_MODE=false
+NEXT_PUBLIC_LOG_API_REQUESTS=false
