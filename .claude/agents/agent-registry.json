@@ -1,0 +1,55 @@
+{
+  "registry": {
+    "version": "1.0.0",
+    "created": "2025-08-01",
+    "total_agents": 16,
+    "categories": {
+      "medical_clinical": {
+        "description": "Medical content validation and clinical safety",
+        "agents": ["clinical-validator", "medical-entity-extractor", "guideline-analyzer"],
+        "priority": "high"
+      },
+      "graphrag_specific": {
+        "description": "Knowledge graph and retrieval optimization",
+        "agents": ["graph-optimizer", "retrieval-tuner", "knowledge-graph-builder", "vector-store-manager"],
+        "priority": "high"
+      },
+      "data_quality": {
+        "description": "Data quality, testing, and performance analysis",
+        "agents": ["medical-scraper", "data-validator", "test-generator", "performance-analyzer"],
+        "priority": "medium"
+      },
+      "infrastructure_devops": {
+        "description": "Infrastructure optimization and operations",
+        "agents": ["aws-lambda-optimizer", "mongodb-specialist", "security-auditor", "cost-optimizer"],
+        "priority": "medium"
+      },
+      "development": {
+        "description": "Software development and deployment",
+        "agents": ["api-designer", "documentation-writer", "code-reviewer", "deployment-manager"],
+        "priority": "low"
+      }
+    },
+    "proactive_agents": [
+      "clinical-validator",
+      "data-validator", 
+      "graph-optimizer",
+      "retrieval-tuner",
+      "performance-analyzer",
+      "security-auditor",
+      "cost-optimizer",
+      "code-reviewer",
+      "deployment-manager"
+    ],
+    "on_demand_agents": [
+      "medical-entity-extractor",
+      "guideline-analyzer",
+      "knowledge-graph-builder",
+      "vector-store-manager",
+      "medical-scraper",
+      "test-generator",
+      "api-designer",
+      "documentation-writer"
+    ]
+  }
+}

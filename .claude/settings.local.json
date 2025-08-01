@@ -1,4 +1,5 @@
 {
+  "$schema": "https://json.schemastore.org/claude-code-settings.json",
   "permissions": {
     "allow": [
       "Bash(source:*)",
@@ -11,7 +12,10 @@
       "Bash(cp:*)",
       "Bash(export:*)",
       "Bash(uv:*)",
-      "Bash(./build_layer.sh:*)"
+      "Bash(./build_layer.sh:*)",
+      "WebFetch(domain:ion.sst.dev)",
+      "WebFetch(domain:sst.dev)",
+      "Bash(curl:*)"
     ],
     "deny": []
   }
