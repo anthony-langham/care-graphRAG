@@ -1,0 +1,60 @@
+{
+  "Version": "2012-10-17",
+  "Statement": [
+    {
+      "Sid": "BasicLambdaExecution",
+      "Effect": "Allow",
+      "Action": [
+        "logs:CreateLogGroup",
+        "logs:CreateLogStream",
+        "logs:PutLogEvents"
+      ],
+      "Resource": [
+        "arn:aws:logs:eu-west-2:*:log-group:/aws/lambda/nice-cks-graphrag-*",
+        "arn:aws:logs:eu-west-2:*:log-group:/aws/audit/nice-cks-graphrag-*"
+      ]
+    },
+    {
+      "Sid": "XRayTracing",
+      "Effect": "Allow",
+      "Action": [
+        "xray:PutTraceSegments",
+        "xray:PutTelemetryRecords"
+      ],
+      "Resource": "*",
+      "Condition": {
+        "StringEquals": {
+          "aws:RequestedRegion": "eu-west-2"
+        }
+      }
+    },
+    {
+      "Sid": "SecretsManagerAccess",
+      "Effect": "Allow",
+      "Action": [
+        "secretsmanager:GetSecretValue"
+      ],
+      "Resource": [
+        "arn:aws:secretsmanager:eu-west-2:*:secret:sst/nice-cks-graphrag/*/Secret/MongoDbUri/*",
+        "arn:aws:secretsmanager:eu-west-2:*:secret:sst/nice-cks-graphrag/*/Secret/OpenAiApiKey/*",
+        "arn:aws:secretsmanager:eu-west-2:*:secret:sst/nice-cks-graphrag/*/Secret/ApiKey/*"
+      ]
+    },
+    {
+      "Sid": "CloudWatchMetrics",
+      "Effect": "Allow",
+      "Action": [
+        "cloudwatch:PutMetricData"
+      ],
+      "Resource": "*",
+      "Condition": {
+        "StringEquals": {
+          "cloudwatch:namespace": [
+            "nice-cks-graphrag",
+            "AWS/Lambda"
+          ]
+        }
+      }
+    }
+  ]
+}
