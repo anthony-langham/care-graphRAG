@@ -19,7 +19,7 @@ This package contains all documentation needed to integrate with the GraphRAG AP
 
 ## API Details
 
-- **Endpoint**: `https://nk0lprzxu7.execute-api.eu-west-2.amazonaws.com`
+- **Endpoint**: `https://api.graphrag.care`
 - **Rate Limit**: 10 requests per minute per user
 - **Timeout**: 30 seconds per request
 - **Authentication**: API key via `x-api-key` header
@@ -36,10 +36,10 @@ After deployment, run these tests:
 
 ```bash
 # Test health endpoint (no auth required)
-curl https://nk0lprzxu7.execute-api.eu-west-2.amazonaws.com/health
+curl https://api.graphrag.care/health
 
 # Test query endpoint (requires API key)
-curl -X POST https://nk0lprzxu7.execute-api.eu-west-2.amazonaws.com/query \
+curl -X POST https://api.graphrag.care/query \
   -H "Content-Type: application/json" \
   -H "x-api-key: YOUR_API_KEY" \
   -d '{"question": "What is the first-line treatment for hypertension?"}'

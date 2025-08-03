@@ -22,6 +22,7 @@ Building an explainable, low-cost GraphRAG system for UK NICE Clinical Knowledge
 - AWS Lambda + API Gateway via SST for serverless deployment
 - EventBridge for scheduled sync (weekly scraper)
 - CloudWatch for monitoring and logs
+- Custom domain: api.graphrag.care (production), staging-api.graphrag.care (staging)
 
 ## Plan
 
@@ -212,6 +213,7 @@ export default {
 - **GraphRAG Environment Configuration**: ✅ **COMPLETE** - All Lambda environment variables configured for GraphRAG integration (TASK-053)
 - **MongoDB SSL Resolution**: ✅ **COMPLETE** - Python 3.11 + OpenSSL 1.1.1 compatibility confirmed for MongoDB Atlas (TASK-054)
 - **Production Monitoring**: ✅ **COMPLETE** - CloudWatch dashboards, X-Ray tracing, alarms, and SNS notifications fully configured (TASK-055)
+- **Custom Domain Setup**: ✅ **COMPLETE** - graphrag.care domain configured with api.graphrag.care (production) and staging-api.graphrag.care (staging)
 
 ### 🛠️ AVAILABLE SCRIPTS:
 
@@ -229,6 +231,9 @@ export default {
 - **Production Monitoring**: `scripts/setup-production-monitoring.sh` - Configure CloudWatch dashboards and alarms
 - **Monitoring Validation**: `scripts/test-monitoring.py` - Comprehensive monitoring test suite
 - **Configuration Validation**: `scripts/validate-monitoring-setup.sh` - Validate monitoring configuration
+- **Domain Management**: `scripts/setup-custom-domain.sh` - Configure custom graphrag.care domain
+- **URL Discovery**: `scripts/show-current-urls.sh` - Find current API Gateway URLs
+- **URL Migration**: `scripts/update-urls-to-custom-domains.py` - Update codebase to use custom domains
 
 ### 📋 NEXT PRIORITIES (Plan v003):
 

@@ -11,7 +11,7 @@
 ```javascript
 // Production API configuration
 const GRAPHRAG_API_CONFIG = {
-  baseUrl: 'https://nk0lprzxu7.execute-api.eu-west-2.amazonaws.com',
+  baseUrl: 'https://api.graphrag.care',
   apiKey: process.env.NEXT_PUBLIC_GRAPHRAG_API_KEY, // Store in .env.production
   timeout: 30000, // 30 seconds
   headers: {
@@ -27,7 +27,7 @@ Create `.env.production` in your Next.js project:
 
 ```bash
 # GraphRAG API Configuration
-NEXT_PUBLIC_GRAPHRAG_API_URL=https://nk0lprzxu7.execute-api.eu-west-2.amazonaws.com
+NEXT_PUBLIC_GRAPHRAG_API_URL=https://api.graphrag.care
 NEXT_PUBLIC_GRAPHRAG_API_KEY=your-secure-api-key-here
 
 # Feature Flags
@@ -380,7 +380,7 @@ export const cdnHeaders = {
 ## Support Information
 
 ### Production API Status
-- **Endpoint**: https://nk0lprzxu7.execute-api.eu-west-2.amazonaws.com
+- **Endpoint**: https://api.graphrag.care
 - **Region**: eu-west-2 (London)
 - **Status Page**: [To be configured]
 

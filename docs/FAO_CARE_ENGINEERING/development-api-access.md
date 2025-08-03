@@ -1,14 +1,14 @@
 # Development API Access Configuration
 
 **Date:** 2025-07-29  
-**API Endpoint:** https://w46s2t96h8.execute-api.eu-west-2.amazonaws.com  
+**API Endpoint:** https://staging-api.graphrag.care  
 **Environment:** Development/Staging  
 **Status:** ✅ Ready for Frontend Integration  
 
 ## API Configuration Summary
 
 ### Endpoint Details
-- **Base URL**: `https://w46s2t96h8.execute-api.eu-west-2.amazonaws.com`
+- **Base URL**: `https://staging-api.graphrag.care`
 - **Region**: `eu-west-2` (London)
 - **Authentication**: No API keys required for staging (public endpoints)
 - **Rate Limiting**: AWS default limits apply
@@ -22,7 +22,7 @@ GET /health
 ```
 **Example:**
 ```bash
-curl https://w46s2t96h8.execute-api.eu-west-2.amazonaws.com/health
+curl https://staging-api.graphrag.care/health
 ```
 
 #### 2. Query Endpoint
@@ -31,7 +31,7 @@ POST /query
 ```
 **Example:**
 ```bash
-curl -X POST https://w46s2t96h8.execute-api.eu-west-2.amazonaws.com/query \
+curl -X POST https://staging-api.graphrag.care/query \
   -H "Content-Type: application/json" \
   -d '{"question": "What is hypertension?", "max_tokens": 1000}'
 ```
@@ -41,7 +41,7 @@ curl -X POST https://w46s2t96h8.execute-api.eu-west-2.amazonaws.com/query \
 ### Environment Configuration
 ```typescript
 // .env.local (care.engineering)
-NEXT_PUBLIC_GRAPHRAG_API_URL=https://w46s2t96h8.execute-api.eu-west-2.amazonaws.com
+NEXT_PUBLIC_GRAPHRAG_API_URL=https://staging-api.graphrag.care
 GRAPHRAG_ENVIRONMENT=development
 ```
 

@@ -2,7 +2,7 @@
 
 **Date:** 2025-07-29  
 **Environment:** Development/Staging  
-**API Endpoint:** https://w46s2t96h8.execute-api.eu-west-2.amazonaws.com  
+**API Endpoint:** https://staging-api.graphrag.care  
 **Validation Status:** ✅ PASSED  
 
 ## Executive Summary

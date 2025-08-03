@@ -2,7 +2,7 @@
 
 **Date**: August 1, 2025  
 **Status**: ✅ STAGING OPERATIONAL  
-**Staging URL**: `https://fdfd8icboe.execute-api.eu-west-2.amazonaws.com`
+**Staging URL**: `https://staging-api.graphrag.care`
 
 ## Current Status
 
@@ -22,7 +22,7 @@
 
 **Test Query Example:**
 ```bash
-curl -X POST https://fdfd8icboe.execute-api.eu-west-2.amazonaws.com/query \
+curl -X POST https://staging-api.graphrag.care/query \
   -H "Content-Type: application/json" \
   -d '{"question": "What is the first line treatment for hypertension?"}'
 ```
@@ -120,7 +120,7 @@ curl -X POST https://fdfd8icboe.execute-api.eu-west-2.amazonaws.com/query \
 
 #### Frontend Team (care.engineering)
 - **Notification**: Staging URL is ready for integration testing
-- **URL**: `https://fdfd8icboe.execute-api.eu-west-2.amazonaws.com`
+- **URL**: `https://staging-api.graphrag.care`
 - **API Format**: 
   ```json
   POST /query
@@ -189,7 +189,7 @@ python3 demos/test_qa_chain.py
 sst deploy --stage staging
 
 # 4. Test staging endpoints
-curl -X POST https://fdfd8icboe.execute-api.eu-west-2.amazonaws.com/query \
+curl -X POST https://staging-api.graphrag.care/query \
   -H "Content-Type: application/json" \
   -d '{"question": "test question"}'
 

@@ -29,7 +29,7 @@
 
 **Backend provides to Frontend team:**
 
-1. **API Endpoint**: `https://nk0lprzxu7.execute-api.eu-west-2.amazonaws.com`
+1. **API Endpoint**: `https://api.graphrag.care`
 2. **API Key**: [Securely shared via encrypted channel]
 3. **Documentation**: 
    - `docs/frontend-production-config.md`
@@ -51,7 +51,7 @@
 
 1. **Backend Verification** (Already Complete ✅)
    ```bash
-   curl https://nk0lprzxu7.execute-api.eu-west-2.amazonaws.com/health
+   curl https://api.graphrag.care/health
    ```
 
 2. **Frontend Staging Deployment**

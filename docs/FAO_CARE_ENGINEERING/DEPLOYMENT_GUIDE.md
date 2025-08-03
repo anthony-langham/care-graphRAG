@@ -27,7 +27,7 @@
 
 ```bash
 # .env.local (local development)
-NEXT_PUBLIC_GRAPHRAG_API_URL=https://w46s2t96h8.execute-api.eu-west-2.amazonaws.com
+NEXT_PUBLIC_GRAPHRAG_API_URL=https://staging-api.graphrag.care
 GRAPHRAG_ENVIRONMENT=development
 NODE_ENV=development
 ```
@@ -36,7 +36,7 @@ NODE_ENV=development
 
 ```bash
 # .env.staging (care.engineering staging)
-NEXT_PUBLIC_GRAPHRAG_API_URL=https://w46s2t96h8.execute-api.eu-west-2.amazonaws.com  
+NEXT_PUBLIC_GRAPHRAG_API_URL=https://staging-api.graphrag.care  
 GRAPHRAG_ENVIRONMENT=staging
 NODE_ENV=staging
 ```
@@ -86,7 +86,7 @@ cp .env.example .env.local
 # Edit .env.local with staging API URL
 
 # 3. Test API connectivity
-curl https://w46s2t96h8.execute-api.eu-west-2.amazonaws.com/health
+curl https://staging-api.graphrag.care/health
 
 # 4. Start development
 npm run dev
@@ -104,7 +104,7 @@ git checkout -b feature/graphrag-integration
 
 # 2. Set up environment
 cp .env.example .env.local
-echo "NEXT_PUBLIC_GRAPHRAG_API_URL=https://w46s2t96h8.execute-api.eu-west-2.amazonaws.com" >> .env.local
+echo "NEXT_PUBLIC_GRAPHRAG_API_URL=https://staging-api.graphrag.care" >> .env.local
 
 # 3. Create directory structure
 mkdir -p src/components/graphrag
@@ -349,7 +349,7 @@ export const auditClinicalQuery = (
 **Solution**:
 ```bash
 # 1. Check API status
-curl https://w46s2t96h8.execute-api.eu-west-2.amazonaws.com/health
+curl https://staging-api.graphrag.care/health
 
 # 2. Verify environment variables
 echo $NEXT_PUBLIC_GRAPHRAG_API_URL

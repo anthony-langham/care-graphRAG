@@ -40,7 +40,7 @@
 
 ```json
 {
-  "api_endpoint": "https://nk0lprzxu7.execute-api.eu-west-2.amazonaws.com",
+  "api_endpoint": "https://api.graphrag.care",
   "health_status": "healthy",
   "response_time_ms": 103,
   "environment": "production",

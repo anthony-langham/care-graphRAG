@@ -10,7 +10,7 @@
 ```javascript
 // client/lib/graphrag-config.js
 export const GRAPHRAG_CONFIG = {
-  baseUrl: "https://w46s2t96h8.execute-api.eu-west-2.amazonaws.com",
+  baseUrl: "https://staging-api.graphrag.care",
   timeout: 30000, // 30 seconds
   environment: "staging",
   maxTokens: 1000,

@@ -10,7 +10,7 @@
 ## 🚀 Quick Start
 
 ### Ready to Use
-- **Staging API**: https://w46s2t96h8.execute-api.eu-west-2.amazonaws.com
+- **Staging API**: https://staging-api.graphrag.care
 - **Health Check**: `GET /health` ✅ Operational
 - **Query Endpoint**: `POST /query` ✅ Operational  
 - **CORS**: ✅ Configured for care.engineering domains
@@ -65,14 +65,14 @@ The backend team has completed all infrastructure setup. Your tasks (TASK-201 to
 ### Required Environment Variables
 ```bash
 # Add to your .env.local or deployment config
-NEXT_PUBLIC_GRAPHRAG_API_URL=https://w46s2t96h8.execute-api.eu-west-2.amazonaws.com
+NEXT_PUBLIC_GRAPHRAG_API_URL=https://staging-api.graphrag.care
 GRAPHRAG_ENVIRONMENT=staging
 ```
 
 ### Quick Connectivity Test
 ```bash
 # Test the API is working
-curl https://w46s2t96h8.execute-api.eu-west-2.amazonaws.com/health
+curl https://staging-api.graphrag.care/health
 
 # Expected response:
 # {"status":"healthy","service":"nice-graphrag","version":"1.0.0"...}
@@ -112,7 +112,7 @@ curl https://w46s2t96h8.execute-api.eu-west-2.amazonaws.com/health
 
 ### Backend Team Contact
 - **Repository**: care-graphRAG GitHub repository
-- **API Endpoint**: https://w46s2t96h8.execute-api.eu-west-2.amazonaws.com
+- **API Endpoint**: https://staging-api.graphrag.care
 - **Monitoring**: CloudWatch logs available for debugging
 
 ### Escalation Path

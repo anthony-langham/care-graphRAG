@@ -7,7 +7,7 @@
 ### ✅ Completed:
 1. **Backend (GraphRAG Team)**: 
    - Fully operational GraphRAG system with SST v3 deployment
-   - Staging API deployed at: https://w46s2t96h8.execute-api.eu-west-2.amazonaws.com
+   - Staging API deployed at: https://staging-api.graphrag.care
    - Complete with rate limiting, CORS, monitoring
 
 2. **Frontend (care.engineering Team)**: 
