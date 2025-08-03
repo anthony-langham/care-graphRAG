@@ -3,7 +3,7 @@
 **Created:** 2025-07-29  
 **Backend Status:** Phase 9 Complete (Staging Ready)  
 **Your Phase:** Phase 10 (Frontend Integration)  
-**Staging API:** https://w46s2t96h8.execute-api.eu-west-2.amazonaws.com  
+**Staging API:** https://staging-api.graphrag.care  
 
 ---
 
@@ -365,10 +365,10 @@ While you work on frontend integration, the backend team will be working on:
 ### API Testing
 ```bash
 # Quick health check
-curl https://w46s2t96h8.execute-api.eu-west-2.amazonaws.com/health
+curl https://staging-api.graphrag.care/health
 
 # Test query
-curl -X POST https://w46s2t96h8.execute-api.eu-west-2.amazonaws.com/query \
+curl -X POST https://staging-api.graphrag.care/query \
   -H "Content-Type: application/json" \
   -d '{"question": "What is hypertension?", "max_tokens": 1000}'
 ```

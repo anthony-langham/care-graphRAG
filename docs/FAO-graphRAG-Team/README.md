@@ -66,7 +66,7 @@ npm run sst:deploy --stage production
 ### Critical Configuration
 ```javascript
 // Production API endpoint (update for production)
-VITE_GRAPHRAG_API_URL=https://w46s2t96h8.execute-api.eu-west-2.amazonaws.com
+VITE_GRAPHRAG_API_URL=https://staging-api.graphrag.care
 VITE_GRAPHRAG_ENVIRONMENT=staging
 
 // Rate limiting (AWS compliant)

@@ -114,12 +114,12 @@ JWT_SECRET=your-jwt-secret-here
 SESSION_SECRET=your-session-secret-here
 
 # GraphRAG Integration  
-VITE_GRAPHRAG_API_URL=https://w46s2t96h8.execute-api.eu-west-2.amazonaws.com
+VITE_GRAPHRAG_API_URL=https://staging-api.graphrag.care
 VITE_GRAPHRAG_ENVIRONMENT=staging
 ```
 
 ### Current API Configuration
-- **Base URL**: `https://w46s2t96h8.execute-api.eu-west-2.amazonaws.com`
+- **Base URL**: `https://staging-api.graphrag.care`
 - **Environment**: `staging`
 - **Timeout**: 30 seconds
 - **Rate Limits**: 60 queries/minute, 3 concurrent, 50 per session

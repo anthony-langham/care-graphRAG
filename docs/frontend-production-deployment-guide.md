@@ -17,7 +17,7 @@ The GraphRAG production API is now live and ready for frontend integration. Foll
 
 2. **Update with production values**:
    ```env
-   NEXT_PUBLIC_GRAPHRAG_API_URL=https://nk0lprzxu7.execute-api.eu-west-2.amazonaws.com
+   NEXT_PUBLIC_GRAPHRAG_API_URL=https://api.graphrag.care
    NEXT_PUBLIC_GRAPHRAG_API_KEY=[Contact security@care.engineering for API key]
    ```
 
@@ -52,10 +52,10 @@ The GraphRAG production API is now live and ready for frontend integration. Foll
 1. **Test API connectivity**:
    ```bash
    # Test health endpoint (no auth required)
-   curl https://nk0lprzxu7.execute-api.eu-west-2.amazonaws.com/health
+   curl https://api.graphrag.care/health
 
    # Test query endpoint (requires API key)
-   curl -X POST https://nk0lprzxu7.execute-api.eu-west-2.amazonaws.com/query \
+   curl -X POST https://api.graphrag.care/query \
      -H "Content-Type: application/json" \
      -H "x-api-key: YOUR_API_KEY" \
      -d '{"question": "What is the first-line treatment for hypertension?"}'
@@ -275,5 +275,5 @@ Before marking deployment as complete:
 ---
 
 **Deployment Status**: Ready for production  
-**API Endpoint**: https://nk0lprzxu7.execute-api.eu-west-2.amazonaws.com  
+**API Endpoint**: https://api.graphrag.care  
 **Support**: graphrag-support@care.engineering

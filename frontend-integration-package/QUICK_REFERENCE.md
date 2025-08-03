@@ -2,7 +2,7 @@
 
 ## API Endpoint
 ```
-https://nk0lprzxu7.execute-api.eu-west-2.amazonaws.com
+https://api.graphrag.care
 ```
 
 ## Required Headers
@@ -15,7 +15,7 @@ headers: {
 
 ## Environment Variables (.env.production)
 ```bash
-NEXT_PUBLIC_GRAPHRAG_API_URL=https://nk0lprzxu7.execute-api.eu-west-2.amazonaws.com
+NEXT_PUBLIC_GRAPHRAG_API_URL=https://api.graphrag.care
 NEXT_PUBLIC_GRAPHRAG_API_KEY=[Contact security@care.engineering]
 NEXT_PUBLIC_ENABLE_GRAPHRAG=true
 ```
@@ -23,10 +23,10 @@ NEXT_PUBLIC_ENABLE_GRAPHRAG=true
 ## Test Commands
 ```bash
 # Health check (no auth)
-curl https://nk0lprzxu7.execute-api.eu-west-2.amazonaws.com/health
+curl https://api.graphrag.care/health
 
 # Query test (with auth)
-curl -X POST https://nk0lprzxu7.execute-api.eu-west-2.amazonaws.com/query \
+curl -X POST https://api.graphrag.care/query \
   -H "Content-Type: application/json" \
   -H "x-api-key: YOUR_API_KEY" \
   -d '{"question": "What is hypertension?"}'

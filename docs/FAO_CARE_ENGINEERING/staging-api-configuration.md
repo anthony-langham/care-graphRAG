@@ -10,7 +10,7 @@
 ### Base Configuration
 ```typescript
 const GRAPHRAG_API_CONFIG = {
-  baseUrl: "https://w46s2t96h8.execute-api.eu-west-2.amazonaws.com",
+  baseUrl: "https://staging-api.graphrag.care",
   timeout: 30000, // 30 second timeout
   headers: {
     'Content-Type': 'application/json',
@@ -24,7 +24,7 @@ const GRAPHRAG_API_CONFIG = {
 
 #### 1. Health Check Endpoint
 ```bash
-curl -X GET "https://w46s2t96h8.execute-api.eu-west-2.amazonaws.com/health" \
+curl -X GET "https://staging-api.graphrag.care/health" \
   -H "Content-Type: application/json"
 ```
 
@@ -39,7 +39,7 @@ curl -X GET "https://w46s2t96h8.execute-api.eu-west-2.amazonaws.com/health" \
 
 #### 2. Query Endpoint
 ```bash
-curl -X POST "https://w46s2t96h8.execute-api.eu-west-2.amazonaws.com/query" \
+curl -X POST "https://staging-api.graphrag.care/query" \
   -H "Content-Type: application/json" \
   -H "X-API-Key: YOUR_API_KEY" \
   -d '{
@@ -96,7 +96,7 @@ API keys will be generated and provided to the frontend team with:
 ### Environment Variables (care.engineering)
 ```bash
 # Add to .env.local or deployment config
-NEXT_PUBLIC_GRAPHRAG_API_URL=https://w46s2t96h8.execute-api.eu-west-2.amazonaws.com
+NEXT_PUBLIC_GRAPHRAG_API_URL=https://staging-api.graphrag.care
 GRAPHRAG_API_KEY=<to-be-provided>
 GRAPHRAG_ENVIRONMENT=staging
 ```
@@ -244,5 +244,5 @@ const testQuery = async (): Promise<void> => {
 ---
 
 *Last Updated: 2025-07-29*  
-*API Endpoint: https://w46s2t96h8.execute-api.eu-west-2.amazonaws.com*  
+*API Endpoint: https://staging-api.graphrag.care*  
 *Status: Ready for frontend integration*

@@ -123,7 +123,7 @@ e2e/                     # End-to-end test suites
 
 ## Deployment Status
 
-**Current Environment**: Staging API (https://w46s2t96h8.execute-api.eu-west-2.amazonaws.com)  
+**Current Environment**: Staging API (https://staging-api.graphrag.care)  
 **Ready for Production**: ✅ Yes - All technical and clinical requirements met  
 **Next Action**: `sst deploy` to production environment
 

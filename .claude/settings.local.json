@@ -21,7 +21,8 @@
       "Bash(sst deploy:*)",
       "Bash(aws lambda get-function-configuration:*)",
       "Bash(find:*)",
-      "Bash(unzip:*)"
+      "Bash(unzip:*)",
+      "Bash(./scripts/update-to-custom-domains.sh:*)"
     ],
     "deny": []
   }

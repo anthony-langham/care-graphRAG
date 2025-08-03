@@ -1,6 +1,6 @@
 # API Examples - Ready to Use Code
 
-**Staging API:** https://w46s2t96h8.execute-api.eu-west-2.amazonaws.com  
+**Staging API:** https://staging-api.graphrag.care  
 **Status:** ✅ Operational and tested  
 **CORS:** ✅ Configured for care.engineering domains  
 
@@ -12,7 +12,7 @@
 
 ```typescript
 // .env.local
-NEXT_PUBLIC_GRAPHRAG_API_URL=https://w46s2t96h8.execute-api.eu-west-2.amazonaws.com
+NEXT_PUBLIC_GRAPHRAG_API_URL=https://staging-api.graphrag.care
 GRAPHRAG_ENVIRONMENT=staging
 ```
 
@@ -683,7 +683,7 @@ describe('GraphRAGClient', () => {
       const result = await graphragClient.healthCheck();
       
       expect(fetch).toHaveBeenCalledWith(
-        'https://w46s2t96h8.execute-api.eu-west-2.amazonaws.com/health',
+        'https://staging-api.graphrag.care/health',
         expect.objectContaining({
           method: 'GET',
           headers: { 'Content-Type': 'application/json' },

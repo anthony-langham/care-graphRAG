@@ -12,13 +12,13 @@
 
 ```bash
 # Test the staging API is working
-curl https://w46s2t96h8.execute-api.eu-west-2.amazonaws.com/health
+curl https://staging-api.graphrag.care/health
 
 # Expected response:
 # {"status":"healthy","service":"nice-graphrag",...}
 
 # Test a query
-curl -X POST https://w46s2t96h8.execute-api.eu-west-2.amazonaws.com/query \
+curl -X POST https://staging-api.graphrag.care/query \
   -H "Content-Type: application/json" \
   -d '{"question": "What is hypertension?", "max_tokens": 1000}'
 
@@ -32,7 +32,7 @@ curl -X POST https://w46s2t96h8.execute-api.eu-west-2.amazonaws.com/query \
 
 ```bash
 # Add to your .env.local file
-echo "NEXT_PUBLIC_GRAPHRAG_API_URL=https://w46s2t96h8.execute-api.eu-west-2.amazonaws.com" >> .env.local
+echo "NEXT_PUBLIC_GRAPHRAG_API_URL=https://staging-api.graphrag.care" >> .env.local
 echo "GRAPHRAG_ENVIRONMENT=development" >> .env.local
 
 # Verify
@@ -227,7 +227,7 @@ console.log(process.env.NEXT_PUBLIC_GRAPHRAG_API_URL);
 **Cause**: Wrong API URL  
 **Fix**: Double-check the URL:
 ```
-https://w46s2t96h8.execute-api.eu-west-2.amazonaws.com
+https://staging-api.graphrag.care
 ```
 
 ### Issue: Timeout Errors
@@ -305,7 +305,7 @@ Once you have the basic integration working:
 ## 🆘 Need Help?
 
 ### Quick References
-- **API Base URL**: `https://w46s2t96h8.execute-api.eu-west-2.amazonaws.com`
+- **API Base URL**: `https://staging-api.graphrag.care`
 - **Health Endpoint**: `GET /health`
 - **Query Endpoint**: `POST /query`
 - **CORS**: Enabled for care.engineering domains

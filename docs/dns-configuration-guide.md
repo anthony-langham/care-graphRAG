@@ -10,7 +10,7 @@ This guide covers DNS configuration requirements for the frontend deployment. Th
 ## Current Infrastructure
 
 ### Backend API (Already Configured ✅)
-- **Endpoint**: `https://nk0lprzxu7.execute-api.eu-west-2.amazonaws.com`
+- **Endpoint**: `https://api.graphrag.care`
 - **Type**: AWS API Gateway (managed by AWS)
 - **SSL**: Provided by AWS Certificate Manager
 - **Region**: eu-west-2 (London)

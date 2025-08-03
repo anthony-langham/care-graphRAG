@@ -1,7 +1,7 @@
 {
   "deployment_timestamp": "2025-01-31T18:30:00Z",
   "stage": "production",
-  "api_url": "https://nk0lprzxu7.execute-api.eu-west-2.amazonaws.com",
+  "api_url": "https://api.graphrag.care",
   "api_key": "222bfcbcf7d6875344681c6f2fcac133b6907fb2aa5ba7b71a54d603b11b10fc",
   "endpoints": {
     "health": "GET /health",

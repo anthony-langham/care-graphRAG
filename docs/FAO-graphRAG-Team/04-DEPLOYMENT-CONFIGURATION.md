@@ -16,7 +16,7 @@ JWT_SECRET=your-jwt-secret-here           # JWT token signing secret
 SESSION_SECRET=your-session-secret-here   # Express session secret
 
 # GraphRAG Integration
-VITE_GRAPHRAG_API_URL=https://w46s2t96h8.execute-api.eu-west-2.amazonaws.com
+VITE_GRAPHRAG_API_URL=https://staging-api.graphrag.care
 VITE_GRAPHRAG_ENVIRONMENT=staging
 ```
 
@@ -39,7 +39,7 @@ Create `.env` file in project root:
 OPENAI_API_KEY=sk-your-actual-openai-key
 JWT_SECRET=super-secure-jwt-secret-change-this
 SESSION_SECRET=super-secure-session-secret-change-this
-VITE_GRAPHRAG_API_URL=https://w46s2t96h8.execute-api.eu-west-2.amazonaws.com
+VITE_GRAPHRAG_API_URL=https://staging-api.graphrag.care
 VITE_GRAPHRAG_ENVIRONMENT=staging
 ```
 
@@ -170,7 +170,7 @@ After successful deployment, SST will provide:
 ```javascript
 // client/lib/graphrag-config.js
 export const GRAPHRAG_CONFIG = {
-  baseUrl: "https://w46s2t96h8.execute-api.eu-west-2.amazonaws.com",
+  baseUrl: "https://staging-api.graphrag.care",
   environment: "staging",
   timeout: 30000,
   retryAttempts: 2
@@ -388,7 +388,7 @@ app.get('/health', (req, res) => {
 #### GraphRAG API Health Check
 ```bash
 # Test GraphRAG API connectivity
-curl -X GET "https://w46s2t96h8.execute-api.eu-west-2.amazonaws.com/health" \
+curl -X GET "https://staging-api.graphrag.care/health" \
   -H "Content-Type: application/json"
 ```
 

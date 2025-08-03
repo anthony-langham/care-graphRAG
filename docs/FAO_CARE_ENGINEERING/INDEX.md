@@ -51,7 +51,7 @@
 ## 🔥 Critical Information Summary
 
 ### API Ready Status ✅
-- **Staging URL**: https://w46s2t96h8.execute-api.eu-west-2.amazonaws.com
+- **Staging URL**: https://staging-api.graphrag.care
 - **Health Endpoint**: `GET /health` - ✅ Operational (1.34s response)
 - **Query Endpoint**: `POST /query` - ✅ Operational (0.10s avg response)
 - **CORS**: ✅ Configured for care.engineering domains
@@ -206,7 +206,7 @@ You have everything you need:
 - **Integration Help**: Reference specific documentation file
 
 ### For Urgent Issues
-- **API Down**: Test health endpoint first: `curl https://w46s2t96h8.execute-api.eu-west-2.amazonaws.com/health`
+- **API Down**: Test health endpoint first: `curl https://staging-api.graphrag.care/health`
 - **CORS Problems**: Check Origin header in requests
 - **Authentication**: No API keys required for staging
 
