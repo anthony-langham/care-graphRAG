@@ -147,31 +147,32 @@ def handler(event, context):
         # Check multiple possible SST v3 secret naming patterns
         mongodb_uri = None
         
-        # Try SST v3 Resource pattern first
+        # Use the new SST secrets handler with UTF-8 fix
         try:
-            from sst import Resource
-            mongodb_results["sst_import"] = "success"
+            # Enable debug mode for detailed logging
+            os.environ["DEBUG_SST_SECRETS"] = "true"
             
-            # Check if MongoDbUri is available
-            if hasattr(Resource, 'MongoDbUri'):
-                try:
-                    mongodb_uri = Resource.MongoDbUri.value
-                    mongodb_results["uri_source"] = "sst_resource"
-                    mongodb_results["sst_resource_mongodb"] = "found"
-                    mongodb_results["sst_resource_value_type"] = type(mongodb_uri).__name__
-                except Exception as value_error:
-                    mongodb_results["sst_resource_value_error"] = str(value_error)
-                    mongodb_results["sst_resource_mongodb"] = "found_but_error_accessing_value"
+            from graphrag.sst_secrets import get_mongodb_uri, get_openai_api_key, debug_sst_environment
+            
+            # Get detailed debug information
+            sst_debug_info = debug_sst_environment()
+            mongodb_results["sst_debug_info"] = sst_debug_info
+            
+            # Try to get MongoDB URI
+            mongodb_uri = get_mongodb_uri()
+            if mongodb_uri:
+                mongodb_results["uri_source"] = "sst_secrets_handler"
+                mongodb_results["sst_handler_success"] = True
             else:
-                mongodb_results["sst_resource_mongodb"] = "not_found"
-                mongodb_results["sst_resource_attrs"] = [attr for attr in dir(Resource) if not attr.startswith('_')][:10]
+                mongodb_results["sst_handler_success"] = False
+                mongodb_results["uri_source"] = "sst_handler_failed"
                 
         except ImportError as e:
-            mongodb_results["sst_import"] = f"import_failed: {str(e)}"
+            mongodb_results["sst_handler_import"] = f"import_failed: {str(e)}"
         except Exception as e:
-            mongodb_results["sst_resource_error"] = f"general_error: {str(e)}"
+            mongodb_results["sst_handler_error"] = f"general_error: {str(e)}"
             import traceback
-            mongodb_results["sst_resource_traceback"] = traceback.format_exc()[:500]
+            mongodb_results["sst_handler_traceback"] = traceback.format_exc()[:500]
         
         # Fallback to environment variables
         if not mongodb_uri:
@@ -185,9 +186,10 @@ def handler(event, context):
                 mongodb_uri = os.getenv("SST_Secret_value_MongoDbUri")
                 mongodb_results["uri_source"] = "env_secret_value_pattern"
             elif os.getenv("MONGODB_URI"):
-            mongodb_uri = os.getenv("MONGODB_URI")
-            mongodb_results["uri_source"] = "environment_fallback"
-        else:
+                mongodb_uri = os.getenv("MONGODB_URI")
+                mongodb_results["uri_source"] = "environment_fallback"
+        
+        if not mongodb_uri:
             # Try AWS SSM Parameter Store as SST might store secrets there
             try:
                 import boto3

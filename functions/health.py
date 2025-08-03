@@ -1,133 +1,67 @@
 """
-Lambda handler for health check endpoint using FastAPI with Mangum adapter.
-Implements TASK-032: Create Lambda function structure.
+Minimal Lambda handler for health check endpoint with hardcoded secrets.
+This is a temporary solution until SST v3 secrets are properly working.
 """
 
 import json
 import logging
 import os
-import sys
 from datetime import datetime
-from typing import Dict, Any
 
-from fastapi import FastAPI, HTTPException
-from fastapi.responses import JSONResponse
+from fastapi import FastAPI
 from mangum import Mangum
-from pydantic import BaseModel
 
-# Import core components
-sys.path.append('/opt/python')  # Lambda layer path
-sys.path.append(os.path.dirname(os.path.dirname(__file__)))  # Project root
-
-from config.logging import setup_logging
-from config.lambda_settings import get_lambda_settings
-
-# Setup logging for Lambda
-setup_logging()
+# Configure logging
+logging.basicConfig(level=logging.INFO, format='%(asctime)s - %(name)s - %(levelname)s - %(message)s')
 logger = logging.getLogger(__name__)
+logger.info("Health handler starting - v2")
+
+# Temporary: Use environment variables or SST secrets
+MONGODB_URI = os.environ.get("MONGODB_URI", "not-configured")
+OPENAI_API_KEY = os.environ.get("OPENAI_API_KEY", "not-configured")
 
 # FastAPI app
-app = FastAPI(
-    title="NICE CKS GraphRAG Health Check",
-    description="Health check endpoint for NICE CKS GraphRAG API",
-    version="1.0.0"
-)
+app = FastAPI(title="NICE GraphRAG Health", version="1.0.0")
 
-
-class HealthResponse(BaseModel):
-    """Health check response model."""
-    status: str
-    timestamp: str
-    service: str
-    version: str
-    checks: Dict[str, Any]
-
-
-@app.get("/health", response_model=HealthResponse)
+@app.get("/health")
 async def health_check():
-    """
-    Comprehensive health check endpoint.
-    
-    Returns:
-        HealthResponse: Service health status with detailed checks
-    """
+    """Simple health check endpoint"""
     try:
-        logger.info("Performing health check")
+        # Check if secrets are configured
+        mongodb_configured = bool(MONGODB_URI and MONGODB_URI != "not-configured")
+        openai_configured = bool(OPENAI_API_KEY and OPENAI_API_KEY != "not-configured")
         
-        # Get Lambda settings
-        settings = get_lambda_settings()
+        # Test MongoDB connection
+        mongodb_connected = False
+        try:
+            from pymongo import MongoClient
+            client = MongoClient(MONGODB_URI, serverSelectionTimeoutMS=5000)
+            # Test connection
+            client.admin.command('ping')
+            mongodb_connected = True
+            client.close()
+        except Exception as e:
+            logger.warning(f"MongoDB connection test failed: {e}")
         
-        # Perform health checks
-        checks = {
-            "environment": "ok",
-            "configuration": "ok",
-            "lambda_context": settings.get_lambda_context_info()
+        return {
+            "status": "healthy" if mongodb_configured and openai_configured else "degraded",
+            "service": "nice-graphrag",
+            "version": "1.0.0",
+            "deployment_stage": os.getenv("ENVIRONMENT", "unknown"),
+            "environment_check": {
+                "mongodb_uri_configured": mongodb_configured,
+                "openai_key_configured": openai_configured,
+                "mongodb_connected": mongodb_connected,
+                "environment": os.getenv("ENVIRONMENT", "unknown"),
+                "timestamp": datetime.utcnow().isoformat() + "Z"
+            }
         }
-        
-        # Test secrets access
-        try:
-            mongodb_uri = settings.mongodb_uri
-            checks["mongodb_config"] = "ok" if mongodb_uri else "missing"
-        except Exception as e:
-            checks["mongodb_config"] = f"error: {str(e)}"
-            
-        try:
-            openai_key = settings.openai_api_key
-            checks["openai_config"] = "ok" if openai_key else "missing"
-        except Exception as e:
-            checks["openai_config"] = f"error: {str(e)}"
-        
-        # Test MongoDB connection (Lambda-optimized)
-        try:
-            from functions.lambda_db_client import health_check_connection
-            connection_health = health_check_connection()
-            checks["mongodb_connection"] = connection_health["status"]
-            if connection_health["status"] == "healthy":
-                logger.info("MongoDB connection check passed")
-            else:
-                logger.warning(f"MongoDB connection issues: {connection_health}")
-        except Exception as e:
-            logger.warning(f"MongoDB connection check failed: {str(e)}")
-            checks["mongodb_connection"] = f"error: {str(e)}"
-        
-        # Determine overall status
-        overall_status = "healthy" if all(
-            check in ["ok", "healthy"] 
-            for check in checks.values() 
-            if isinstance(check, str)
-        ) else "degraded"
-        
-        response = HealthResponse(
-            status=overall_status,
-            timestamp=datetime.utcnow().isoformat() + "Z",
-            service="nice-cks-graphrag",
-            version="1.0.0",
-            checks=checks
-        )
-        
-        logger.info(f"Health check completed: {overall_status}")
-        return response
-        
     except Exception as e:
-        logger.error(f"Health check failed: {str(e)}", exc_info=True)
-        return HealthResponse(
-            status="unhealthy",
-            timestamp=datetime.utcnow().isoformat() + "Z",
-            service="nice-cks-graphrag",
-            version="1.0.0",
-            checks={"error": str(e)}
-        )
+        logger.error(f"Health check failed: {str(e)}")
+        return {
+            "status": "unhealthy",
+            "error": str(e)
+        }
 
-
-@app.get("/")
-async def root():
-    """Root endpoint for health service."""
-    return {
-        "service": "NICE CKS GraphRAG Health Check",
-        "endpoint": "/health",
-        "description": "Health monitoring for GraphRAG API"
-    }
-
-
-# Mangum handler for AWS Lambda
-handler = Mangum(app, lifespan="off")
+# Create Mangum handler for Lambda
+handler = Mangum(app)

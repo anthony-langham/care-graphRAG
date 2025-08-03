@@ -16,7 +16,12 @@
       "WebFetch(domain:ion.sst.dev)",
       "WebFetch(domain:sst.dev)",
       "Bash(curl:*)",
-      "Bash(aws logs describe-log-groups:*)"
+      "Bash(aws logs describe-log-groups:*)",
+      "Bash(aws logs tail:*)",
+      "Bash(sst deploy:*)",
+      "Bash(aws lambda get-function-configuration:*)",
+      "Bash(find:*)",
+      "Bash(unzip:*)"
     ],
     "deny": []
   }

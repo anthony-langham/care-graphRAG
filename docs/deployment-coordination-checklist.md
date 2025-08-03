@@ -1,186 +1,225 @@
-# Deployment Coordination Checklist
+# Care-GraphRAG Deployment Coordination Checklist
 
-**Date:** 2025-01-31  
-**Purpose:** Coordinate backend and frontend production deployment  
-**Teams:** care-graphRAG (backend) & care.engineering (frontend)  
+Generated: 2025-08-03
+Status: ACTIVE - Use this checklist for coordinated deployment
 
-## Pre-Deployment Status
+## 🚨 CRITICAL BLOCKERS TO RESOLVE FIRST
 
-### Backend (care-graphRAG) ✅
-- [X] GraphRAG API deployed to production
-- [X] MongoDB Atlas configured and connected
-- [X] OpenAI API integrated
-- [X] API Gateway with CORS configured
-- [X] Authentication (API key) implemented
-- [X] Rate limiting configured (10 req/min)
-- [X] Monitoring and alerting set up
-- [X] SSL/TLS properly configured
+### SST v3 Secrets Integration (TASK-058b)
+- [ ] Debug UTF-8 decode error in SST key file
+- [ ] Test secret access with debug logging enabled
+- [ ] Verify MongoDB URI accessible in Lambda
+- [ ] Verify OpenAI API key accessible in Lambda
+- [ ] Document working secret access pattern
 
-### Frontend (care.engineering) 🚧
-- [ ] Production environment variables configured
-- [ ] API key stored in secret management
-- [ ] GraphRAG components integrated
-- [ ] Production build tested
-- [ ] Deployment pipeline ready
+### GraphRAG Lambda Integration (TASK-058c)
+- [ ] Fix import path errors (from ..graphrag to graphrag)
+- [ ] Test MongoDB connection from Lambda
+- [ ] Verify OpenAI API calls work
+- [ ] Replace placeholder responses with real GraphRAG
+- [ ] Validate hybrid retrieval operational
 
-## Coordination Steps
+## 📋 PRE-DEPLOYMENT CHECKLIST
 
-### Step 1: Information Exchange (Backend → Frontend)
+### Backend Validation
+- [ ] Health endpoint returns `mongodb_configured: true`
+- [ ] Query endpoint returns real clinical data (not placeholders)
+- [ ] Response times < 5 seconds for test queries
+- [ ] Error handling tested for all failure scenarios
+- [ ] Rate limiting tested and configured correctly
 
-**Backend provides to Frontend team:**
+### Frontend Integration Validation
+- [ ] Frontend configured with production API URL
+- [ ] API key authentication working
+- [ ] CORS headers allow frontend domain
+- [ ] Real GraphRAG responses displayed correctly
+- [ ] Error states handled gracefully
 
-1. **API Endpoint**: `https://nk0lprzxu7.execute-api.eu-west-2.amazonaws.com`
-2. **API Key**: [Securely shared via encrypted channel]
-3. **Documentation**: 
-   - `docs/frontend-production-config.md`
-   - `docs/frontend-production-deployment-guide.md`
-   - `docs/frontend-env-production.template`
+### Infrastructure Readiness
+- [ ] CloudWatch dashboards configured
+- [ ] X-Ray tracing enabled
+- [ ] SNS alerts configured
+- [ ] Lambda memory/timeout optimized
+- [ ] API Gateway throttling configured
 
-### Step 2: Frontend Configuration
+## 🚀 DEPLOYMENT SEQUENCE
 
-**Frontend team actions:**
-
-- [ ] Update `.env.production` with API endpoint and key
-- [ ] Configure build pipeline with production env vars
-- [ ] Update API client with production configuration
-- [ ] Test API connectivity from local build
-
-### Step 3: Staged Deployment
-
-**Deployment sequence:**
-
-1. **Backend Verification** (Already Complete ✅)
-   ```bash
-   curl https://nk0lprzxu7.execute-api.eu-west-2.amazonaws.com/health
-   ```
-
-2. **Frontend Staging Deployment**
-   - [ ] Deploy to staging environment first
-   - [ ] Test GraphRAG integration in staging
-   - [ ] Verify CORS headers work correctly
-   - [ ] Check error handling and rate limiting
-
-3. **Production Deployment**
-   - [ ] Deploy frontend to production
-   - [ ] Run smoke tests immediately
-   - [ ] Monitor error rates for 30 minutes
-   - [ ] Check performance metrics
-
-### Step 4: Post-Deployment Verification
-
-Run the verification script:
+### Day 1: Fix Technical Blockers
 ```bash
-./scripts/verify-production-deployment.sh
+# 1. Debug SST secrets
+sst secret list --stage staging
+aws lambda get-function-configuration --function-name nice-cks-graphrag-staging-QueryFunction
+
+# 2. Test health endpoint
+curl https://api-staging.nice-cks-graphrag.care/health
+
+# 3. Test query endpoint with real question
+curl -X POST https://api-staging.nice-cks-graphrag.care/query \
+  -H "Content-Type: application/json" \
+  -H "X-API-Key: ${API_KEY}" \
+  -d '{"question":"What is the first-line treatment for hypertension?"}'
 ```
 
-**Manual checks:**
-- [ ] Navigate to https://care.engineering
-- [ ] Test GraphRAG query functionality
-- [ ] Verify source attribution displays correctly
-- [ ] Check clinical disclaimer appears
-- [ ] Test error scenarios (invalid query, timeout)
-- [ ] Verify rate limiting messages
-
-### Step 5: Monitoring Setup
-
-**Backend monitoring:**
-- CloudWatch Dashboard: https://eu-west-2.console.aws.amazon.com/cloudwatch/
-- X-Ray Traces: https://eu-west-2.console.aws.amazon.com/xray/
-- Lambda Metrics: Check invocation count, errors, duration
-
-**Frontend monitoring:**
-- [ ] Google Analytics events for GraphRAG queries
-- [ ] Error tracking (Sentry) for GraphRAG errors
-- [ ] Performance monitoring for query latency
-
-## Communication Channels
-
-### During Deployment
-- **Primary**: Slack #graphrag-deployment channel
-- **Escalation**: Direct messages to team leads
-- **Emergency**: Phone contacts (see internal docs)
-
-### Status Updates
-- [ ] T-30min: Final go/no-go decision
-- [ ] T-0: Deployment started
-- [ ] T+15min: Initial verification complete
-- [ ] T+30min: Full verification complete
-- [ ] T+1hr: Stability confirmed
-
-## Rollback Plan
-
-### Backend Rollback
+### Day 2: Validate GraphRAG Integration
 ```bash
-# If critical issues found
-npx sst rollback --stage production
+# Run verification script
+./scripts/test-graphrag-integration.sh
+
+# Check Lambda logs for errors
+aws logs tail /aws/lambda/nice-cks-graphrag-staging-QueryFunction --follow
+
+# Monitor performance
+aws cloudwatch get-metric-statistics \
+  --namespace AWS/Lambda \
+  --metric-name Duration \
+  --dimensions Name=FunctionName,Value=nice-cks-graphrag-staging-QueryFunction \
+  --statistics Average \
+  --start-time $(date -u -d '1 hour ago' +%Y-%m-%dT%H:%M:%S) \
+  --end-time $(date -u +%Y-%m-%dT%H:%M:%S) \
+  --period 300
 ```
 
-### Frontend Rollback
+### Day 3: Frontend-Backend Integration Testing
+- [ ] Frontend team confirms API integration working
+- [ ] End-to-end user flow tested
+- [ ] Performance benchmarks documented
+- [ ] Security scan completed
+- [ ] Load testing performed
+
+### Day 4: Production Deployment
 ```bash
-# Platform-specific (example for Vercel)
-vercel rollback
+# Pre-deployment checks
+./scripts/pre-deployment-validation.sh
+
+# Deploy backend
+sst deploy --stage production
+
+# Verify production health
+curl https://api.nice-cks-graphrag.care/health
+
+# Deploy frontend
+cd frontend && npm run deploy:production
+
+# Run smoke tests
+./scripts/production-smoke-tests.sh
 ```
 
-### Feature Flag Disable
-If rollback not feasible:
-```env
-NEXT_PUBLIC_ENABLE_GRAPHRAG=false
+### Day 5: Post-Deployment Monitoring
+- [ ] Monitor CloudWatch dashboards for 24 hours
+- [ ] Check error rates remain < 0.1%
+- [ ] Verify response times < 5 seconds
+- [ ] Review X-Ray traces for bottlenecks
+- [ ] Validate audit logs capturing correctly
+
+## 🔍 VERIFICATION SCRIPTS
+
+### Health Check Verification
+```bash
+#!/bin/bash
+# save as: scripts/verify-health.sh
+
+ENVIRONMENTS=("staging" "production")
+for ENV in "${ENVIRONMENTS[@]}"; do
+  echo "Checking $ENV environment..."
+  RESPONSE=$(curl -s https://api${ENV:+"-$ENV"}.nice-cks-graphrag.care/health)
+  echo "$RESPONSE" | jq '.'
+  
+  # Check critical fields
+  MONGO=$(echo "$RESPONSE" | jq -r '.mongodb_configured')
+  OPENAI=$(echo "$RESPONSE" | jq -r '.openai_configured')
+  
+  if [[ "$MONGO" == "true" && "$OPENAI" == "true" ]]; then
+    echo "✅ $ENV: All systems operational"
+  else
+    echo "❌ $ENV: Configuration issues detected"
+  fi
+done
 ```
 
-## Success Criteria
+### Query Validation
+```bash
+#!/bin/bash
+# save as: scripts/verify-queries.sh
+
+TEST_QUERIES=(
+  "What is the first-line treatment for hypertension?"
+  "What blood pressure target for patients with diabetes?"
+  "When to refer hypertension to specialist?"
+)
+
+for QUERY in "${TEST_QUERIES[@]}"; do
+  echo "Testing: $QUERY"
+  RESPONSE=$(curl -s -X POST https://api-staging.nice-cks-graphrag.care/query \
+    -H "Content-Type: application/json" \
+    -H "X-API-Key: ${API_KEY}" \
+    -d "{\"question\":\"$QUERY\"}")
+  
+  # Check if response contains placeholder text
+  if echo "$RESPONSE" | grep -q "placeholder"; then
+    echo "❌ Still returning placeholder responses"
+  else
+    echo "✅ Real GraphRAG response received"
+  fi
+done
+```
+
+## 📊 SUCCESS METRICS
 
 ### Technical Metrics
-- [ ] API response time < 5 seconds (p95)
-- [ ] Error rate < 1%
-- [ ] Successful query completion > 95%
-- [ ] No CORS errors in browser console
+- [ ] API uptime > 99.9%
+- [ ] Response time p50 < 2s, p99 < 5s
+- [ ] Error rate < 0.1%
+- [ ] MongoDB connection pool healthy
+- [ ] No Lambda cold start issues
 
-### Functional Validation
-- [ ] Users can ask clinical questions
-- [ ] Answers include NICE sources
-- [ ] Clinical disclaimer displayed
-- [ ] Rate limiting works gracefully
-- [ ] Error messages are user-friendly
+### Business Metrics
+- [ ] Clinical accuracy validated
+- [ ] Source attribution working
+- [ ] No hallucinated responses
+- [ ] Audit trail complete
+- [ ] Cost per query < £0.03
 
-## Post-Deployment Tasks
+## 🚨 ROLLBACK PROCEDURES
 
-### Day 1
-- [ ] Monitor error logs closely
-- [ ] Collect initial user feedback
-- [ ] Document any issues found
-- [ ] Update runbooks if needed
+### Immediate Rollback Triggers
+- Clinical inaccuracy detected
+- Response time > 10s sustained
+- Error rate > 5%
+- Security issue identified
 
-### Week 1
-- [ ] Review usage analytics
-- [ ] Analyze query patterns
-- [ ] Identify optimization opportunities
-- [ ] Plan for sync automation (TASK-060)
+### Rollback Steps
+1. Route traffic to previous version
+   ```bash
+   sst deploy --stage production --rollback
+   ```
+2. Notify all stakeholders
+3. Disable problematic functions
+4. Begin root cause analysis
+5. Document lessons learned
 
-## Sign-offs
+## 📞 ESCALATION CONTACTS
 
-### Backend Team (care-graphRAG)
-- **Ready for Production**: ✅
-- **Contact**: graphrag-support@care.engineering
-- **On-call**: [Name] - [Phone]
+| Role | Contact | When to Escalate |
+|------|---------|------------------|
+| Dev Lead | [TBD] | Code/deployment issues |
+| Infra Lead | [TBD] | AWS/SST issues |
+| Clinical Lead | [TBD] | Accuracy concerns |
+| PM | [TBD] | Timeline/scope issues |
 
-### Frontend Team (care.engineering)
-- **Ready for Production**: [ ]
-- **Contact**: frontend-team@care.engineering
-- **On-call**: [Name] - [Phone]
+## 📝 SIGN-OFF REQUIREMENTS
 
-### Clinical Safety
-- **Review Complete**: [ ]
-- **Approved By**: [Name]
-- **Date**: [Date]
+### Technical Sign-off
+- [ ] Backend lead approval
+- [ ] Frontend lead approval
+- [ ] Infrastructure approval
+- [ ] Security review passed
 
-## Notes
-
-1. **API Key Security**: Never commit API keys to version control
-2. **CORS Domains**: Only production domains are whitelisted
-3. **Rate Limits**: 10 requests per minute per IP
-4. **Support**: 24/7 on-call for first 48 hours post-deployment
+### Business Sign-off
+- [ ] Clinical team validation
+- [ ] Product owner approval
+- [ ] Compliance review
+- [ ] Go-live authorization
 
 ---
 
-**Last Updated**: 2025-01-31  
-**Next Review**: After deployment completion
+**Remember**: Do not proceed to production until ALL blockers are resolved and GraphRAG is returning real clinical responses.
