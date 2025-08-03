@@ -1,11 +1,16 @@
 """
 Lambda-compatible configuration management for GraphRAG.
-Simplified version using environment variables only.
+Uses SST v3 secrets with UTF-8 decode fix.
 """
 
 import os
 import logging
 from typing import Optional
+
+try:
+    from .simple_secrets import get_mongodb_uri, get_openai_api_key
+except ImportError:
+    from .sst_secrets import get_mongodb_uri, get_openai_api_key
 
 logger = logging.getLogger(__name__)
 
@@ -51,33 +56,21 @@ class GraphRAGConfig:
         logger.info(f"GraphRAG Config initialized for {self.environment} environment")
     
     def _load_secrets(self) -> None:
-        """Load secrets from SST environment variables if available."""
-        # SST v3 makes linked secrets available as environment variables
-        # Try different possible environment variable names
-        
-        # MongoDB URI
-        mongodb_uri = (
-            os.getenv("MongoDbUri") or  # Direct secret name
-            os.getenv("MONGODB_URI") or  # Standard environment variable
-            os.getenv("SST_Secret_MongoDbUri") or  # Alternative SST pattern
-            os.getenv("SST_RESOURCE_MongoDbUri")  # Another possible pattern
-        )
-        
+        """Load secrets from SST v3 with UTF-8 decode fix."""
+        # Use the robust SST secrets handler
+        mongodb_uri = get_mongodb_uri()
         if mongodb_uri:
             os.environ["MONGODB_URI"] = mongodb_uri
-            logger.info("MongoDB URI loaded from SST environment variables")
+            logger.info("MongoDB URI loaded from SST secrets")
+        else:
+            logger.warning("MongoDB URI not found in SST secrets")
         
-        # OpenAI API Key
-        openai_api_key = (
-            os.getenv("OpenAiApiKey") or  # Direct secret name
-            os.getenv("OPENAI_API_KEY") or  # Standard environment variable
-            os.getenv("SST_Secret_OpenAiApiKey") or  # Alternative SST pattern
-            os.getenv("SST_RESOURCE_OpenAiApiKey")  # Another possible pattern
-        )
-        
+        openai_api_key = get_openai_api_key()
         if openai_api_key:
             os.environ["OPENAI_API_KEY"] = openai_api_key
-            logger.info("OpenAI API key loaded from SST environment variables")
+            logger.info("OpenAI API key loaded from SST secrets")
+        else:
+            logger.warning("OpenAI API key not found in SST secrets")
     
     def _get_required_env(self, key: str) -> str:
         """Get required environment variable or raise error."""
