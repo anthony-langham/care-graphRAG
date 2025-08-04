@@ -16,7 +16,7 @@ BLUE='\033[0;34m'
 NC='\033[0m'
 
 # Configuration
-API_URL="${API_URL:-https://nk0lprzxu7.execute-api.eu-west-2.amazonaws.com}"
+API_URL="${API_URL:-https://api.graphrag.care}"
 API_KEY="${GRAPHRAG_API_KEY:-}"
 
 # Test queries

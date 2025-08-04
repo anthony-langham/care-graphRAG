@@ -24,6 +24,15 @@ Building an explainable, low-cost GraphRAG system for UK NICE Clinical Knowledge
 - CloudWatch for monitoring and logs
 - Custom domain: api.graphrag.care (production), staging-api.graphrag.care (staging)
 
+### API Endpoints
+
+- **Production**: `https://api.graphrag.care`
+  - Health: `https://api.graphrag.care/health`
+  - Query: `POST https://api.graphrag.care/query`
+- **Staging**: `https://staging-api.graphrag.care`
+  - Health: `https://staging-api.graphrag.care/health`
+  - Query: `POST https://staging-api.graphrag.care/query`
+
 ## Plan
 
 ### Phase Overview
@@ -178,7 +187,7 @@ export default {
 **Phase 8: Serverless Deployment** - COMPLETE
 
 - ✅ **TASK-038**: SST project setup for serverless deployment
-- ✅ **TASK-039**: Lambda functions created (query, sync, health)  
+- ✅ **TASK-039**: Lambda functions created (query, sync, health)
 - ✅ **TASK-040**: Lambda layers configured with Python dependencies
 - ✅ **TASK-041**: API Gateway configured with CORS and authentication
 - ✅ **TASK-042**: Environment config and AWS Secrets Manager integration
@@ -214,6 +223,7 @@ export default {
 - **MongoDB SSL Resolution**: ✅ **COMPLETE** - Python 3.11 + OpenSSL 1.1.1 compatibility confirmed for MongoDB Atlas (TASK-054)
 - **Production Monitoring**: ✅ **COMPLETE** - CloudWatch dashboards, X-Ray tracing, alarms, and SNS notifications fully configured (TASK-055)
 - **Custom Domain Setup**: ✅ **COMPLETE** - graphrag.care domain configured with api.graphrag.care (production) and staging-api.graphrag.care (staging)
+- **URL Migration**: ✅ **COMPLETE** - All documentation and scripts updated from AWS URLs to custom domains (20+ files updated)
 
 ### 🛠️ AVAILABLE SCRIPTS:
 
@@ -238,14 +248,16 @@ export default {
 ### 📋 NEXT PRIORITIES (Plan v003):
 
 **Phase 9-10: Frontend Integration - ✅ COMPLETE**
+
 - ✅ TASK-046 to TASK-048: Staging environment deployed and validated
 - ✅ Frontend Team Handoff: Complete documentation delivered to care.engineering team
   - ✅ 33 production-ready files delivered (components, services, hooks, utilities)
-  - ✅ 85%+ test coverage achieved 
+  - ✅ 85%+ test coverage achieved
   - ✅ All 11 tasks (TASK-201 to TASK-211) completed by care.engineering team
   - ✅ Ready for production deployment
 
 **Phase 11: Production Deployment & Operations - 🚀 CURRENT FOCUS**
+
 - ✅ TASK-049: Production API Setup - COMPLETE
   - Production deployment scripts with safety checks
   - Security middleware (API key auth, rate limiting)
@@ -270,7 +282,7 @@ export default {
 - TASK-055 to TASK-057: Maintenance automation (Week 2)
   - Automated NICE content sync implementation
   - Cost optimization and performance tuning
-- TASK-058 to TASK-060: Operations support (Week 3)  
+- TASK-058 to TASK-060: Operations support (Week 3)
   - Documentation and runbook creation
   - Long-term planning and architecture scaling
 
@@ -326,7 +338,7 @@ Each task should follow:
 - Implement comprehensive error handling in each module
 - Add logging statements for debugging
 - Write tests alongside implementation
-- Document functions and complex logic
+- Document functions and complex logic in Claude or TODO file
 
 ## Test-Driven Development (TDD) Approach
 

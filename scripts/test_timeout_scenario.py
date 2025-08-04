@@ -9,7 +9,7 @@ import json
 import aiohttp
 from typing import Dict, Any
 
-API_BASE = "https://w46s2t96h8.execute-api.eu-west-2.amazonaws.com"
+API_BASE = "https://staging-api.graphrag.care"
 
 async def test_timeout_scenario():
     """Test various timeout scenarios"""

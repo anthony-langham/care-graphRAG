@@ -19,9 +19,7 @@ export default $config({
     const openaiApiKey = new sst.Secret("OpenAiApiKey");
 
     // Create SNS topic for alerts (production only)
-    // Disabled due to IAM permissions - enable after adding SNS permissions to deploy user
-    const alertsTopic = null; // $app.stage === "production" ? new sst.aws.SnsTopic("AlertsTopic") : null;
-
+    const alertsTopic = $app.stage === "production" ? new sst.aws.SnsTopic("AlertsTopic") : null;
 
     // API with Python Lambda functions
     const api = new sst.aws.ApiGatewayV2("Api", {
@@ -37,21 +35,6 @@ export default $config({
           process.env.ALLOWED_ORIGIN || "http://localhost:3000",
         ],
       },
-      // Add custom domain configuration
-      ...($app.stage === "production" && {
-        domain: {
-          name: "api.graphrag.care",
-          cert: "arn:aws:acm:eu-west-2:146409062658:certificate/04ea5541-2506-4169-880e-f3c60457a82f",
-          dns: false, // We're managing DNS in Cloudflare
-        }
-      }),
-      ...($app.stage === "staging" && {
-        domain: {
-          name: "staging-api.graphrag.care",
-          cert: "arn:aws:acm:eu-west-2:146409062658:certificate/ee003893-b55d-445d-9981-260fbbfe3aa2",
-          dns: false, // We're managing DNS in Cloudflare
-        }
-      }),
     });
 
     // API Key secret for production authentication
@@ -182,26 +165,27 @@ export default $config({
     // CloudWatch Dashboard will be created via setup script
     // This avoids SST v3 API compatibility issues
 
-    // Custom domain info for outputs
-    const customDomain = $app.stage === "production" 
-      ? "api.graphrag.care"
-      : $app.stage === "staging" 
-      ? "staging-api.graphrag.care"
-      : undefined;
-
     // Output the API URL and monitoring links
     const outputs: Record<string, any> = {
       ApiUrl: api.url,
-      CustomDomain: customDomain || "No custom domain configured",
-      CustomDomainStatus: "Pending certificate setup - run ./scripts/setup-api-gateway-domains.sh",
       CloudWatchDashboard: `https://eu-west-2.console.aws.amazon.com/cloudwatch/home?region=eu-west-2#dashboards:name/nice-cks-graphrag-${$app.stage}`,
       XRayTraces: `https://eu-west-2.console.aws.amazon.com/xray/home?region=eu-west-2#/traces`,
     };
 
-    // Commented out until SNS permissions are added to deploy user
-    // if ($app.stage === "production" && alertsTopic) {
-    //   outputs.AlertsTopicArn = alertsTopic.arn;
-    // }
+    if ($app.stage === "production" && alertsTopic) {
+      outputs.AlertsTopicArn = alertsTopic.arn;
+    }
+
+    // Instructions for custom domain setup
+    if ($app.stage === "staging" || $app.stage === "production") {
+      const domain = $app.stage === "production" ? "api.graphrag.care" : "staging-api.graphrag.care";
+      console.log("\n📌 To set up custom domain:");
+      console.log(`1. Run: ./scripts/setup-api-gateway-domains.sh`);
+      console.log(`2. Request certificate for ${domain}`);
+      console.log(`3. Add validation DNS records to Cloudflare`);
+      console.log(`4. Once validated, manually create custom domain in API Gateway`);
+      console.log(`5. Update Cloudflare CNAME to point to the API Gateway custom domain`);
+    }
 
     return outputs;
   },
