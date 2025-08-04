@@ -15,7 +15,7 @@ from pydantic import BaseModel
 from mangum import Mangum
 
 # Import GraphRAG components
-from graphrag.qa_chain import QAChain
+from .graphrag.qa_chain import QAChain
 
 # Configure logging
 logging.basicConfig(level=logging.INFO, format='%(asctime)s - %(name)s - %(levelname)s - %(message)s')
