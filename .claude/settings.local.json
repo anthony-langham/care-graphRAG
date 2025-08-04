@@ -25,7 +25,9 @@
       "Bash(./scripts/update-to-custom-domains.sh:*)",
       "Bash(sst dev:*)",
       "mcp__context7__get-library-docs",
-      "Bash(rm:*)"
+      "Bash(rm:*)",
+      "Bash(sst unlock:*)",
+      "Bash(mv:*)"
     ],
     "deny": []
   }
