@@ -9,10 +9,6 @@ declare module "sst" {
       "type": "sst.aws.ApiGatewayV2"
       "url": string
     }
-    "ApiKey": {
-      "type": "sst.sst.Secret"
-      "value": string
-    }
     "MongoDbUri": {
       "type": "sst.sst.Secret"
       "value": string
