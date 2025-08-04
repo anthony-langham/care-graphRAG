@@ -17,16 +17,16 @@ echo -e "${BLUE}==============================${NC}\n"
 # URL mappings
 declare -A url_mappings=(
     # Production
-    ["https://nk0lprzxu7.execute-api.eu-west-2.amazonaws.com"]="https://api.graphrag.care"
-    ["nk0lprzxu7.execute-api.eu-west-2.amazonaws.com"]="api.graphrag.care"
+    ["https://api.graphrag.care"]="https://api.graphrag.care"
+    ["api.graphrag.care"]="api.graphrag.care"
     
     # Staging (current)
-    ["https://fdfd8icboe.execute-api.eu-west-2.amazonaws.com"]="https://staging-api.graphrag.care"
-    ["fdfd8icboe.execute-api.eu-west-2.amazonaws.com"]="staging-api.graphrag.care"
+    ["https://staging-api.graphrag.care"]="https://staging-api.graphrag.care"
+    ["staging-api.graphrag.care"]="staging-api.graphrag.care"
     
     # Dev/Staging (older docs)
-    ["https://w46s2t96h8.execute-api.eu-west-2.amazonaws.com"]="https://staging-api.graphrag.care"
-    ["w46s2t96h8.execute-api.eu-west-2.amazonaws.com"]="staging-api.graphrag.care"
+    ["https://staging-api.graphrag.care"]="https://staging-api.graphrag.care"
+    ["staging-api.graphrag.care"]="staging-api.graphrag.care"
 )
 
 # Files to exclude from updates

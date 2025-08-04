@@ -8,8 +8,8 @@ Log into Cloudflare → Select graphrag.care → DNS → Add these records:
 
 | Type | Name | Content | Proxy |
 |------|------|---------|-------|
-| CNAME | api | nk0lprzxu7.execute-api.eu-west-2.amazonaws.com | ✅ ON |
-| CNAME | staging-api | fdfd8icboe.execute-api.eu-west-2.amazonaws.com | ✅ ON |
+| CNAME | api | api.graphrag.care | ✅ ON |
+| CNAME | staging-api | staging-api.graphrag.care | ✅ ON |
 | A | @ | 192.0.2.1 | ✅ ON |
 
 ### Step 2: Configure Page Rule
@@ -34,8 +34,8 @@ curl https://staging-api.graphrag.care/health
 
 | Environment | Old URL | New URL |
 |-------------|---------|---------|
-| Production | https://nk0lprzxu7.execute-api.eu-west-2.amazonaws.com | https://api.graphrag.care |
-| Staging | https://fdfd8icboe.execute-api.eu-west-2.amazonaws.com | https://staging-api.graphrag.care |
+| Production | https://api.graphrag.care | https://api.graphrag.care |
+| Staging | https://staging-api.graphrag.care | https://staging-api.graphrag.care |
 
 ## 🔄 DNS Propagation
 

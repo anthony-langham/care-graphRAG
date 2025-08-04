@@ -19,11 +19,48 @@ export default $config({
     const openaiApiKey = new sst.Secret("OpenAiApiKey");
 
     // Create SNS topic for alerts (production only)
-    // Disabled due to IAM permissions - enable after adding SNS permissions to deploy user
-    const alertsTopic = null; // $app.stage === "production" ? new sst.aws.SnsTopic("AlertsTopic") : null;
+    const alertsTopic = $app.stage === "production" ? new sst.aws.SnsTopic("AlertsTopic") : null;
 
+    // Custom domain configuration based on stage
+    let domainProps = {};
+    
+    if ($app.stage === "production") {
+      // For production, we need to create the certificate in us-east-1
+      const cert = new sst.aws.AcmCertificate("ApiCertificate", {
+        domainName: "api.graphrag.care",
+        validation: {
+          method: "DNS",
+          // You'll need to add these DNS records to Cloudflare
+          // The records will be shown in the SST output
+        },
+      });
+      
+      domainProps = {
+        domain: {
+          name: "api.graphrag.care",
+          cert: cert.arn,
+          dns: false, // We're using Cloudflare for DNS
+        },
+      };
+    } else if ($app.stage === "staging") {
+      // For staging
+      const cert = new sst.aws.AcmCertificate("ApiCertificate", {
+        domainName: "staging-api.graphrag.care",
+        validation: {
+          method: "DNS",
+        },
+      });
+      
+      domainProps = {
+        domain: {
+          name: "staging-api.graphrag.care",
+          cert: cert.arn,
+          dns: false, // We're using Cloudflare for DNS
+        },
+      };
+    }
 
-    // API with Python Lambda functions
+    // API with Python Lambda functions and custom domain
     const api = new sst.aws.ApiGatewayV2("Api", {
       cors: {
         allowCredentials: true,
@@ -37,21 +74,7 @@ export default $config({
           process.env.ALLOWED_ORIGIN || "http://localhost:3000",
         ],
       },
-      // Add custom domain configuration
-      ...($app.stage === "production" && {
-        domain: {
-          name: "api.graphrag.care",
-          cert: "arn:aws:acm:eu-west-2:146409062658:certificate/04ea5541-2506-4169-880e-f3c60457a82f",
-          dns: false, // We're managing DNS in Cloudflare
-        }
-      }),
-      ...($app.stage === "staging" && {
-        domain: {
-          name: "staging-api.graphrag.care",
-          cert: "arn:aws:acm:eu-west-2:146409062658:certificate/ee003893-b55d-445d-9981-260fbbfe3aa2",
-          dns: false, // We're managing DNS in Cloudflare
-        }
-      }),
+      ...domainProps,
     });
 
     // API Key secret for production authentication
@@ -182,26 +205,26 @@ export default $config({
     // CloudWatch Dashboard will be created via setup script
     // This avoids SST v3 API compatibility issues
 
-    // Custom domain info for outputs
-    const customDomain = $app.stage === "production" 
-      ? "api.graphrag.care"
-      : $app.stage === "staging" 
-      ? "staging-api.graphrag.care"
-      : undefined;
-
     // Output the API URL and monitoring links
     const outputs: Record<string, any> = {
       ApiUrl: api.url,
-      CustomDomain: customDomain || "No custom domain configured",
-      CustomDomainStatus: "Pending certificate setup - run ./scripts/setup-api-gateway-domains.sh",
+      CustomDomain: domainProps.domain?.name || "No custom domain configured",
       CloudWatchDashboard: `https://eu-west-2.console.aws.amazon.com/cloudwatch/home?region=eu-west-2#dashboards:name/nice-cks-graphrag-${$app.stage}`,
       XRayTraces: `https://eu-west-2.console.aws.amazon.com/xray/home?region=eu-west-2#/traces`,
     };
 
-    // Commented out until SNS permissions are added to deploy user
-    // if ($app.stage === "production" && alertsTopic) {
-    //   outputs.AlertsTopicArn = alertsTopic.arn;
-    // }
+    if ($app.stage === "production" && alertsTopic) {
+      outputs.AlertsTopicArn = alertsTopic.arn;
+    }
+
+    // Show certificate validation instructions if using custom domain
+    if (domainProps.domain) {
+      console.log("\n⚠️  IMPORTANT: Certificate Validation Required!");
+      console.log("1. Check AWS ACM Console for validation DNS records");
+      console.log("2. Add the CNAME records to Cloudflare");
+      console.log("3. Wait for certificate validation (5-30 minutes)");
+      console.log("4. Then redeploy with: sst deploy --stage " + $app.stage);
+    }
 
     return outputs;
   },

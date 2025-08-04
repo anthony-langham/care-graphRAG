@@ -15,7 +15,7 @@ YELLOW='\033[1;33m'
 NC='\033[0m' # No Color
 
 # Configuration
-API_URL="https://nk0lprzxu7.execute-api.eu-west-2.amazonaws.com"
+API_URL="https://api.graphrag.care"
 FRONTEND_URLS=(
     "https://care.engineering"
     "https://www.care.engineering"

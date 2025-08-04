@@ -196,7 +196,7 @@ show_cloudflare_guide() {
     echo -e "${GREEN}Staging API:${NC}"
     echo "   Type: CNAME"
     echo "   Name: staging-api"
-    echo "   Content: w46s2t96h8.execute-api.eu-west-2.amazonaws.com"
+    echo "   Content: staging-api.graphrag.care"
     echo "   Proxy: ON (orange cloud)"
     echo ""
     echo -e "${GREEN}Production API:${NC}"

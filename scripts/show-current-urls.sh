@@ -73,20 +73,20 @@ echo ""
 echo -e "${BLUE}3. Documented URLs (from codebase):${NC}"
 
 echo -e "\n${CYAN}Staging URLs found in documentation:${NC}"
-echo -e "- ${YELLOW}https://w46s2t96h8.execute-api.eu-west-2.amazonaws.com${NC} (most common in docs)"
-echo -e "- ${YELLOW}https://fdfd8icboe.execute-api.eu-west-2.amazonaws.com${NC} (found in .sst/outputs.json)"
+echo -e "- ${YELLOW}https://staging-api.graphrag.care${NC} (most common in docs)"
+echo -e "- ${YELLOW}https://staging-api.graphrag.care${NC} (found in .sst/outputs.json)"
 
 echo -e "\n${CYAN}Production URLs found in documentation:${NC}"
-echo -e "- ${YELLOW}https://nk0lprzxu7.execute-api.eu-west-2.amazonaws.com${NC} (in production docs)"
+echo -e "- ${YELLOW}https://api.graphrag.care${NC} (in production docs)"
 echo ""
 
 # 4. Test known endpoints
 echo -e "${BLUE}4. Testing Known Endpoints...${NC}\n"
 
 # Test all known URLs
-test_endpoint "https://w46s2t96h8.execute-api.eu-west-2.amazonaws.com" "Staging (docs)"
-test_endpoint "https://fdfd8icboe.execute-api.eu-west-2.amazonaws.com" "Dev/Staging (current)"
-test_endpoint "https://nk0lprzxu7.execute-api.eu-west-2.amazonaws.com" "Production (docs)"
+test_endpoint "https://staging-api.graphrag.care" "Staging (docs)"
+test_endpoint "https://staging-api.graphrag.care" "Dev/Staging (current)"
+test_endpoint "https://api.graphrag.care" "Production (docs)"
 
 # 5. CloudWatch Logs check
 echo -e "${BLUE}5. Recent Lambda Invocations (CloudWatch):${NC}"
@@ -108,9 +108,9 @@ echo ""
 echo -e "${BLUE}📋 SUMMARY:${NC}"
 echo -e "${CYAN}━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━${NC}"
 echo -e "${GREEN}Most Likely Current URLs:${NC}"
-echo -e "  Staging: ${YELLOW}https://w46s2t96h8.execute-api.eu-west-2.amazonaws.com${NC}"
-echo -e "  Dev:     ${YELLOW}https://fdfd8icboe.execute-api.eu-west-2.amazonaws.com${NC}"
-echo -e "  Prod:    ${YELLOW}https://nk0lprzxu7.execute-api.eu-west-2.amazonaws.com${NC} (if deployed)"
+echo -e "  Staging: ${YELLOW}https://staging-api.graphrag.care${NC}"
+echo -e "  Dev:     ${YELLOW}https://staging-api.graphrag.care${NC}"
+echo -e "  Prod:    ${YELLOW}https://api.graphrag.care${NC} (if deployed)"
 echo -e "${CYAN}━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━${NC}"
 
 # 7. Recommendations
