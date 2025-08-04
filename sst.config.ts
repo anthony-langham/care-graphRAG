@@ -80,6 +80,10 @@ export default $config({
         }
       },
       environment: {
+        // Pass secrets directly
+        MONGODB_URI: process.env.MONGODB_URI || "",
+        OPENAI_API_KEY: process.env.OPENAI_API_KEY || "",
+        
         // MongoDB Configuration
         MONGODB_DB_NAME: process.env.MONGODB_DB_NAME || "ckshtn",
         MONGODB_GRAPH_COLLECTION: process.env.MONGODB_GRAPH_COLLECTION || "kg",
@@ -110,6 +114,15 @@ export default $config({
       },
     });
 
+    // Debug endpoint (temporary)
+    api.route("GET /debug/env", {
+      handler: "functions/src/functions/debug_env.handler",
+      link: [mongodbUri, openaiApiKey],
+      runtime: "python3.11",
+      timeout: "10 seconds",
+      memory: "512 MB",
+    });
+
     // Health endpoint with monitoring
     const healthFunction = api.route("GET /health", {
       handler: "functions/src/functions/health.handler",
@@ -133,6 +146,10 @@ export default $config({
         }
       },
       environment: {
+        // Pass secrets directly
+        MONGODB_URI: process.env.MONGODB_URI || "",
+        OPENAI_API_KEY: process.env.OPENAI_API_KEY || "",
+        
         // MongoDB Configuration
         MONGODB_DB_NAME: process.env.MONGODB_DB_NAME || "ckshtn",
         MONGODB_GRAPH_COLLECTION: process.env.MONGODB_GRAPH_COLLECTION || "kg",

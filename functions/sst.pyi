@@ -6,9 +6,6 @@ class Resource:
     class Api:
         type: str
         url: str
-    class ApiKey:
-        type: str
-        value: str
     class App:
         name: str
         stage: str

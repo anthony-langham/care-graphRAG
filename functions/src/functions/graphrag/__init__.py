@@ -1,0 +1,1 @@
+"""Lambda-compatible GraphRAG modules for production deployment."""

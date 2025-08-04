@@ -185,7 +185,6 @@ dependencies = [
     { name = "pymongo" },
     { name = "python-dotenv" },
     { name = "requests" },
-    { name = "sst" },
     { name = "tenacity" },
 ]
 
@@ -205,7 +204,6 @@ requires-dist = [
     { name = "pymongo", specifier = "==4.6.1" },
     { name = "python-dotenv", specifier = "==1.0.0" },
     { name = "requests", specifier = "==2.31.0" },
-    { name = "sst", specifier = ">=0.2.0" },
     { name = "tenacity", specifier = "==8.2.3" },
 ]
 
@@ -745,12 +743,6 @@ wheels = [
     { url = "https://files.pythonhosted.org/packages/91/72/55b0c34e39feb81991aa3c974d85074c356239ac1170dfb81a474b4c23b3/sqlalchemy-2.0.42-cp311-cp311-win_amd64.whl", hash = "sha256:9193fa484bf00dcc1804aecbb4f528f1123c04bad6a08d7710c909750fa76aeb", size = 2123380, upload-time = "2025-07-29T13:24:00.155Z" },
     { url = "https://files.pythonhosted.org/packages/ee/55/ba2546ab09a6adebc521bf3974440dc1d8c06ed342cceb30ed62a8858835/sqlalchemy-2.0.42-py3-none-any.whl", hash = "sha256:defcdff7e661f0043daa381832af65d616e060ddb54d3fe4476f51df7eaa1835", size = 1922072, upload-time = "2025-07-29T13:09:17.061Z" },
 ]
-
-[[package]]
-name = "sst"
-version = "0.2.4"
-source = { registry = "https://pypi.org/simple" }
-sdist = { url = "https://files.pythonhosted.org/packages/a1/52/de850270ffe20766f6ca1c19a0fd2d0ed0a2143950210446a74815c614f0/sst-0.2.4.tar.gz", hash = "sha256:cc2a5469e745fef6986df2e3638b0af96a6033a1b268bdc4654d27b2914d0d0f", size = 171202, upload-time = "2013-07-30T21:01:43.889Z" }
 
 [[package]]
 name = "starlette"

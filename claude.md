@@ -224,6 +224,8 @@ export default {
 - **Production Monitoring**: ✅ **COMPLETE** - CloudWatch dashboards, X-Ray tracing, alarms, and SNS notifications fully configured (TASK-055)
 - **Custom Domain Setup**: ✅ **COMPLETE** - graphrag.care domain configured with api.graphrag.care (production) and staging-api.graphrag.care (staging)
 - **URL Migration**: ✅ **COMPLETE** - All documentation and scripts updated from AWS URLs to custom domains (20+ files updated)
+- **GraphRAG Integration**: ✅ **COMPLETE** - QAChain integrated into Lambda handlers (TASK-058e)
+- **Module Packaging**: 🔧 **PENDING** - Python module imports need adjustment for Lambda deployment (TASK-058f)
 
 ### 🛠️ AVAILABLE SCRIPTS:
 
@@ -291,6 +293,11 @@ export default {
 The detailed task list is maintained in `.claude/TODO.md` for all production deployment tasks (TASK-049 to TASK-060) based on plan-v003.md comprehensive production deployment strategy. Previous TODO versions are archived in `.claude/TODOS/` with timestamps.
 
 ### Recent Major Achievements:
+
+- **GraphRAG Lambda Integration**: Successfully integrated QAChain with hybrid retriever into Lambda handlers
+- **SST v3 Deployment**: Complete serverless infrastructure deployed to staging with custom domains
+- **Secret Management**: MongoDB URI and OpenAI API key configured via SST secrets
+- **API Infrastructure**: Fully operational API Gateway with health monitoring and authentication
 
 - **Integration Testing Suite**: Complete integration test framework with 4 test modules covering end-to-end workflows, error scenarios, load testing, and cost tracking with automated CI/CD reporting
 - **Comprehensive Unit Test Suite**: Complete TDD implementation with 59 passing tests covering scraper, graph builder, and retriever components

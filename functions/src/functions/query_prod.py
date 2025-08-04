@@ -14,7 +14,10 @@ from fastapi import FastAPI, HTTPException, Header
 from pydantic import BaseModel
 from mangum import Mangum
 
-# Import GraphRAG components
+# Import GraphRAG components - adjust path for Lambda
+import sys
+import os
+sys.path.insert(0, os.path.dirname(os.path.dirname(os.path.abspath(__file__))))
 from graphrag.qa_chain import QAChain
 
 # Configure logging

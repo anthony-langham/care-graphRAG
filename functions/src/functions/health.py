@@ -1,6 +1,5 @@
 """
-Minimal Lambda handler for health check endpoint with hardcoded secrets.
-This is a temporary solution until SST v3 secrets are properly working.
+Lambda handler for health check endpoint.
 """
 
 import json
@@ -14,11 +13,16 @@ from mangum import Mangum
 # Configure logging
 logging.basicConfig(level=logging.INFO, format='%(asctime)s - %(name)s - %(levelname)s - %(message)s')
 logger = logging.getLogger(__name__)
-logger.info("Health handler starting - v3 simplified")
+logger.info("Health handler starting - v6 with environment variables")
 
-# Temporary: Use environment variables or SST secrets
+# Load from environment variables
 MONGODB_URI = os.environ.get("MONGODB_URI", "not-configured")
 OPENAI_API_KEY = os.environ.get("OPENAI_API_KEY", "not-configured")
+
+if MONGODB_URI != "not-configured" and OPENAI_API_KEY != "not-configured":
+    logger.info("Secrets loaded from environment variables")
+else:
+    logger.warning("Secrets not found in environment variables")
 
 # FastAPI app
 app = FastAPI(title="NICE GraphRAG Health", version="1.0.0")
