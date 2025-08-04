@@ -9,10 +9,4 @@ class Resource:
     class App:
         name: str
         stage: str
-    class MongoDbUri:
-        type: str
-        value: str
-    class OpenAiApiKey:
-        type: str
-        value: str
 

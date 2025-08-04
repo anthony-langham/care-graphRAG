@@ -22,7 +22,10 @@
       "Bash(aws lambda get-function-configuration:*)",
       "Bash(find:*)",
       "Bash(unzip:*)",
-      "Bash(./scripts/update-to-custom-domains.sh:*)"
+      "Bash(./scripts/update-to-custom-domains.sh:*)",
+      "Bash(sst dev:*)",
+      "mcp__context7__get-library-docs",
+      "Bash(rm:*)"
     ],
     "deny": []
   }
