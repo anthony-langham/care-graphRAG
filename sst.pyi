@@ -3,7 +3,16 @@
 from typing import Any
 
 class Resource:
+    class Api:
+        type: str
+        url: str
     class App:
         name: str
         stage: str
+    class MongoDbUri:
+        type: str
+        value: str
+    class OpenAiApiKey:
+        type: str
+        value: str
 

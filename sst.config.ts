@@ -150,9 +150,9 @@ export default $config({
       },
     });
 
-    // Environment test endpoint (temporary for debugging)
-    const envTestFunction = api.route("GET /env-test", {
-      handler: "functions/src/functions/env_test.handler",
+    // MongoDB test endpoint (debugging)
+    const mongoTestFunction = api.route("GET /test-mongodb", {
+      handler: "functions/src/functions/test_mongodb.handler",
       link: [mongodbUri, openaiApiKey],
       runtime: "python3.11",
       timeout: "30 seconds",

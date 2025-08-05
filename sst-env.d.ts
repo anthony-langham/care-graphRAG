@@ -5,6 +5,18 @@
 
 declare module "sst" {
   export interface Resource {
+    "Api": {
+      "type": "sst.aws.ApiGatewayV2"
+      "url": string
+    }
+    "MongoDbUri": {
+      "type": "sst.sst.Secret"
+      "value": string
+    }
+    "OpenAiApiKey": {
+      "type": "sst.sst.Secret"
+      "value": string
+    }
   }
 }
 /// <reference path="sst-env.d.ts" />
