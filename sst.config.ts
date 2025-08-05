@@ -4,7 +4,7 @@ export default $config({
   app(input) {
     return {
       name: "nice-cks-graphrag",
-      removal: input?.stage === "production" ? "retain" : "remove",
+      removal: "remove",  // Always remove - only using staging
       home: "aws",
       providers: {
         aws: {
@@ -34,12 +34,12 @@ export default $config({
           process.env.ALLOWED_ORIGIN || "http://localhost:3000",
         ],
       },
-      // Custom domain for staging only
-      domain: {
-        name: "staging-api.graphrag.care",
-        cert: "arn:aws:acm:eu-west-2:146409062658:certificate/ee003893-b55d-445d-9981-260fbbfe3aa2",
-        dns: false, // We're managing DNS in Cloudflare
-      },
+      // Custom domain for staging only (temporarily disabled to avoid conflicts)
+      // domain: {
+      //   name: "staging-api.graphrag.care",
+      //   cert: "arn:aws:acm:eu-west-2:146409062658:certificate/ee003893-b55d-445d-9981-260fbbfe3aa2",
+      //   dns: false, // We're managing DNS in Cloudflare
+      // },
     });
 
 
