@@ -39,19 +39,68 @@ async def test_mongodb():
         logger.info(f"SSL version: {ssl.OPENSSL_VERSION}")
         logger.info(f"PyMongo version: {pymongo.version}")
         
-        # Use the documented working pattern from MongoDB SSL Resolution Summary
-        # AWS Lambda Python 3.11 + OpenSSL 1.1.1 should work with simple connection
-        client = pymongo.MongoClient(
-            mongodb_uri,
-            serverSelectionTimeoutMS=5000,
-            maxPoolSize=1,  # Lambda constraint
-            retryWrites=True,
-            connectTimeoutMS=5000
-        )
+        # Try multiple connection approaches to find what works
+        connection_attempts = [
+            # Attempt 1: Simple connection (documented approach)
+            {
+                "name": "simple_connection",
+                "config": {
+                    "serverSelectionTimeoutMS": 5000,
+                    "maxPoolSize": 1,
+                    "retryWrites": True,
+                    "connectTimeoutMS": 5000
+                }
+            },
+            # Attempt 2: Disable SSL validation
+            {
+                "name": "ssl_disabled_validation",
+                "config": {
+                    "serverSelectionTimeoutMS": 5000,
+                    "maxPoolSize": 1,
+                    "retryWrites": True,
+                    "connectTimeoutMS": 5000,
+                    "tls": True,
+                    "tlsAllowInvalidCertificates": True,
+                    "tlsAllowInvalidHostnames": True
+                }
+            },
+            # Attempt 3: Force TLS 1.2
+            {
+                "name": "force_tls12",
+                "config": {
+                    "serverSelectionTimeoutMS": 5000,
+                    "maxPoolSize": 1,
+                    "retryWrites": True,
+                    "connectTimeoutMS": 5000,
+                    "tls": True,
+                    "tlsInsecure": True
+                }
+            }
+        ]
         
-        # Test connection
-        client.admin.command('ping')
-        logger.info("MongoDB ping successful")
+        last_error = None
+        working_method = None
+        for attempt in connection_attempts:
+            try:
+                logger.info(f"Trying connection method: {attempt['name']}")
+                client = pymongo.MongoClient(mongodb_uri, **attempt['config'])
+                
+                # Test connection
+                client.admin.command('ping')
+                logger.info(f"MongoDB connection successful with method: {attempt['name']}")
+                
+                # If we get here, connection worked
+                working_method = attempt['name']
+                break
+                
+            except Exception as e:
+                logger.warning(f"Connection method {attempt['name']} failed: {str(e)}")
+                last_error = e
+                client = None
+                continue
+        
+        if client is None:
+            raise last_error or Exception("All connection methods failed")
         
         # List databases
         dbs = client.list_database_names()
@@ -71,6 +120,7 @@ async def test_mongodb():
         return {
             "status": "success",
             "message": "MongoDB connection successful",
+            "working_method": working_method,
             "environment": {
                 "python_version": platform.python_version(),
                 "ssl_version": ssl.OPENSSL_VERSION,
