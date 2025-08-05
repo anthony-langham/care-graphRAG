@@ -98,7 +98,7 @@ config/
 # Other project files
 tsconfig.json
 sst.config.ts
-requirements-*.txt
+requirements/
 layers/
 
 # Mac

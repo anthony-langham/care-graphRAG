@@ -43,6 +43,57 @@ export default $config({
     });
 
 
+    // Basic test endpoint (no GraphRAG imports)
+    api.route("GET /test-basic", {
+      handler: "functions/src/functions/test_basic.handler",
+      link: [mongodbUri, openaiApiKey],
+      runtime: "python3.11",
+      timeout: "10 seconds",
+      memory: "512 MB",
+      environment: {
+        MONGODB_URI: process.env.MONGODB_URI || "",
+        OPENAI_API_KEY: process.env.OPENAI_API_KEY || "",
+      },
+    });
+
+    // Minimal test endpoint  
+    api.route("GET /test-minimal", {
+      handler: "functions/src/functions/test_minimal.handler",
+      link: [mongodbUri, openaiApiKey],
+      runtime: "python3.11",
+      timeout: "10 seconds",
+      memory: "512 MB",
+      environment: {
+        MONGODB_URI: process.env.MONGODB_URI || "",
+        OPENAI_API_KEY: process.env.OPENAI_API_KEY || "",
+      },
+    });
+
+    // Test imports endpoint
+    api.route("GET /test-imports", {
+      handler: "functions/src/functions/query_prod.handler",
+      link: [mongodbUri, openaiApiKey],
+      runtime: "python3.11",
+      timeout: "10 seconds",
+      memory: "512 MB",
+    });
+
+    // Test QA initialization endpoint
+    api.route("GET /test-qa-init", {
+      handler: "functions/src/functions/query_prod.handler",
+      link: [mongodbUri, openaiApiKey],
+      runtime: "python3.11",
+      timeout: "15 seconds",
+      memory: "512 MB",
+      environment: {
+        MONGODB_URI: process.env.MONGODB_URI || "",
+        OPENAI_API_KEY: process.env.OPENAI_API_KEY || "",
+        MONGODB_DB_NAME: process.env.MONGODB_DB_NAME || "ckshtn",
+        MONGODB_GRAPH_COLLECTION: process.env.MONGODB_GRAPH_COLLECTION || "kg",
+        MONGODB_VECTOR_COLLECTION: process.env.MONGODB_VECTOR_COLLECTION || "chunks",
+      },
+    });
+
     // Query endpoint with enhanced monitoring
     const queryFunction = api.route("POST /query", {
       handler: "functions/src/functions/query_prod.handler",

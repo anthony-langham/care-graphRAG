@@ -38,7 +38,7 @@ def test_required_files_exist():
         'src/qa_chain.py',
         'sst.config.ts',
         'package.json',
-        'requirements.txt'
+        'requirements/requirements.txt'
     ]
     
     for file_path in required_files:
