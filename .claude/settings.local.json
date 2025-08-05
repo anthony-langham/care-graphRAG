@@ -30,7 +30,8 @@
       "Bash(mv:*)",
       "Bash(sst remove:*)",
       "Bash(aws logs describe-log-streams:*)",
-      "Bash(aws logs get-log-events:*)"
+      "Bash(aws logs get-log-events:*)",
+      "Bash(aws apigatewayv2 get-apis:*)"
     ],
     "deny": []
   }

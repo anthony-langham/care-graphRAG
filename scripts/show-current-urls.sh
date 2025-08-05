@@ -116,7 +116,7 @@ echo -e "${CYAN}━━━━━━━━━━━━━━━━━━━━━�
 # 7. Recommendations
 echo -e "\n${BLUE}🔍 To get the exact current URLs:${NC}"
 echo -e "1. Run: ${GREEN}sst deploy --stage staging${NC} and note the ApiUrl output"
-echo -e "2. Run: ${GREEN}sst deploy --stage production${NC} and note the ApiUrl output"
+echo -e "2. Run: ${GREEN}sst deploy --stage staging${NC} and note the ApiUrl output"
 echo -e "3. Or check AWS Console: ${CYAN}https://eu-west-2.console.aws.amazon.com/apigateway${NC}"
 
 echo -e "\n${YELLOW}Note: The URL in .sst/outputs.json is for stage '${current_stage}'${NC}"
