@@ -14,12 +14,18 @@ from fastapi import FastAPI, HTTPException, Header
 from pydantic import BaseModel
 from mangum import Mangum
 
-# Import GraphRAG components
-from .graphrag.qa_chain import QAChain
-
-# Configure logging
+# Configure logging first
 logging.basicConfig(level=logging.INFO, format='%(asctime)s - %(name)s - %(levelname)s - %(message)s')
 logger = logging.getLogger(__name__)
+
+# Import GraphRAG components with error handling
+try:
+    from .graphrag.qa_chain import QAChain
+    IMPORT_ERROR = None
+except Exception as e:
+    logger.error(f"Failed to import QAChain: {e}")
+    QAChain = None
+    IMPORT_ERROR = str(e)
 logger.info("GraphRAG Query handler starting - v4 with full integration")
 
 # FastAPI app
@@ -51,6 +57,66 @@ class QueryResponse(BaseModel):
     confidence: float
     response_time: float
     search_type: str
+
+@app.get("/test-imports")
+async def test_imports():
+    """Test basic imports"""
+    imports_status = {
+        "os": True,
+        "logging": True,
+        "fastapi": True,
+        "mangum": True
+    }
+    
+    # Test individual imports
+    try:
+        from .graphrag import mongo_client
+        imports_status["graphrag.mongo_client"] = True
+    except Exception as e:
+        imports_status["graphrag.mongo_client"] = str(e)
+    
+    try:
+        from .graphrag import hybrid_retriever
+        imports_status["graphrag.hybrid_retriever"] = True
+    except Exception as e:
+        imports_status["graphrag.hybrid_retriever"] = str(e)
+        
+    try:
+        from .graphrag import qa_chain
+        imports_status["graphrag.qa_chain"] = True
+    except Exception as e:
+        imports_status["graphrag.qa_chain"] = str(e)
+    
+    return {
+        "status": "ok",
+        "imports": imports_status,
+        "import_error": IMPORT_ERROR
+    }
+
+@app.get("/test-qa-init")
+async def test_qa_initialization():
+    """Test QA Chain initialization"""
+    if IMPORT_ERROR:
+        return {
+            "status": "error",
+            "message": f"Import error: {IMPORT_ERROR}",
+            "error_type": "ImportError"
+        }
+    
+    try:
+        qa_chain = get_qa_chain()
+        return {
+            "status": "success",
+            "message": "QA Chain initialized successfully",
+            "qa_chain_type": type(qa_chain).__name__
+        }
+    except Exception as e:
+        logger.error(f"QA Chain initialization failed: {str(e)}", exc_info=True)
+        return {
+            "status": "error",
+            "message": f"QA Chain initialization failed: {str(e)}",
+            "error_type": type(e).__name__
+        }
 
 @app.post("/query", response_model=QueryResponse)
 async def query_endpoint(
