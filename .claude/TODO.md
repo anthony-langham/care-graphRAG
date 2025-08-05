@@ -2,7 +2,7 @@
 
 Generated: 2025-01-31T19:15:00Z
 
-## URGENT: GraphRAG Integration into Production Lambda (Week 1 - High Priority)
+## URGENT: GraphRAG Integration into Staging Lambda (Week 1 - High Priority)
 
 ### TASK-049: Production API Setup ✅ COMPLETE
 

@@ -18,9 +18,6 @@ export default $config({
     const mongodbUri = new sst.Secret("MongoDbUri");
     const openaiApiKey = new sst.Secret("OpenAiApiKey");
 
-    // Create SNS topic for alerts (production only)
-    // Disabled due to IAM permissions - enable after adding SNS permissions to deploy user
-    const alertsTopic = null; // $app.stage === "production" ? new sst.aws.SnsTopic("AlertsTopic") : null;
 
 
     // API with Python Lambda functions
@@ -37,44 +34,31 @@ export default $config({
           process.env.ALLOWED_ORIGIN || "http://localhost:3000",
         ],
       },
-      // Add custom domain configuration
-      ...($app.stage === "production" && {
-        domain: {
-          name: "api.graphrag.care",
-          cert: "arn:aws:acm:eu-west-2:146409062658:certificate/04ea5541-2506-4169-880e-f3c60457a82f",
-          dns: false, // We're managing DNS in Cloudflare
-        }
-      }),
-      ...($app.stage === "staging" && {
-        domain: {
-          name: "staging-api.graphrag.care",
-          cert: "arn:aws:acm:eu-west-2:146409062658:certificate/ee003893-b55d-445d-9981-260fbbfe3aa2",
-          dns: false, // We're managing DNS in Cloudflare
-        }
-      }),
+      // Custom domain for staging only
+      domain: {
+        name: "staging-api.graphrag.care",
+        cert: "arn:aws:acm:eu-west-2:146409062658:certificate/ee003893-b55d-445d-9981-260fbbfe3aa2",
+        dns: false, // We're managing DNS in Cloudflare
+      },
     });
 
-    // API Key secret for production authentication
-    const apiKey = $app.stage === "production" ? new sst.Secret("ApiKey") : null;
 
     // Query endpoint with enhanced monitoring
     const queryFunction = api.route("POST /query", {
       handler: "functions/src/functions/query_prod.handler",
-      link: [mongodbUri, openaiApiKey, ...(apiKey ? [apiKey] : [])],
+      link: [mongodbUri, openaiApiKey],
       runtime: "python3.11",
       timeout: "30 seconds",
-      memory: $app.stage === "production" ? "2048 MB" : "1024 MB",
+      memory: "1024 MB",
       transform: {
         function: (args) => {
-          // Enable X-Ray tracing for production
-          if ($app.stage === "production") {
-            args.tracingConfig = { mode: "Active" };
-          }
+          // Enable X-Ray tracing
+          args.tracingConfig = { mode: "Active" };
           // Add enhanced CloudWatch insights
           args.loggingConfig = {
             logFormat: "JSON",
             logGroup: `/aws/lambda/nice-cks-graphrag-${$app.stage}-query`,
-            applicationLogLevel: $app.stage === "production" ? "WARN" : "INFO",
+            applicationLogLevel: "INFO",
             systemLogLevel: "INFO"
           };
         }
@@ -104,11 +88,11 @@ export default $config({
         VECTOR_WEIGHT: "0.3",
         
         // Application Configuration
-        LOG_LEVEL: $app.stage === "production" ? "WARNING" : "INFO",
+        LOG_LEVEL: "INFO",
         ENVIRONMENT: $app.stage,
         
         // Authentication & Rate Limiting
-        RATE_LIMIT_ENABLED: $app.stage === "production" ? "true" : "false",
+        RATE_LIMIT_ENABLED: "true",
         RATE_LIMIT_REQUESTS: "10",
         RATE_LIMIT_WINDOW: "60",
       },
@@ -132,15 +116,13 @@ export default $config({
       memory: "512 MB",
       transform: {
         function: (args) => {
-          // Enable X-Ray tracing for production
-          if ($app.stage === "production") {
-            args.tracingConfig = { mode: "Active" };
-          }
+          // Enable X-Ray tracing
+          args.tracingConfig = { mode: "Active" };
           // Add enhanced CloudWatch insights
           args.loggingConfig = {
             logFormat: "JSON",
             logGroup: `/aws/lambda/nice-cks-graphrag-${$app.stage}-health`,
-            applicationLogLevel: $app.stage === "production" ? "WARN" : "INFO",
+            applicationLogLevel: "INFO",
             systemLogLevel: "INFO"
           };
         }
@@ -162,9 +144,9 @@ export default $config({
         OPENAI_TEMPERATURE: "0.0",
         
         // Application Configuration
-        LOG_LEVEL: $app.stage === "production" ? "WARNING" : "INFO",
+        LOG_LEVEL: "INFO",
         ENVIRONMENT: $app.stage,
-        CHECK_DEPENDENCIES: $app.stage === "production" ? "true" : "false",
+        CHECK_DEPENDENCIES: "true",
       },
     });
 
@@ -177,10 +159,8 @@ export default $config({
       memory: "1024 MB",
       transform: {
         function: (args) => {
-          // Enable X-Ray tracing for production
-          if ($app.stage === "production") {
-            args.tracingConfig = { mode: "Active" };
-          }
+          // Enable X-Ray tracing
+          args.tracingConfig = { mode: "Active" };
         }
       },
       environment: {
@@ -189,37 +169,13 @@ export default $config({
       },
     });
 
-    // CloudWatch alarms for production monitoring (using Pulumi directly)
-    if ($app.stage === "production" && alertsTopic) {
-      // We'll use a simpler approach and create alarms via AWS CDK construct after deployment
-      // This avoids SST v3 API compatibility issues while still providing monitoring
-      console.log("Production monitoring configured - alarms will be created via setup script");
-    }
-
-    // CloudWatch Dashboard will be created via setup script
-    // This avoids SST v3 API compatibility issues
-
-    // Custom domain info for outputs
-    const customDomain = $app.stage === "production" 
-      ? "api.graphrag.care"
-      : $app.stage === "staging" 
-      ? "staging-api.graphrag.care"
-      : undefined;
 
     // Output the API URL and monitoring links
-    const outputs: Record<string, any> = {
+    return {
       ApiUrl: api.url,
-      CustomDomain: customDomain || "No custom domain configured",
-      CustomDomainStatus: "Pending certificate setup - run ./scripts/setup-api-gateway-domains.sh",
-      CloudWatchDashboard: `https://eu-west-2.console.aws.amazon.com/cloudwatch/home?region=eu-west-2#dashboards:name/nice-cks-graphrag-${$app.stage}`,
+      CustomDomain: "staging-api.graphrag.care",
+      CloudWatchDashboard: `https://eu-west-2.console.aws.amazon.com/cloudwatch/home?region=eu-west-2#dashboards:name/nice-cks-graphrag-staging`,
       XRayTraces: `https://eu-west-2.console.aws.amazon.com/xray/home?region=eu-west-2#/traces`,
     };
-
-    // Commented out until SNS permissions are added to deploy user
-    // if ($app.stage === "production" && alertsTopic) {
-    //   outputs.AlertsTopicArn = alertsTopic.arn;
-    // }
-
-    return outputs;
   },
 });

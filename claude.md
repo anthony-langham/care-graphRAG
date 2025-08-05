@@ -22,14 +22,11 @@ Building an explainable, low-cost GraphRAG system for UK NICE Clinical Knowledge
 - AWS Lambda + API Gateway via SST for serverless deployment
 - EventBridge for scheduled sync (weekly scraper)
 - CloudWatch for monitoring and logs
-- Custom domain: api.graphrag.care (production), staging-api.graphrag.care (staging)
+- Custom domain: staging-api.graphrag.care
 
 ### API Endpoints
 
-- **Production**: `https://api.graphrag.care`
-  - Health: `https://api.graphrag.care/health`
-  - Query: `POST https://api.graphrag.care/query`
-- **Staging**: `https://staging-api.graphrag.care`
+- **Primary (Staging)**: `https://staging-api.graphrag.care`
   - Health: `https://staging-api.graphrag.care/health`
   - Query: `POST https://staging-api.graphrag.care/query`
 

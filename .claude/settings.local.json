@@ -27,7 +27,8 @@
       "mcp__context7__get-library-docs",
       "Bash(rm:*)",
       "Bash(sst unlock:*)",
-      "Bash(mv:*)"
+      "Bash(mv:*)",
+      "Bash(sst remove:*)"
     ],
     "deny": []
   }
