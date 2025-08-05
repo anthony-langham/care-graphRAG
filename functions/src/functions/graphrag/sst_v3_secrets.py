@@ -1,65 +1,110 @@
 """
-SST v3 secrets access for Lambda
-Based on SST v3 documentation
+AWS SSM Parameter Store integration for Lambda
+Using SSM Parameter Store SecureString for secrets storage
+Based on investigation showing SST v3 secrets don't work as expected
 """
 
 import os
 import logging
 from typing import Optional
+import boto3
+from botocore.exceptions import ClientError
 
 logger = logging.getLogger(__name__)
 
+def get_ssm_parameter(parameter_name: str, region_name: str = "eu-west-2") -> Optional[str]:
+    """
+    Get secret from AWS SSM Parameter Store.
+    This is an enterprise-grade solution with SecureString encryption.
+    """
+    
+    try:
+        # Create an SSM client
+        session = boto3.session.Session()
+        client = session.client(
+            service_name='ssm',
+            region_name=region_name
+        )
+        
+        # Get the parameter value with decryption
+        response = client.get_parameter(
+            Name=parameter_name,
+            WithDecryption=True
+        )
+        
+        # Return the decrypted parameter value
+        return response['Parameter']['Value']
+            
+    except ClientError as e:
+        error_code = e.response['Error']['Code']
+        if error_code == 'ParameterNotFound':
+            logger.error(f"SSM parameter {parameter_name} not found")
+        elif error_code == 'AccessDeniedException':
+            logger.error(f"Access denied to SSM parameter {parameter_name}")
+        elif error_code == 'InvalidKeyId':
+            logger.error(f"Invalid KMS key for parameter {parameter_name}")
+        else:
+            logger.error(f"Error accessing SSM parameter {parameter_name}: {e}")
+        return None
+    except Exception as e:
+        logger.error(f"Unexpected error accessing SSM parameter {parameter_name}: {e}")
+        return None
+
 def get_sst_secret(name: str) -> Optional[str]:
     """
-    Get SST v3 secret using the correct pattern.
-    In SST v3, secrets are injected as environment variables when linked.
+    DEPRECATED: SST v3 secrets don't work as expected in Lambda.
+    Fallback to environment variables for development compatibility.
     """
-    
-    # Try SST v3 pattern - secrets are injected with SST_ prefix
-    patterns = [
-        f"SST_SECRET_{name}",
-        f"SST_Secret_{name}",
-        f"SST_{name}",
-        name,  # Sometimes just the name itself
-    ]
-    
-    for pattern in patterns:
-        value = os.environ.get(pattern)
-        if value:
-            logger.info(f"Found secret {name} using pattern: {pattern}")
-            return value
-    
-    # For SST v3, we need to use the sst module if available
-    try:
-        import sst
-        # In SST v3, linked resources should be available as sst.<ResourceName>
-        # But based on the debug output, this doesn't seem to be working
-        if hasattr(sst, name):
-            resource = getattr(sst, name)
-            if hasattr(resource, 'value'):
-                return resource.value
-    except Exception as e:
-        logger.debug(f"Could not access {name} via sst module: {e}")
-    
-    logger.warning(f"Secret {name} not found in any SST v3 pattern")
-    return None
+    logger.warning(f"SST v3 secrets don't work - using environment fallback for {name}")
+    return os.environ.get(name)
 
 def get_mongodb_uri() -> Optional[str]:
-    """Get MongoDB URI from SST v3 secrets"""
-    # Try various patterns SST might use
-    uri = get_sst_secret("MongoDbUri")
+    """Get MongoDB URI from AWS SSM Parameter Store"""
+    # Try SSM Parameter Store first (production)
+    uri = get_ssm_parameter("/nice-cks-graphrag/mongodb-uri")
     if uri:
+        logger.info("MongoDB URI loaded from SSM Parameter Store")
         return uri
         
-    # Fallback to environment variable if set directly
-    return os.environ.get("MONGODB_URI")
+    # Fallback to environment variable for development
+    env_uri = os.environ.get("MONGODB_URI")
+    if env_uri:
+        logger.info("MongoDB URI loaded from environment variable")
+        return env_uri
+        
+    logger.error("MongoDB URI not found in SSM Parameter Store or environment")
+    return None
 
 def get_openai_api_key() -> Optional[str]:
-    """Get OpenAI API key from SST v3 secrets"""
-    # Try various patterns SST might use
-    key = get_sst_secret("OpenAiApiKey") 
+    """Get OpenAI API key from AWS SSM Parameter Store"""
+    # Try SSM Parameter Store first (production)
+    key = get_ssm_parameter("/nice-cks-graphrag/openai-api-key")
     if key:
+        logger.info("OpenAI API key loaded from SSM Parameter Store")
         return key
         
-    # Fallback to environment variable if set directly
-    return os.environ.get("OPENAI_API_KEY")
+    # Fallback to environment variable for development
+    env_key = os.environ.get("OPENAI_API_KEY")
+    if env_key:
+        logger.info("OpenAI API key loaded from environment variable")
+        return env_key
+        
+    logger.error("OpenAI API key not found in SSM Parameter Store or environment")
+    return None
+
+def get_api_key() -> Optional[str]:
+    """Get API authentication key from AWS SSM Parameter Store"""
+    # Try SSM Parameter Store first (production)
+    key = get_ssm_parameter("/nice-cks-graphrag/api-key")
+    if key:
+        logger.info("API key loaded from SSM Parameter Store")
+        return key
+        
+    # Fallback to environment variable for development
+    env_key = os.environ.get("API_KEY")
+    if env_key:
+        logger.info("API key loaded from environment variable")
+        return env_key
+        
+    logger.warning("API key not found in SSM Parameter Store or environment")
+    return "test-api-key-2024"  # Development fallback

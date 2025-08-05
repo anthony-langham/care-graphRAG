@@ -15,12 +15,22 @@ from pydantic import BaseModel
 from mangum import Mangum
 
 # Import GraphRAG components
-from .graphrag.qa_chain import QAChain
+import sys
+import os
+sys.path.append(os.path.dirname(os.path.abspath(__file__)))
+
+try:
+    from graphrag.qa_chain import QAChain
+    from graphrag.sst_v3_secrets import get_api_key
+except ImportError:
+    # Fallback to relative import
+    from .graphrag.qa_chain import QAChain
+    from .graphrag.sst_v3_secrets import get_api_key
 
 # Configure logging
 logging.basicConfig(level=logging.INFO, format='%(asctime)s - %(name)s - %(levelname)s - %(message)s')
 logger = logging.getLogger(__name__)
-logger.info("GraphRAG Query handler starting - v4 with full integration")
+logger.info("GraphRAG Query handler starting - v6 with SSM Parameter Store integration")
 
 # FastAPI app
 app = FastAPI(title="NICE GraphRAG Query", version="1.0.0")
@@ -62,8 +72,8 @@ async def query_endpoint(
     query_id = str(uuid.uuid4())
     
     try:
-        # Basic API key check
-        expected_key = os.getenv("API_KEY", "test-api-key-2024")
+        # Basic API key check - use AWS Secrets Manager for production
+        expected_key = get_api_key()
         if x_api_key != expected_key:
             raise HTTPException(status_code=401, detail="Invalid API key")
         

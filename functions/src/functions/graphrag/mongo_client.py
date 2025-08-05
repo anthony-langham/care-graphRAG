@@ -7,8 +7,6 @@ import os
 import logging
 from typing import Optional, Dict, Any
 from contextlib import contextmanager
-import ssl
-import certifi
 
 import pymongo
 from pymongo import MongoClient
@@ -21,6 +19,7 @@ from pymongo.errors import (
     ConfigurationError
 )
 from tenacity import retry, stop_after_attempt, wait_exponential, retry_if_exception_type
+from .sst_v3_secrets import get_mongodb_uri
 
 logger = logging.getLogger(__name__)
 
@@ -33,7 +32,7 @@ class MongoDBClient:
     
     def __init__(self, mongodb_uri: Optional[str] = None):
         """Initialize MongoDB client."""
-        self.mongodb_uri = mongodb_uri or os.environ.get('MONGODB_URI')
+        self.mongodb_uri = mongodb_uri or get_mongodb_uri()
         self.db_name = os.environ.get('MONGODB_DB_NAME', 'ckshtn')
         self.graph_collection = os.environ.get('MONGODB_GRAPH_COLLECTION', 'kg')
         self.vector_collection = os.environ.get('MONGODB_VECTOR_COLLECTION', 'chunks')
@@ -43,7 +42,7 @@ class MongoDBClient:
         self._database: Optional[Database] = None
         
         if not self.mongodb_uri:
-            raise ValueError("MONGODB_URI environment variable is required")
+            raise ValueError("MongoDB URI not found in SST secrets or environment")
     
     @property
     def client(self) -> MongoClient:
@@ -79,8 +78,8 @@ class MongoDBClient:
                 # Compression
                 compressors="snappy,zlib",
                 readPreference="secondaryPreferred",
-                # SSL settings for macOS (matches main codebase)
-                tlsCAFile=certifi.where()
+                # Try simplest SSL approach - let MongoDB handle SSL automatically
+                # No explicit SSL/TLS parameters - use URI defaults
             )
             
             # Test connection

@@ -14,6 +14,7 @@ from langchain_openai import ChatOpenAI
 from langchain.schema import Document
 
 from .hybrid_retriever import HybridRetriever
+from .sst_v3_secrets import get_openai_api_key
 
 logger = logging.getLogger(__name__)
 
@@ -34,9 +35,9 @@ class QAChain:
             retriever: HybridRetriever instance (will create if None)
             llm: ChatOpenAI instance (will create if None)
         """
-        self.openai_api_key = os.environ.get('OPENAI_API_KEY')
+        self.openai_api_key = get_openai_api_key()
         if not self.openai_api_key:
-            raise ValueError("OPENAI_API_KEY environment variable is required")
+            raise ValueError("OpenAI API key not found in SST secrets or environment")
         
         # Initialize LLM
         self.llm = llm or self._create_llm()

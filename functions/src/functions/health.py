@@ -10,19 +10,29 @@ from datetime import datetime
 from fastapi import FastAPI
 from mangum import Mangum
 
+# Import SST secrets module
+try:
+    from .graphrag.sst_v3_secrets import get_mongodb_uri, get_openai_api_key
+except ImportError:
+    # Fallback for local development
+    def get_mongodb_uri():
+        return os.environ.get("MONGODB_URI")
+    def get_openai_api_key():
+        return os.environ.get("OPENAI_API_KEY")
+
 # Configure logging
 logging.basicConfig(level=logging.INFO, format='%(asctime)s - %(name)s - %(levelname)s - %(message)s')
 logger = logging.getLogger(__name__)
-logger.info("Health handler starting - v6 with environment variables")
+logger.info("Health handler starting - v8 with SSM Parameter Store integration")
 
-# Load from environment variables
-MONGODB_URI = os.environ.get("MONGODB_URI", "not-configured")
-OPENAI_API_KEY = os.environ.get("OPENAI_API_KEY", "not-configured")
+# Load from SSM Parameter Store
+MONGODB_URI = get_mongodb_uri() or "not-configured"
+OPENAI_API_KEY = get_openai_api_key() or "not-configured"
 
 if MONGODB_URI != "not-configured" and OPENAI_API_KEY != "not-configured":
-    logger.info("Secrets loaded from environment variables")
+    logger.info("Secrets loaded from SSM Parameter Store")
 else:
-    logger.warning("Secrets not found in environment variables")
+    logger.warning("Secrets not found in SSM Parameter Store or environment variables")
 
 # FastAPI app
 app = FastAPI(title="NICE GraphRAG Health", version="1.0.0")
@@ -39,7 +49,12 @@ async def health_check():
         mongodb_connected = False
         try:
             from pymongo import MongoClient
-            client = MongoClient(MONGODB_URI, serverSelectionTimeoutMS=5000)
+            # Use simplest connection approach - let MongoDB URI handle SSL
+            client = MongoClient(
+                MONGODB_URI, 
+                serverSelectionTimeoutMS=5000,
+                # No explicit SSL parameters - use URI defaults
+            )
             # Test connection
             client.admin.command('ping')
             mongodb_connected = True

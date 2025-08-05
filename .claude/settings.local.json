@@ -27,7 +27,14 @@
       "mcp__context7__get-library-docs",
       "Bash(rm:*)",
       "Bash(sst unlock:*)",
-      "Bash(mv:*)"
+      "Bash(mv:*)",
+      "Bash(aws iam get-policy-version:*)",
+      "Bash(aws ssm put-parameter:*)",
+      "Bash(--name \"/nice-cks-graphrag/api-key\" )",
+      "Bash(--value \"222bfcbcf7d6875344681c6f2fcac133b6907fb2aa5ba7b71a54d603b11b10fc\" )",
+      "Bash(--type \"SecureString\" )",
+      "Bash(--description \"API authentication key for NICE CKS GraphRAG production\" )",
+      "Bash(--region eu-west-2)"
     ],
     "deny": []
   }
