@@ -62,33 +62,41 @@ class MongoDBClient:
     def _create_client(self) -> MongoClient:
         """Create MongoDB client with Lambda-optimized settings."""
         try:
-            logger.info("Creating MongoDB client for Lambda")
+            logger.info("Creating MongoDB client for Lambda with SSL bypass workaround")
+            logger.info(f"MongoDB URI: {self.mongodb_uri[:50]}...")  # Log first 50 chars
             
+            # Use official MongoDB Atlas connection pattern
+            logger.info("Creating MongoDB Atlas connection with official PyMongo settings")
+            
+            # Ensure the URI includes the database name
+            uri = self.mongodb_uri
+            if not uri.endswith('/ckshtn') and '/ckshtn?' not in uri:
+                # Add database name if missing
+                if '?' in uri:
+                    uri = uri.replace('/?', '/ckshtn?')
+                else:
+                    uri = uri.rstrip('/') + '/ckshtn'
+            
+            logger.info(f"Using URI with database: {uri[:50]}...")
+            
+            # Standard MongoDB Atlas connection (no SSL bypass needed)
             client = MongoClient(
-                self.mongodb_uri,
-                # Lambda-optimized settings
+                uri,
+                # Atlas-optimized settings
                 maxPoolSize=1,  # Single connection per Lambda container
                 minPoolSize=0,
-                maxIdleTimeMS=30000,  # 30 seconds
+                maxIdleTimeMS=60000,  # 1 minute (recommended for serverless)
                 serverSelectionTimeoutMS=5000,  # 5 seconds
                 connectTimeoutMS=5000,  # 5 seconds
                 socketTimeoutMS=10000,  # 10 seconds
-                # Retry settings
+                # Let PyMongo handle SSL automatically for mongodb+srv://
                 retryWrites=True,
-                retryReads=True,
-                # Compression
-                compressors="snappy,zlib",
-                readPreference="secondaryPreferred",
-                # SSL workaround for Lambda environment SSL handshake issues
-                tls=True,
-                tlsAllowInvalidCertificates=True,
-                tlsAllowInvalidHostnames=True
+                retryReads=True
             )
             
             # Test connection
             client.admin.command('ping')
-            logger.info("MongoDB client created successfully")
-            
+            logger.info("MongoDB Atlas connection successful")
             return client
             
         except (ConnectionFailure, ServerSelectionTimeoutError) as e:
