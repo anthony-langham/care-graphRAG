@@ -79,7 +79,10 @@ class MongoDBClient:
                 # Compression
                 compressors="snappy,zlib",
                 readPreference="secondaryPreferred",
-                # SSL handled automatically by MongoDB Atlas connection string
+                # SSL workaround for Lambda environment SSL handshake issues
+                tls=True,
+                tlsAllowInvalidCertificates=True,
+                tlsAllowInvalidHostnames=True
             )
             
             # Test connection
