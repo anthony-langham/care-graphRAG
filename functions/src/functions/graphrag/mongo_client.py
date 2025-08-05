@@ -79,8 +79,7 @@ class MongoDBClient:
                 # Compression
                 compressors="snappy,zlib",
                 readPreference="secondaryPreferred",
-                # SSL settings for macOS (matches main codebase)
-                tlsCAFile=certifi.where()
+                # SSL handled automatically by MongoDB Atlas connection string
             )
             
             # Test connection

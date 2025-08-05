@@ -8,6 +8,8 @@ import os
 from datetime import datetime
 
 import pymongo
+import ssl
+import platform
 from mangum import Mangum
 from fastapi import FastAPI
 
@@ -32,7 +34,13 @@ async def test_mongodb():
     try:
         logger.info("Attempting MongoDB connection...")
         
-        # Create MongoDB client with Lambda-optimized settings
+        # Log environment details
+        logger.info(f"Python version: {platform.python_version()}")
+        logger.info(f"SSL version: {ssl.OPENSSL_VERSION}")
+        logger.info(f"PyMongo version: {pymongo.version}")
+        
+        # Use the documented working pattern from MongoDB SSL Resolution Summary
+        # AWS Lambda Python 3.11 + OpenSSL 1.1.1 should work with simple connection
         client = pymongo.MongoClient(
             mongodb_uri,
             serverSelectionTimeoutMS=5000,
@@ -63,6 +71,11 @@ async def test_mongodb():
         return {
             "status": "success",
             "message": "MongoDB connection successful",
+            "environment": {
+                "python_version": platform.python_version(),
+                "ssl_version": ssl.OPENSSL_VERSION,
+                "pymongo_version": pymongo.version
+            },
             "databases": dbs,
             "database_details": db_info,
             "timestamp": datetime.now().isoformat()
@@ -74,6 +87,11 @@ async def test_mongodb():
             "status": "error",
             "message": f"MongoDB connection failed: {str(e)}",
             "error_type": e.__class__.__name__,
+            "environment": {
+                "python_version": platform.python_version(),
+                "ssl_version": ssl.OPENSSL_VERSION,
+                "pymongo_version": pymongo.version
+            },
             "timestamp": datetime.now().isoformat()
         }
 

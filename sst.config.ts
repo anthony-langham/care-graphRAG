@@ -150,6 +150,30 @@ export default $config({
       },
     });
 
+    // Secrets debugging endpoint 
+    const secretsDebugFunction = api.route("GET /debug-secrets", {
+      handler: "functions/src/functions/debug_secrets.handler",
+      link: [mongodbUri, openaiApiKey],
+      runtime: "python3.11",
+      timeout: "30 seconds",
+      memory: "1024 MB",
+      transform: {
+        function: (args) => {
+          // Enable X-Ray tracing
+          args.tracingConfig = { mode: "Active" };
+        }
+      },
+      environment: {
+        // Pass secrets directly for comparison
+        MONGODB_URI: process.env.MONGODB_URI || "",
+        OPENAI_API_KEY: process.env.OPENAI_API_KEY || "",
+        
+        // Configuration
+        MONGODB_DB_NAME: process.env.MONGODB_DB_NAME || "ckshtn",
+        ENVIRONMENT: $app.stage,
+      },
+    });
+
     // MongoDB test endpoint (debugging)
     const mongoTestFunction = api.route("GET /test-mongodb", {
       handler: "functions/src/functions/test_mongodb.handler",
@@ -164,6 +188,11 @@ export default $config({
         }
       },
       environment: {
+        // Pass secrets directly
+        MONGODB_URI: process.env.MONGODB_URI || "",
+        OPENAI_API_KEY: process.env.OPENAI_API_KEY || "",
+        
+        // MongoDB Configuration
         MONGODB_DB_NAME: process.env.MONGODB_DB_NAME || "ckshtn",
         ENVIRONMENT: $app.stage,
       },
