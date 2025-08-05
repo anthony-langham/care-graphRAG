@@ -108,7 +108,7 @@ main_menu() {
             # Check for existing certificate
             if check_certificate "api.graphrag.care"; then
                 echo -e "${GREEN}Certificate already issued and ready!${NC}"
-                echo -e "You can now deploy with: ${YELLOW}sst deploy --stage production${NC}"
+                echo -e "You can now deploy with: ${YELLOW}sst deploy --stage staging${NC}"
             else
                 request_certificate "api.graphrag.care"
             fi
@@ -138,7 +138,7 @@ main_menu() {
                     echo -e "\n${BLUE}Deploying production...${NC}"
                     echo -e "${YELLOW}Using configuration from sst-config-with-domains.ts${NC}"
                     echo -e "\nRun: ${GREEN}cp sst-config-with-domains.ts sst.config.ts${NC}"
-                    echo -e "Then: ${GREEN}sst deploy --stage production${NC}"
+                    echo -e "Then: ${GREEN}sst deploy --stage staging${NC}"
                     ;;
                 3)
                     main_menu

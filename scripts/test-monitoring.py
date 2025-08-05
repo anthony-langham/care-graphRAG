@@ -22,7 +22,7 @@ logger = logging.getLogger(__name__)
 class MonitoringTester:
     """Test production monitoring setup for NICE CKS GraphRAG."""
     
-    def __init__(self, region: str = "eu-west-2", stage: str = "production"):
+    def __init__(self, region: str = "eu-west-2", stage: str = "staging"):
         self.region = region
         self.stage = stage
         self.app_name = "nice-cks-graphrag"
@@ -343,7 +343,7 @@ def main():
     
     parser = argparse.ArgumentParser(description='Test NICE CKS GraphRAG monitoring setup')
     parser.add_argument('--region', default='eu-west-2', help='AWS region')
-    parser.add_argument('--stage', default='production', help='Deployment stage')
+    parser.add_argument('--stage', default='staging', help='Deployment stage')
     parser.add_argument('--api-endpoint', help='API Gateway endpoint URL')
     parser.add_argument('--output', help='Output file for test results (JSON)')
     

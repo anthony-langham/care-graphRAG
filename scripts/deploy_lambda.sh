@@ -30,7 +30,7 @@ npm install
 
 # Deploy to development stage
 echo "🔧 Deploying to development stage..."
-npx sst deploy --stage dev
+npx sst deploy --stage staging
 
 echo "✅ Deployment completed successfully!"
 echo ""
@@ -42,5 +42,5 @@ echo "4. Configure production environment variables for prod stage"
 echo ""
 echo "🔍 Useful commands:"
 echo "- View logs: npx sst console"
-echo "- Remove deployment: npx sst remove --stage dev"
-echo "- Deploy to production: npx sst deploy --stage prod"
+echo "- Remove deployment: npx sst remove --stage staging"
+echo "- Deploy to staging: npx sst deploy --stage staging"

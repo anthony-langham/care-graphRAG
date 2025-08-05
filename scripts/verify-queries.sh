@@ -1,6 +1,6 @@
 #!/bin/bash
 # Verify GraphRAG query functionality
-# Usage: ./scripts/verify-queries.sh [staging|production]
+# Usage: ./scripts/verify-queries.sh [staging]
 
 set -e
 
@@ -20,10 +20,10 @@ if [ -z "$API_KEY" ]; then
 fi
 
 # Set API URL based on environment
-if [ "$ENVIRONMENT" == "production" ]; then
-    API_URL="https://api.nice-cks-graphrag.care"
+if [ "$ENVIRONMENT" == "staging" ]; then
+    API_URL="https://staging-api.graphrag.care"
 else
-    API_URL="https://api-${ENVIRONMENT}.nice-cks-graphrag.care"
+    API_URL="https://staging-api.graphrag.care"  # Default to staging
 fi
 
 echo "API URL: $API_URL"

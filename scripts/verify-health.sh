@@ -16,7 +16,7 @@ if ! command -v jq &> /dev/null; then
 fi
 
 # Define environments
-ENVIRONMENTS=("staging" "production")
+ENVIRONMENTS=("staging")
 
 # Function to check health
 check_health() {
