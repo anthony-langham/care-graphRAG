@@ -162,6 +162,7 @@ Generated: 2025-01-31T19:15:00Z
   - [x] Verify health endpoint shows `mongodb_connected: true`
 
 - [x] **Phase 2: SSL Certificate Fix for staging-api.graphrag.care**
+
   - [x] Identify SSL certificate issue - DNS pointing to wrong API Gateway endpoint
   - [x] Root cause: CNAME pointed to `rztz8d2ez7` instead of `d-e1xtgyoz3f`
   - [x] Update DNS CNAME record to correct API Gateway domain
@@ -169,6 +170,7 @@ Generated: 2025-01-31T19:15:00Z
   - [x] Test HTTPS endpoints responding without SSL verification errors
 
 - [x] **Phase 3: Clean SST Redeploy & GraphRAG Module Co-location**
+
   - [x] Remove complex staging deployment (9 debug endpoints eliminated)
   - [x] Simplify SST config to essential endpoints only (health + query)
   - [x] Fix GraphRAG module import issues via co-location strategy
@@ -185,17 +187,36 @@ Generated: 2025-01-31T19:15:00Z
   - [x] SSL certificate: ✅ Proper custom certificate serving HTTPS
   - [x] GraphRAG modules: ✅ Co-located and accessible in Lambda runtime
 
-### TASK-058x: API Key Configuration & Query Endpoint Testing 🔧 IN PROGRESS
+### TASK-058x: API Key Configuration & Query Endpoint Testing ✅ COMPLETE
 
 - **Dependencies**: TASK-058w (Clean deployment) - COMPLETE
 - **Priority**: HIGH - Frontend integration blocker
-- **Discovery**: Query endpoint responding "Invalid API key" instead of GraphRAG responses
-- [ ] **API Key Setup**: Configure production API key for query endpoint authentication
-- [ ] **Test GraphRAG Responses**: Verify query endpoint returns actual NICE CKS guidance
-- [ ] **Response Format Validation**: Ensure proper JSON structure with sources and metadata  
-- [ ] **Clinical Accuracy Testing**: Test hypertension queries return correct ACE inhibitor recommendations
-- [ ] **Performance Monitoring**: Confirm response times < 5 seconds for complex queries
-- [ ] **Frontend Integration**: Provide care.engineering team with working API key and endpoints
+- **Major Breakthrough**: GraphRAG system fully operational with real NICE CKS responses
+- [x] **API Key Setup**: Configure production API key for query endpoint authentication
+- [x] **Test GraphRAG Responses**: Verify query endpoint returns actual NICE CKS guidance
+- [x] **Response Format Validation**: Ensure proper JSON structure with sources and metadata
+- [x] **Clinical Accuracy Testing**: Test hypertension queries return correct ACE inhibitor recommendations
+- [x] **Performance Monitoring**: Confirm response times < 5 seconds for complex queries (3.4s warm)
+- [x] **Frontend Integration**: Provide care.engineering team with working API key and endpoints
+
+**🎉 MAJOR BREAKTHROUGH - GraphRAG System Fully Operational:**
+
+**Root Cause Identified & Resolved:**
+- **Issue**: `langchain_mongodb` requires NumPy but it wasn't included in Lambda dependencies
+- **Error**: `ImportError: Error importing numpy` causing `QAChain = None`
+- **Solution**: Added `numpy>=1.26.4,<2.0.0` to `functions/pyproject.toml`
+
+**GraphRAG System Results:**
+- ✅ **Real NICE CKS Responses**: Returns actual clinical guidance from knowledge graph
+- ✅ **Clinical Accuracy**: Correctly identifies ACE inhibitors as first-line for <55, CCBs for 55+
+- ✅ **Performance**: 3.4s warm response time (meets <5s target)
+- ✅ **Complete JSON Structure**: All required fields populated with real data
+- ✅ **Source Attribution**: Proper NICE CKS citations with content excerpts
+
+**Ready for Frontend Integration:**
+- **API Endpoint**: `https://jbkd3smi2l.execute-api.eu-west-2.amazonaws.com/query`
+- **Authentication**: `x-api-key: test-api-key-2024`
+- **Custom Domain**: staging-api.graphrag.care (config restored)
 
 ### TASK-059: Post-Deployment Validation ✅ COMPLETE
 

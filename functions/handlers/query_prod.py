@@ -18,14 +18,29 @@ from mangum import Mangum
 logging.basicConfig(level=logging.INFO, format='%(asctime)s - %(name)s - %(levelname)s - %(message)s')
 logger = logging.getLogger(__name__)
 
-# Import GraphRAG components with error handling
+# Import GraphRAG components with detailed error handling
 try:
+    import sys
+    print(f"Python path: {sys.path}")
+    print("Testing individual GraphRAG imports...")
+    
+    from .graphrag import mongo_client
+    print("✓ mongo_client imported successfully")
+    
+    from .graphrag import hybrid_retriever  
+    print("✓ hybrid_retriever imported successfully")
+    
     from .graphrag.qa_chain import QAChain
+    print("✓ QAChain imported successfully")
+    
     IMPORT_ERROR = None
 except Exception as e:
-    print(f"Failed to import QAChain: {e}")  # Use print before logger is available
+    import traceback
+    error_details = traceback.format_exc()
+    print(f"Failed to import QAChain: {e}")
+    print(f"Full traceback: {error_details}")
     QAChain = None
-    IMPORT_ERROR = str(e)
+    IMPORT_ERROR = error_details
 logger.info("GraphRAG Query handler starting - v4 with full integration")
 
 # FastAPI app
