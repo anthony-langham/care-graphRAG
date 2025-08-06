@@ -26,7 +26,9 @@ def handler(event, context):
     
     # Test MongoDB client
     try:
-        from .graphrag.mongo_client import get_mongo_client
+        import sys
+        sys.path.insert(0, os.path.dirname(os.path.dirname(os.path.abspath(__file__))))
+        from graphrag.mongo_client import get_mongo_client
         results["imports"]["mongo_client"] = "success"
         
         # Try to get client
@@ -40,7 +42,7 @@ def handler(event, context):
     
     # Test QA Chain
     try:
-        from .graphrag.qa_chain import QAChain
+        from graphrag.qa_chain import QAChain
         results["imports"]["qa_chain"] = "success"
     except Exception as e:
         results["imports"]["qa_chain"] = str(e)
