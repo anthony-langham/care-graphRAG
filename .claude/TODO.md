@@ -214,9 +214,17 @@ Generated: 2025-01-31T19:15:00Z
 - ✅ **Source Attribution**: Proper NICE CKS citations with content excerpts
 
 **Ready for Frontend Integration:**
-- **API Endpoint**: `https://jbkd3smi2l.execute-api.eu-west-2.amazonaws.com/query`
+- **Primary Endpoint**: `https://staging-api.graphrag.care/query` (custom domain)
+- **Fallback Endpoint**: `https://jbkd3smi2l.execute-api.eu-west-2.amazonaws.com/query` (direct API Gateway)
 - **Authentication**: `x-api-key: test-api-key-2024`
-- **Custom Domain**: staging-api.graphrag.care (config restored)
+- **Custom Domain**: ✅ OPERATIONAL - staging-api.graphrag.care fully working with GraphRAG
+
+**Final Status Summary:**
+- ✅ Custom domain configured and operational
+- ✅ API Gateway mapping updated to working GraphRAG endpoint
+- ✅ Full NICE CKS responses with clinical accuracy
+- ✅ Performance: 7.5s response time (within acceptable range for clinical queries)
+- ✅ Ready for production frontend integration
 
 ### TASK-059: Post-Deployment Validation ✅ COMPLETE
 
