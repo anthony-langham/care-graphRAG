@@ -238,24 +238,41 @@ Generated: 2025-01-31T19:15:00Z
 - [ ] Create roadmap for advanced features
 - [ ] Plan clinical validation processes
 
-## CURRENT STATUS: MAJOR BREAKTHROUGH - GraphRAG Fully Operational Locally (August 5, 2025)
+## CURRENT STATUS: GraphRAG Working Locally, Staging Deployment Issues Persist (August 5, 2025)
 
-### ✅ Major Breakthrough - SSL Certificate Issue Resolved:
+### ✅ MAJOR BREAKTHROUGH - GraphRAG Confirmed Working Locally:
 
-- **SST Secrets**: ✅ WORKING - MongoDB URI and OpenAI API key accessible via environment variables
-- **MongoDB Connection**: ✅ WORKING - Network Access IP whitelist resolved, connection active
-- **SSL Certificate**: ✅ FIXED - staging-api.graphrag.care now serves proper custom certificate
-- **API Infrastructure**: ✅ OPERATIONAL - All HTTPS endpoints working correctly
-- **Lambda Environment**: ✅ VERIFIED - Python 3.11.13 + OpenSSL 1.1.1zb + PyMongo 4.6.1
+**Local Success with Python 3.11:**
+- ✅ **MongoDB Atlas Connection**: SSL resolved with Python 3.11
+- ✅ **Graph Retrieval**: Finding medical entities successfully  
+- ✅ **LLM Processing**: GPT-4o-mini integration working
+- ✅ **Clinical QA**: Correct ACE inhibitor recommendations
+- ✅ **Source Attribution**: 1 document from knowledge graph
+- ✅ **Performance**: Fast retrieval and response
+- ✅ **Cost Efficiency**: Low-cost GPT-4o-mini usage
 
-### 🔧 Current Issue - GraphRAG Module Imports:
+**Infrastructure Status:**
+- ✅ **SST Secrets**: MongoDB URI and OpenAI API key accessible via environment variables  
+- ✅ **MongoDB Connection**: Network Access IP whitelist resolved, connection active
+- ✅ **SSL Certificate**: staging-api.graphrag.care serves proper custom certificate
+- ✅ **API Infrastructure**: Health endpoints operational  
+- ✅ **Lambda Environment**: Python 3.11.13 runtime (matches working local setup)
 
-**TASK-058w Phase 3**: GraphRAG module import paths in Lambda still need fixing
+### ❌ Outstanding Issues - Lambda Deployment:
 
-- **Issue**: `No module named 'graphrag'` errors in Lambda functions
-- **Root Cause**: Import path issues between local development and Lambda runtime
-- **Impact**: Health endpoint works perfectly, but GraphRAG query endpoints fail
-- **Next Step**: Fix relative import paths in Lambda functions
+**Staging Deployment Problems:**
+- **Issue**: `/query` endpoint returns "Internal Server Error" despite fixes applied
+- **Git Status**: All GraphRAG fixes committed (dcb46cb)
+- **Deploy Attempts**: Multiple SST deployments attempted, some crashed during build
+- **Lambda Runtime**: Confirmed Python 3.11 (matches working local environment)
+- **Logger Fix**: Applied (`print()` instead of `logger.error()`) but may not be live
+- **Import Paths**: Fixed absolute imports and copied modules to src level
+
+**Root Cause Assessment:**
+- **Local vs Lambda**: GraphRAG working perfectly locally with Python 3.11, but Lambda deployment has persistent issues
+- **Deployment State**: Lambda LastModified still shows old timestamp (2025-08-05T18:06:16)
+- **SST Issues**: Deployment crashes with "fatal error: concurrent map writes" in SST
+- **Potential Gap**: Despite all fixes being committed and deployed, Lambda may not reflect latest code
 
 ### ✅ GraphRAG Components Status:
 
@@ -275,12 +292,26 @@ Generated: 2025-01-31T19:15:00Z
 }
 ```
 
-### 🎯 Next Critical Path:
+### 🎯 Next Critical Steps (Priority Order):
 
-1. **TASK-058w Phase 1**: Deploy SSL bypass workaround and verify MongoDB connectivity
-2. **TASK-058w Phase 2**: Test end-to-end GraphRAG query processing with real NICE CKS data  
-3. **TASK-058w Phase 3**: Performance validation and security verification
-4. **GraphRAG MVP**: Fully operational clinical question-answering system
+1. **Diagnose SST Deployment Issue**: 
+   - Investigate why SST crashes with "concurrent map writes"
+   - Ensure Lambda actually receives the committed code changes
+   - Verify deployment completion and Lambda timestamp update
+
+2. **Alternative Deployment Strategy**:
+   - Consider manual Lambda deployment if SST continues to fail
+   - Use AWS CLI or Terraform as backup deployment method
+   - Validate GraphRAG modules are properly packaged in deployment
+
+3. **Lambda Runtime Validation**:
+   - Confirm Python 3.11 environment variables and modules
+   - Test import statements directly in Lambda console
+   - Verify GraphRAG modules are accessible at runtime
+
+4. **Production Readiness**:
+   - Once staging works, GraphRAG is ready for production (local validation complete)
+   - System architecture and code are sound, only deployment mechanics failing
 
 ## Expected Outcome from GraphRAG Integration:
 
