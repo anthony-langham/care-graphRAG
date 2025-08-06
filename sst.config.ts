@@ -45,7 +45,7 @@ export default $config({
 
     // Basic test endpoint (no GraphRAG imports)
     api.route("GET /test-basic", {
-      handler: "functions/src/functions/test_basic.handler",
+      handler: "functions/handlers/test_basic.handler",
       link: [mongodbUri, openaiApiKey],
       runtime: "python3.11",
       timeout: "10 seconds",
@@ -58,7 +58,7 @@ export default $config({
 
     // Minimal test endpoint  
     api.route("GET /test-minimal", {
-      handler: "functions/src/functions/test_minimal.handler",
+      handler: "functions/handlers/test_minimal.handler",
       link: [mongodbUri, openaiApiKey],
       runtime: "python3.11",
       timeout: "10 seconds",
@@ -71,7 +71,7 @@ export default $config({
 
     // Test imports endpoint
     api.route("GET /test-imports", {
-      handler: "functions/src/functions/query_prod.handler",
+      handler: "functions/handlers/query_prod.handler",
       link: [mongodbUri, openaiApiKey],
       runtime: "python3.11",
       timeout: "10 seconds",
@@ -80,7 +80,7 @@ export default $config({
 
     // Test QA initialization endpoint
     api.route("GET /test-qa-init", {
-      handler: "functions/src/functions/query_prod.handler",
+      handler: "functions/handlers/query_prod.handler",
       link: [mongodbUri, openaiApiKey],
       runtime: "python3.11",
       timeout: "15 seconds",
@@ -96,7 +96,7 @@ export default $config({
 
     // Query endpoint with enhanced monitoring
     const queryFunction = api.route("POST /query", {
-      handler: "functions/src/functions/query_prod.handler",
+      handler: "functions/handlers/query_prod.handler",
       link: [mongodbUri, openaiApiKey],
       runtime: "python3.11",
       timeout: "30 seconds",
@@ -151,7 +151,7 @@ export default $config({
 
     // Debug endpoint (temporary)
     api.route("GET /debug/env", {
-      handler: "functions/src/functions/debug_env.handler",
+      handler: "functions/handlers/debug_env.handler",
       link: [mongodbUri, openaiApiKey],
       runtime: "python3.11",
       timeout: "10 seconds",
@@ -160,7 +160,7 @@ export default $config({
 
     // Health endpoint with monitoring
     const healthFunction = api.route("GET /health", {
-      handler: "functions/src/functions/health.handler",
+      handler: "functions/handlers/health.handler",
       link: [mongodbUri, openaiApiKey],
       runtime: "python3.11",
       timeout: "15 seconds",
@@ -203,7 +203,7 @@ export default $config({
 
     // Secrets debugging endpoint 
     const secretsDebugFunction = api.route("GET /debug-secrets", {
-      handler: "functions/src/functions/debug_secrets.handler",
+      handler: "functions/handlers/debug_secrets.handler",
       link: [mongodbUri, openaiApiKey],
       runtime: "python3.11",
       timeout: "30 seconds",
@@ -227,7 +227,7 @@ export default $config({
 
     // MongoDB test endpoint (debugging)
     const mongoTestFunction = api.route("GET /test-mongodb", {
-      handler: "functions/src/functions/test_mongodb.handler",
+      handler: "functions/handlers/test_mongodb.handler",
       link: [mongodbUri, openaiApiKey],
       runtime: "python3.11",
       timeout: "30 seconds",

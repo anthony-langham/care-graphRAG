@@ -20,10 +20,6 @@ logger = logging.getLogger(__name__)
 
 # Import GraphRAG components with error handling
 try:
-    import sys
-    import os
-    # Add the src directory to Python path for imports
-    sys.path.insert(0, os.path.dirname(os.path.dirname(os.path.abspath(__file__))))
     from graphrag.qa_chain import QAChain
     IMPORT_ERROR = None
 except Exception as e:
@@ -74,9 +70,6 @@ async def test_imports():
     
     # Test individual imports
     try:
-        import sys
-        import os
-        sys.path.insert(0, os.path.dirname(os.path.dirname(os.path.abspath(__file__))))
         from graphrag import mongo_client
         imports_status["graphrag.mongo_client"] = True
     except Exception as e:
