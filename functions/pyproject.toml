@@ -19,6 +19,7 @@ dependencies = [
     "tenacity==8.2.3",
     "certifi>=2023.0.0",
     "aws-xray-sdk==2.14.0",
+    "numpy>=1.26.4,<2.0.0",
 ]
 
 [build-system]
