@@ -13,7 +13,7 @@ from langchain.prompts import PromptTemplate
 from langchain_openai import ChatOpenAI
 from langchain.schema import Document
 
-from graphrag.hybrid_retriever import HybridRetriever
+from .hybrid_retriever import HybridRetriever
 
 logger = logging.getLogger(__name__)
 

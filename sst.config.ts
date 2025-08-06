@@ -102,7 +102,7 @@ export default $config({
 
     // Health endpoint with monitoring
     const healthFunction = api.route("GET /health", {
-      handler: "functions/handlers/health_simple.handler",
+      handler: "functions/handlers/health.handler",
       link: [mongodbUri, openaiApiKey],
       runtime: "python3.11",
       timeout: "15 seconds",

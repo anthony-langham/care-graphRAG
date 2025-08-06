@@ -9,7 +9,7 @@ from datetime import datetime
 
 from fastapi import FastAPI
 from mangum import Mangum
-from graphrag.mongo_client import get_mongo_client
+from .graphrag.mongo_client import get_mongo_client
 
 # Configure logging
 logging.basicConfig(level=logging.INFO, format='%(asctime)s - %(name)s - %(levelname)s - %(message)s')
