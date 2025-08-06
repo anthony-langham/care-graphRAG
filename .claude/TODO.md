@@ -165,8 +165,8 @@ Generated: 2025-01-31T19:15:00Z
   - [x] Test HTTPS endpoints responding without SSL verification errors
   
 - [x] **Phase 3: End-to-End GraphRAG Testing**
-  - [x] Fix remaining GraphRAG module import issues in Lambda
-  - [ ] Test `/query` endpoint returns actual GraphRAG responses (not placeholder or error)
+  - [x] Fix remaining GraphRAG module import issues in Lambda (removed duplicate modules, fixed import paths)
+  - [ ] Test `/query` endpoint returns actual GraphRAG responses (deployment in progress)
   - [ ] Verify clinical questions get proper NICE CKS guidance responses
   - [ ] Test graph traversal and hybrid retrieval functionality
   - [ ] Confirm source attribution and confidence scoring working
