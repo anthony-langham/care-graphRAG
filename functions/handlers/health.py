@@ -9,6 +9,7 @@ from datetime import datetime
 
 from fastapi import FastAPI
 from mangum import Mangum
+from graphrag.mongo_client import get_mongo_client
 
 # Configure logging
 logging.basicConfig(level=logging.INFO, format='%(asctime)s - %(name)s - %(levelname)s - %(message)s')
@@ -35,16 +36,18 @@ async def health_check():
         mongodb_configured = bool(MONGODB_URI and MONGODB_URI != "not-configured")
         openai_configured = bool(OPENAI_API_KEY and OPENAI_API_KEY != "not-configured")
         
-        # Test MongoDB connection using optimized client
+        # Test MongoDB connection using centralized GraphRAG client
         mongodb_connected = False
         mongodb_health = None
         try:
-            from graphrag.mongo_client import get_mongo_client
-            mongo_client = get_mongo_client()
-            health_result = mongo_client.health_check()
-            mongodb_connected = health_result.get("status") == "healthy"
-            mongodb_health = health_result
-            logger.info(f"MongoDB health check result: {health_result}")
+            if mongodb_configured:
+                # Use centralized MongoDBClient for health check
+                mongo_client = get_mongo_client()
+                mongodb_health = mongo_client.health_check()
+                mongodb_connected = mongodb_health.get("status") == "healthy"
+                logger.info(f"MongoDB health check result: {mongodb_health}")
+            else:
+                mongodb_health = {"status": "unconfigured"}
         except Exception as e:
             logger.warning(f"MongoDB health check failed: {e}")
             mongodb_health = {"status": "unhealthy", "error": str(e)}
