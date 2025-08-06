@@ -62,10 +62,6 @@ export default $config({
             applicationLogLevel: "INFO",
             systemLogLevel: "INFO"
           };
-          // Include graphrag modules in package
-          args.code = {
-            zipFile: "functions"
-          };
         }
       },
       environment: {
@@ -106,7 +102,7 @@ export default $config({
 
     // Health endpoint with monitoring
     const healthFunction = api.route("GET /health", {
-      handler: "functions/handlers/health.handler",
+      handler: "functions/handlers/health_simple.handler",
       link: [mongodbUri, openaiApiKey],
       runtime: "python3.11",
       timeout: "15 seconds",
@@ -121,10 +117,6 @@ export default $config({
             logGroup: `/aws/lambda/nice-cks-graphrag-${$app.stage}-health`,
             applicationLogLevel: "INFO",
             systemLogLevel: "INFO"
-          };
-          // Include graphrag modules in package
-          args.code = {
-            zipFile: "functions"
           };
         }
       },
