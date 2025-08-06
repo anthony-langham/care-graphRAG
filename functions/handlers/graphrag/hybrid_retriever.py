@@ -15,7 +15,7 @@ from langchain_mongodb.graphrag.graph import MongoDBGraphStore
 from pymongo.collection import Collection
 from pydantic import Field
 
-from graphrag.mongo_client import get_mongo_client
+from .mongo_client import get_mongo_client
 
 logger = logging.getLogger(__name__)
 

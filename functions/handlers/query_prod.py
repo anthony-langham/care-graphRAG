@@ -20,7 +20,7 @@ logger = logging.getLogger(__name__)
 
 # Import GraphRAG components with error handling
 try:
-    from graphrag.qa_chain import QAChain
+    from .graphrag.qa_chain import QAChain
     IMPORT_ERROR = None
 except Exception as e:
     print(f"Failed to import QAChain: {e}")  # Use print before logger is available
@@ -70,19 +70,19 @@ async def test_imports():
     
     # Test individual imports
     try:
-        from graphrag import mongo_client
+        from .graphrag import mongo_client
         imports_status["graphrag.mongo_client"] = True
     except Exception as e:
         imports_status["graphrag.mongo_client"] = str(e)
     
     try:
-        from graphrag import hybrid_retriever
+        from .graphrag import hybrid_retriever
         imports_status["graphrag.hybrid_retriever"] = True
     except Exception as e:
         imports_status["graphrag.hybrid_retriever"] = str(e)
         
     try:
-        from graphrag import qa_chain
+        from .graphrag import qa_chain
         imports_status["graphrag.qa_chain"] = True
     except Exception as e:
         imports_status["graphrag.qa_chain"] = str(e)
