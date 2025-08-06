@@ -152,7 +152,7 @@ def handler(event, context):
             # Enable debug mode for detailed logging
             os.environ["DEBUG_SST_SECRETS"] = "true"
             
-            from .graphrag.sst_secrets import get_mongodb_uri, get_openai_api_key, debug_sst_environment
+            from graphrag.sst_secrets import get_mongodb_uri, get_openai_api_key, debug_sst_environment
             
             # Get detailed debug information
             sst_debug_info = debug_sst_environment()

@@ -14,11 +14,7 @@ from mangum import Mangum
 from pydantic import BaseModel
 
 # Import middleware
-try:
-    from .middleware import require_api_key, rate_limit, add_rate_limit_headers
-except ImportError:
-    # Fallback for direct execution
-    from middleware import require_api_key, rate_limit, add_rate_limit_headers
+from middleware import require_api_key, rate_limit, add_rate_limit_headers
 
 # Environment configuration
 MONGODB_URI = os.getenv("MONGODB_URI", "not-configured")

@@ -1,6 +1,5 @@
 """
-Minimal Lambda handler for health check endpoint with hardcoded secrets.
-This is a temporary solution until SST v3 secrets are properly working.
+Lambda handler for health check endpoint.
 """
 
 import json
@@ -14,11 +13,16 @@ from mangum import Mangum
 # Configure logging
 logging.basicConfig(level=logging.INFO, format='%(asctime)s - %(name)s - %(levelname)s - %(message)s')
 logger = logging.getLogger(__name__)
-logger.info("Health handler starting - v2")
+logger.info("Health handler starting - v6 with environment variables")
 
-# Temporary: Use environment variables or SST secrets
+# Load from environment variables
 MONGODB_URI = os.environ.get("MONGODB_URI", "not-configured")
 OPENAI_API_KEY = os.environ.get("OPENAI_API_KEY", "not-configured")
+
+if MONGODB_URI != "not-configured" and OPENAI_API_KEY != "not-configured":
+    logger.info("Secrets loaded from environment variables")
+else:
+    logger.warning("Secrets not found in environment variables")
 
 # FastAPI app
 app = FastAPI(title="NICE GraphRAG Health", version="1.0.0")
@@ -31,20 +35,22 @@ async def health_check():
         mongodb_configured = bool(MONGODB_URI and MONGODB_URI != "not-configured")
         openai_configured = bool(OPENAI_API_KEY and OPENAI_API_KEY != "not-configured")
         
-        # Test MongoDB connection
+        # Test MongoDB connection using optimized client
         mongodb_connected = False
+        mongodb_health = None
         try:
-            from pymongo import MongoClient
-            client = MongoClient(MONGODB_URI, serverSelectionTimeoutMS=5000)
-            # Test connection
-            client.admin.command('ping')
-            mongodb_connected = True
-            client.close()
+            from graphrag.mongo_client import get_mongo_client
+            mongo_client = get_mongo_client()
+            health_result = mongo_client.health_check()
+            mongodb_connected = health_result.get("status") == "healthy"
+            mongodb_health = health_result
+            logger.info(f"MongoDB health check result: {health_result}")
         except Exception as e:
-            logger.warning(f"MongoDB connection test failed: {e}")
+            logger.warning(f"MongoDB health check failed: {e}")
+            mongodb_health = {"status": "unhealthy", "error": str(e)}
         
         return {
-            "status": "healthy" if mongodb_configured and openai_configured else "degraded",
+            "status": "healthy" if mongodb_configured and openai_configured and mongodb_connected else "degraded",
             "service": "nice-graphrag",
             "version": "1.0.0",
             "deployment_stage": os.getenv("ENVIRONMENT", "unknown"),
@@ -52,6 +58,7 @@ async def health_check():
                 "mongodb_uri_configured": mongodb_configured,
                 "openai_key_configured": openai_configured,
                 "mongodb_connected": mongodb_connected,
+                "mongodb_health": mongodb_health,
                 "environment": os.getenv("ENVIRONMENT", "unknown"),
                 "timestamp": datetime.utcnow().isoformat() + "Z"
             }
