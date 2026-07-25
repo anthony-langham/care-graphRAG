@@ -35,7 +35,10 @@ function d1(sqlOrFlags) {
   if (res.status !== 0) {
     throw new Error(`wrangler d1 failed: ${res.stderr?.slice(0, 500)}`);
   }
-  return JSON.parse(res.stdout)[0].results;
+  // wrangler prints progress lines before the JSON payload; skip to it.
+  const start = res.stdout.indexOf("[\n") >= 0 ? res.stdout.indexOf("[\n") : res.stdout.indexOf("[");
+  if (start < 0) throw new Error(`no JSON in wrangler output: ${res.stdout.slice(0, 300)}`);
+  return JSON.parse(res.stdout.slice(start))[0].results;
 }
 
 function d1File(sql) {
