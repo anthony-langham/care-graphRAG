@@ -1,0 +1,22 @@
+name = "care-graphrag"
+main = "src/index.js"
+compatibility_date = "2026-07-01"
+
+# staging-api.graphrag.care still points at the legacy AWS deployment; only
+# production moves to this Worker.
+routes = [
+  { pattern = "api.graphrag.care", custom_domain = true }
+]
+
+[[d1_databases]]
+binding = "DB"
+database_name = "care-graphrag"
+database_id = "0c793bd8-70b7-4088-b090-0e26bad9fcfa"
+
+[vars]
+ALLOWED_ORIGINS = "https://care.engineering,https://api.care.engineering,http://localhost:5173,http://localhost:3000"
+NICE_BASE_URL = "https://cks.nice.org.uk"
+
+# Secrets (never in this file) — set with:
+#   wrangler secret put OPENAI_API_KEY
+#   wrangler secret put GRAPHRAG_API_KEY
