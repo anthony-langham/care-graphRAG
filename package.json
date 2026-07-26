@@ -1,18 +1,11 @@
 {
   "name": "care-graphRAG",
   "version": "0.1.0",
-  "description": "GraphRAG system for UK NICE Clinical Knowledge Summary on Hypertension",
+  "description": "GraphRAG over NICE CKS (Hypertension) on Cloudflare Workers + D1",
   "private": true,
   "scripts": {
-    "dev": "sst dev",
-    "deploy": "sst deploy",
-    "remove": "sst remove",
-    "console": "sst console",
-    "typecheck": "tsc --noEmit"
-  },
-  "devDependencies": {
-    "@types/node": "^24.1.0",
-    "sst": "^3.0.0",
-    "typescript": "^5.3.0"
+    "deploy": "npm --prefix worker run deploy",
+    "dev": "npm --prefix worker run dev",
+    "tail": "npm --prefix worker exec wrangler tail"
   }
 }
