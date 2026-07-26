@@ -63,10 +63,9 @@ function stripTags(html) {
 // Split a page's <main> content into { heading, text } sections on h2/h3.
 export function extractSections(html) {
   const titleMatch = html.match(/<title[^>]*>([^<]*)<\/title>/i);
-  const title = decodeEntities(titleMatch?.[1] || "")
-    .replace(/\s*\|\s*NICE.*$/i, "")
-    .replace(/\s*-\s*CKS\s*$/i, "")
-    .trim();
+  // Page titles look like "Scenario: Management | Management | Hypertension
+  // | CKS | NICE" — keep only the first, most specific segment.
+  const title = decodeEntities(titleMatch?.[1] || "").split("|")[0].trim();
 
   const mainMatch = html.match(/<main[^>]*>([\s\S]*?)<\/main>/i);
   const main = mainMatch ? mainMatch[1] : html;
