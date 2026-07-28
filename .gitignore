@@ -217,3 +217,12 @@ node_modules/
 # Lambda layers build
 layers/python.zip
 layers/python/python/
+
+# Eval harness output: live generated clinical answers, the grader's working
+# copy rather than repo content. See scripts/eval/README.md.
+scripts/eval/results.json
+scripts/eval/results.md
+
+# Local Worker dev state and local-only secrets
+.wrangler/
+.dev.vars
