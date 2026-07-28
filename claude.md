@@ -31,6 +31,28 @@ cached, keyed on `meta.corpus_version` — bump that and isolates reload.
 
 The response deliberately keeps the legacy shape the client already read
 (`query_id`, `answer`, `sources[]`, `confidence`, `response_time`, `search_type`).
+Add fields; never remove or rename one.
+
+**When retrieval clears nothing, the model is not called.** If no chunk scores
+above the cosine floor (0.2), `/query` short-circuits to a fixed answer saying
+the corpus does not cover the question — `sources: []`, `retrieval_strength: 0`,
+`search_type: "none"`, still HTTP 200. Handing `gpt-4o-mini` an empty excerpt
+block and trusting the system prompt to refuse is not a guarantee: an
+ungrounded completion is an invitation to invent guidance that the client
+renders identically to a retrieved, cited answer. Do not "simplify" this back
+into the normal path.
+
+**`confidence` is not confidence.** It is the cosine similarity of the single
+best-matching chunk — a property of retrieval, saying nothing about whether the
+answer is right. An asthma question still scores ~0.4 against hypertension
+prose. `confidence` and `confidence_score` are frozen for backward
+compatibility with care.engineering; `retrieval_strength` carries the same
+value under the honest name and is what new consumers should read. Never label
+any of the three as answer confidence in a UI.
+
+`scripts/eval/` holds a 30-question honesty eval (in-scope, out-of-scope traps,
+adversarial prompts) that produces a grading sheet for a clinician to mark by
+hand. See its README — nothing in it grades automatically, on purpose.
 
 ### Storage (D1 `care-graphrag`)
 

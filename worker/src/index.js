@@ -44,8 +44,14 @@ function apiKeyRequired() {
 
 // --- Embeddings ----------------------------------------------------------
 
-export const EMBEDDING_MODEL = "text-embedding-3-small";
-export const EMBEDDING_DIMS = 512;
+// Not exported: workerd rejects any named export from the entry module that
+// is not a handler ("Incorrect type for map entry 'EMBEDDING_DIMS'"), which
+// stops `wrangler dev` booting at all. Nothing imported these — the
+// enrichment script keeps its own copies — so they are module-local.
+// They must stay in step with scripts/embed-and-graph.mjs: a mismatch in
+// dimensions silently produces meaningless cosine scores.
+const EMBEDDING_MODEL = "text-embedding-3-small";
+const EMBEDDING_DIMS = 512;
 
 async function embedQuery(text, env) {
   const response = await fetch("https://api.openai.com/v1/embeddings", {
@@ -146,6 +152,20 @@ async function graphNeighbours(env, chunkIds) {
   return { neighbours, entities };
 }
 
+// --- Retrieval honesty ---------------------------------------------------
+// A chunk has to clear this cosine floor to be worth showing the model at
+// all. Below it we treat the corpus as having nothing to say.
+const RELEVANCE_FLOOR = 0.2;
+
+// Returned verbatim when retrieval clears nothing. Naming the corpus's actual
+// scope is the useful part: it tells the clinician where to ask instead,
+// rather than leaving them to guess whether the system broke or the answer is
+// genuinely absent.
+const NO_RELEVANT_CONTEXT_ANSWER =
+  "The NICE CKS Hypertension corpus does not contain guidance relevant to this question. " +
+  "Try the corpus's own scope: diagnosis, investigation and management of hypertension in adults. " +
+  "This tool supports, never replaces, professional clinical judgement.";
+
 // --- Routes --------------------------------------------------------------
 
 app.get("/health", async (c) => {
@@ -198,13 +218,59 @@ app.post("/query", apiKeyRequired(), async (c) => {
     return c.json({ error: "Corpus not ingested yet" }, 503);
   }
 
-  const queryVec = await embedQuery(question, c.env);
+  // If we cannot embed the question we cannot retrieve, and without retrieval
+  // there is nothing honest to say. Answer with the same machine-readable 502
+  // the completion failure below uses, rather than letting the throw escape to
+  // Hono's default handler — that returned a plain-text 500 body, which the
+  // care.engineering client cannot parse for an error message and so surfaces
+  // as an unexplained failure.
+  let queryVec;
+  try {
+    queryVec = await embedQuery(question, c.env);
+  } catch (err) {
+    // The question itself is never logged: it can carry patient detail.
+    console.error("Query embedding failed:", String(err).slice(0, 200));
+    return c.json({ error: "Search failed" }, 502);
+  }
+
   const scored = corpus.chunks
     .map((ch) => ({ ...ch, score: cosine(queryVec, ch.vec) }))
     .sort((a, b) => b.score - a.score);
 
   const TOP_K = 6;
-  const seeds = scored.slice(0, TOP_K).filter((ch) => ch.score > 0.2);
+  const seeds = scored.slice(0, TOP_K).filter((ch) => ch.score > RELEVANCE_FLOOR);
+
+  // Retrieval found nothing above the floor. Answer here and do NOT call the
+  // model.
+  //
+  // The previous behaviour was to carry on and hand gpt-4o-mini an EMPTY
+  // excerpt block, leaving the whole refusal burden on the system prompt's
+  // "if the excerpts do not contain the answer, say so plainly". That is a
+  // request, not a guarantee: a completion with zero grounding context is an
+  // invitation to answer from the model's own weights, and it will sometimes
+  // accept — producing fluent, plausible, uncited clinical guidance that the
+  // client renders identically to a real retrieval-backed answer. In a
+  // clinical tool the failure has to be visible: no sources, zero retrieval
+  // strength, search_type "none", and an answer that says outright the corpus
+  // does not cover this. A wrong-but-plausible answer here is worse than no
+  // answer, so we make it impossible rather than unlikely.
+  //
+  // Still HTTP 200 with the standard response shape: this is a legitimate,
+  // fully-determined result ("not in scope"), not a server error, and the
+  // client renders it through its normal answer path.
+  if (seeds.length === 0) {
+    return c.json({
+      query_id: crypto.randomUUID(),
+      answer: NO_RELEVANT_CONTEXT_ANSWER,
+      sources: [],
+      confidence: 0,
+      confidence_score: 0,
+      retrieval_strength: 0,
+      response_time: (Date.now() - started) / 1000,
+      search_type: "none",
+    });
+  }
+
   const { neighbours, entities } = await graphNeighbours(
     c.env,
     seeds.map((s) => s.id),
@@ -258,8 +324,27 @@ app.post("/query", apiKeyRequired(), async (c) => {
     (await completion.json()).choices?.[0]?.message?.content ||
     "Unable to generate response";
 
+  // What this number is, and what it is not.
+  //
+  // It is the cosine similarity between the question's embedding and the
+  // single best-matching corpus chunk — i.e. "how close is the nearest thing
+  // we hold to what was asked". It is a property of RETRIEVAL only. It says
+  // nothing about whether the generated answer is correct, complete, or even
+  // supported by the chunk it scored.
+  //
+  // It is emphatically NOT answer confidence, and must never be labelled as
+  // such downstream. The failure mode is concrete: ask an asthma question and
+  // hypertension prose still scores ~0.4 on shared clinical vocabulary, which
+  // a UI showing "40% confidence" turns into a claim about the answer's
+  // reliability that nothing here supports.
+  //
+  // `confidence` and `confidence_score` are kept byte-for-byte as they were
+  // for backward compatibility with the care.engineering client; the honest
+  // name is `retrieval_strength`, emitted alongside with the same value, and
+  // that is the field new consumers should read.
   const topScore = seeds[0]?.score ?? 0;
-  const confidence = Math.max(0, Math.min(1, Number(topScore.toFixed(2))));
+  const retrievalStrength = Math.max(0, Math.min(1, Number(topScore.toFixed(2))));
+  const confidence = retrievalStrength;
 
   return c.json({
     query_id: crypto.randomUUID(),
@@ -280,6 +365,7 @@ app.post("/query", apiKeyRequired(), async (c) => {
     })),
     confidence,
     confidence_score: confidence,
+    retrieval_strength: retrievalStrength,
     response_time: (Date.now() - started) / 1000,
     search_type: searchType,
   });
